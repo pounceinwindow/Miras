@@ -34,7 +34,7 @@ export const MOCK_LOCATIONS: LocationPoint[] = [
     entityName: 'Су анасы',
     status: 'available',
     description: 'Таинственные воды озера Кабан, хранящие золотой гребень водяной.',
-    tag: 'lake-02',
+    tag: 'water-01',
   },
   {
     id: 3,
@@ -45,7 +45,7 @@ export const MOCK_LOCATIONS: LocationPoint[] = [
     entityName: 'Башня Сююмбике',
     status: 'available',
     description: 'Семиярусная жемчужина Кремля, символ мудрости и стойкости царицы.',
-    tag: 'tower-03',
+    tag: 'tower-01',
   },
   {
     id: 4,
@@ -56,7 +56,7 @@ export const MOCK_LOCATIONS: LocationPoint[] = [
     entityName: 'Казанский Кремль',
     status: 'available',
     description: 'Древняя цитадель на холме у слияния Волги и Казанки.',
-    tag: 'citadel-04',
+    tag: 'stone-01',
   },
 ]
 
@@ -88,7 +88,7 @@ export async function getLocations(userId?: number): Promise<LocationPoint[]> {
         const mockMatch = MOCK_LOCATIONS.find((m) => m.id === loc.id || m.entityId === loc.entityId)
         return {
           ...loc,
-          tag: mockMatch?.tag ?? (loc.entityId === 1 ? 'forest-01' : loc.entityId === 2 ? 'lake-02' : loc.entityId === 3 ? 'tower-03' : 'citadel-04'),
+          tag: mockMatch?.tag ?? (loc.entityId === 1 ? 'forest-01' : loc.entityId === 2 ? 'water-01' : loc.entityId === 3 ? 'tower-01' : 'stone-01'),
           description: mockMatch?.description,
         }
       })

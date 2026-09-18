@@ -246,7 +246,20 @@ export default function MapPage() {
     mapInstanceRef.current?.setView(TATARSTAN_CENTER, 7, { animate: true })
   }
 
-  // Функция для удобного тестирования/жюри (симуляция нахождения у Кремля)
+  // Функция для удобного тестирования/жюри (симуляция нахождения у точки)
+  const handleSimulateNearLocation = (loc: LocationPoint) => {
+    const simulated: GeoPoint = {
+      latitude: loc.latitude + 0.0002, // ~25 метров от точки
+      longitude: loc.longitude + 0.0002,
+    }
+    setPlayerPosition(simulated)
+    setIsSimulating(true)
+    setGeoError(null)
+    mapInstanceRef.current?.setView([simulated.latitude, simulated.longitude], 16, {
+      animate: true,
+    })
+  }
+
   const handleSimulateNearKremlin = () => {
     const simulated: GeoPoint = {
       latitude: 55.7986, // ~30 метров от Казанского Кремля
@@ -420,19 +433,25 @@ export default function MapPage() {
                   <div className="distance-notice">
                     {distanceToSelected !== null ? (
                       <span>
-                        Вы слишком далеко. Подойдите ближе, чем на {INTERACTION_RADIUS} м
-                        (сейчас {formatDistance(distanceToSelected)}).
+                        Вы находитесь в {formatDistance(distanceToSelected)} от точки. Нужно подойти ближе {INTERACTION_RADIUS} м.
                       </span>
                     ) : (
-                      <span>Включите геолокацию или используйте демо-вход.</span>
+                      <span>Геолокация не включена. Используйте симуляцию для проверки.</span>
                     )}
                   </div>
-                  {/* Запасная демо-кнопка для удобства проверки на хакатоне */}
+                  <button
+                    type="button"
+                    onClick={() => handleSimulateNearLocation(selectedLocation)}
+                    className="button cream full-w"
+                    style={{ background: '#eef6f2', borderColor: '#a8dab5', color: '#174a3b', fontWeight: 600 }}
+                  >
+                    📍 Я на месте (симулировать GPS)
+                  </button>
                   <Link
                     to={`/encounter/${selectedLocation.tag ?? 'forest-01'}`}
-                    className="button cream full-w demo-entry-btn"
+                    className="button primary full-w demo-entry-btn"
                   >
-                    Открыть встречу (демо-режим)
+                    Встретить хранителя (демо-вход)
                     <ArrowRight size={16} />
                   </Link>
                 </div>

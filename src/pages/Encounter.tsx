@@ -17,7 +17,14 @@ export default function Encounter() {
   return <EncounterContent key={tagId} tagId={tagId} />
 }
 function EncounterContent({ tagId }: { tagId?: string }) {
-  const character = characters.find((c) => c.tag === tagId)
+  const character = characters.find(
+    (c) =>
+      c.tag === tagId ||
+      c.id === tagId ||
+      (tagId === 'citadel-04' && c.id === 'kereml') ||
+      (tagId === 'lake-02' && c.id === 'su-anasy') ||
+      (tagId === 'tower-03' && c.id === 'syuyumbike'),
+  )
   const { progress, run, busy, ready } = useGame()
   const [phase, setPhase] = useState<'story' | 'quiz' | 'captured' | 'failed'>(
     'story',
