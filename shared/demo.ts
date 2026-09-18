@@ -14,6 +14,7 @@ export function executeDemo(
     const b = progress.pve
     if (!b || b.id !== command.battleId)
       throw new Error('Этот бой уже завершён или заменён. Обнови страницу.')
+    b.reserves ??= []
     if (b.status !== 'active') return { progress }
     const elapsed = Math.max(0, now - progress.pveUpdatedAt)
     // A hidden tab/disconnection freezes combat, rather than killing the player offline.
@@ -93,17 +94,21 @@ export function executeDemo(
   } else if (command.type === 'pveStart') {
     if (!progress.modes.pve) throw new Error('PvE временно отключено')
     if (!getCharacter(command.target)) throw new Error('Соперник не найден')
-    if (
-      command.mode === 'encounter' &&
-      (!progress.modes.encounters ||
-        !progress.challenges.includes(command.target) ||
-        progress.collection.some((c) => c.id === command.target))
-    )
-      throw new Error('Открой встречу на точке и ответь на вопросы')
+    if (command.mode === 'encounter') {
+      const target = getCharacter(command.target)
+      if (!progress.modes.encounters || target?.tag !== command.tagId)
+        throw new Error('Открой босса с его локации')
+      if (progress.collection.some((c) => c.id === command.target))
+        throw new Error('Хранитель уже в коллекции')
+    }
+    const party = (command.party ?? [command.characterId])
+      .slice(0, 3)
+      .map((id) => progress.collection.find((item) => item.id === id))
+    if (party.some((item) => !item))
+      throw new Error('В команде есть недоступный хранитель')
     progress.pve = createPve(
       battleId,
-      owned.id,
-      owned.level,
+      party.map((item) => ({ id: item!.id, level: item!.level })),
       command.target,
       command.mode,
     )

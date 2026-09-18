@@ -169,18 +169,16 @@ function EncounterContent({ tagId }: { tagId?: string }) {
                 ) : (
                   <>
                     <p className="muted">
-                      Три вопроса по истории откроют испытание. Победи хранителя
-                      — и он станет твоим. Ошибка в вопросах — новая попытка
-                      через 24 часа.
+                      История услышана. Победи хранителя — и он станет частью
+                      команды.
                     </p>
-                    <button
-                      disabled={busy || !ready}
+                    <Link
                       className="button"
-                      onClick={() => setPhase('quiz')}
+                      to={`/battle?target=${character.id}&mode=encounter&tag=${character.tag}`}
                     >
-                      Я готов к знакомству
+                      Вызвать на бой
                       <ArrowRight size={18} />
-                    </button>
+                    </Link>
                   </>
                 )}
               </div>

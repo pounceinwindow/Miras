@@ -37,8 +37,10 @@ export type Command =
   | {
       type: 'pveStart'
       characterId: CharacterId
+      party?: CharacterId[]
       target: CharacterId
       mode: 'training' | 'encounter'
+      tagId?: string
     }
   | {
       type: 'pve'

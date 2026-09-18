@@ -33,6 +33,7 @@ export interface PveBattle {
   mode: 'training' | 'encounter'
   target: CharacterId
   player: Combatant
+  reserves: Combatant[]
   enemy: Combatant
   tick: number
   status: 'active' | 'won' | 'lost'
@@ -48,7 +49,9 @@ export interface PveBattle {
   log: string[]
 }
 export type PveInput =
-  { kind: 'move'; lane: Lane } | { kind: 'skill'; slot: 0 | 1 }
+  | { kind: 'move'; lane: Lane }
+  | { kind: 'skill'; slot: 0 | 1 }
+  | { kind: 'switch'; slot: number }
 export function fighter(id: CharacterId, level: number): Combatant {
   const hp = rules.characters[id].hp + (level - 1) * 12
   return {
@@ -69,18 +72,21 @@ export function fighter(id: CharacterId, level: number): Combatant {
 }
 export function createPve(
   id: string,
-  hero: CharacterId,
-  level: number,
+  heroes: { id: CharacterId; level: number }[],
   target: CharacterId,
   mode: PveBattle['mode'],
 ): PveBattle {
-  const enemy = fighter(target, mode === 'training' ? level : 1)
-  enemy.hp = enemy.maxHp = Math.round(enemy.hp * 1.1)
+  const party = heroes.slice(0, 3)
+  if (!party.length) throw new Error('Выбери хотя бы одного хранителя')
+  const enemy = fighter(target, mode === 'training' ? party[0].level : 1)
+  const scale = party.length === 1 ? 0.78 : party.length === 2 ? 0.92 : 1.1
+  enemy.hp = enemy.maxHp = Math.round(enemy.hp * scale)
   return {
     id,
     mode,
     target,
-    player: fighter(hero, level),
+    player: fighter(party[0].id, party[0].level),
+    reserves: party.slice(1).map((hero) => fighter(hero.id, hero.level)),
     enemy,
     tick: 0,
     status: 'active',
@@ -182,9 +188,17 @@ export function cast(b: PveBattle, side: Side, slot: 0 | 1): boolean {
   return true
 }
 export function inputPve(b: PveBattle, input: PveInput) {
-  return input.kind === 'move'
-    ? move(b, 'player', input.lane)
-    : cast(b, 'player', input.slot)
+  if (input.kind === 'move') return move(b, 'player', input.lane)
+  if (input.kind === 'skill') return cast(b, 'player', input.slot)
+  const reserve = b.reserves[input.slot]
+  if (!reserve || reserve.hp <= 0 || b.player.moveReady > b.tick) return false
+  const lane = b.player.lane
+  b.reserves[input.slot] = b.player
+  b.player = reserve
+  b.player.lane = lane
+  b.player.moveReady = b.tick + 15
+  note(b, `В бой выходит ${b.player.id}`)
+  return true
 }
 export function stepPve(b: PveBattle, ticks = 1): PveBattle {
   for (let i = 0; i < ticks && b.status === 'active' && !b.paused; i++) {
@@ -212,6 +226,13 @@ export function stepPve(b: PveBattle, ticks = 1): PveBattle {
       if (t.kind === 'comb' || t.kind === 'tickle')
         target.rootUntil = Math.max(target.rootUntil, b.tick + t.duration)
       if (t.kind === 'voice') target.weakUntil = b.tick + t.duration
+    }
+    if (b.player.hp <= 0 && b.reserves.some((item) => item.hp > 0)) {
+      const next = b.reserves.findIndex((item) => item.hp > 0)
+      const defeated = b.player
+      b.player = b.reserves[next]
+      b.reserves[next] = defeated
+      note(b, `В бой выходит ${b.player.id}`)
     }
     if (b.player.hp <= 0 || b.tick >= rules.maxTicks) b.status = 'lost'
     else if (b.enemy.hp <= 0) b.status = 'won'

@@ -120,31 +120,39 @@ public sealed class GameService(AppDbContext db)
         var targetSlug = RequiredString(command, "target");
         var mode = RequiredString(command, "mode");
         if (mode is not ("training" or "encounter")) throw new InvalidOperationException("Неизвестный режим боя.");
-        var player = await db.UserEntities.Include(item => item.Entity)
-            .SingleOrDefaultAsync(item => item.UserId == user.Id && item.Entity.Slug == playerSlug, ct)
-            ?? throw new InvalidOperationException("Хранитель игрока не найден.");
+        var partySlugs = command.TryGetProperty("party", out var partyElement)
+            ? partyElement.EnumerateArray().Select(item => item.GetString()!).Distinct().Take(3).ToList()
+            : [playerSlug];
+        var party = await db.UserEntities.Include(item => item.Entity)
+            .Where(item => item.UserId == user.Id && partySlugs.Contains(item.Entity.Slug)).ToListAsync(ct);
+        if (party.Count != partySlugs.Count) throw new InvalidOperationException("В команде есть недоступный хранитель.");
         var target = await db.Entities.SingleOrDefaultAsync(item => item.Slug == targetSlug, ct)
             ?? throw new InvalidOperationException("Соперник не найден.");
+        if (mode == "encounter" && await db.UserEntities.AnyAsync(item => item.UserId == user.Id && item.EntityId == target.Id, ct))
+            throw new InvalidOperationException("Хранитель уже в коллекции.");
         Encounter? encounter = null;
         if (mode == "encounter")
         {
-            encounter = await db.Encounters
-                .Where(item => item.UserId == user.Id && item.EntityId == target.Id && item.Status == EncounterStatus.ReadyForBattle)
-                .OrderByDescending(item => item.StartedAt)
-                .FirstOrDefaultAsync(ct)
-                ?? throw new InvalidOperationException("Открой встречу на точке и ответь на вопросы.");
+            var tag = RequiredString(command, "tagId");
+            if (!Tags.TryGetValue(tag, out var tagSlug) || tagSlug != targetSlug)
+                throw new InvalidOperationException("Открой босса с его локации.");
+            var location = await db.Locations.FirstAsync(item => item.EntityId == target.Id, ct);
+            encounter = new Encounter { UserId = user.Id, EntityId = target.Id, LocationId = location.Id, Status = EncounterStatus.ReadyForBattle };
+            db.Encounters.Add(encounter);
         }
         var active = await db.PveBattles.Where(item => item.UserId == user.Id)
             .OrderByDescending(item => item.UpdatedAt).FirstOrDefaultAsync(ct);
         if (active is not null && Deserialize(active).Status == "active")
             throw new InvalidOperationException("Сначала заверши текущий бой.");
         var id = Guid.NewGuid();
-        var state = PveEngine.Create(id, playerSlug, player.Level, targetSlug, mode);
+        var orderedParty = partySlugs.Select(slug => party.Single(item => item.Entity.Slug == slug)).Select(item => (item.Entity.Slug, item.Level)).ToList();
+        var state = PveEngine.Create(id, orderedParty, targetSlug, mode);
         db.PveBattles.Add(new PveBattle
         {
             Id = id,
             UserId = user.Id,
             EncounterId = encounter?.Id,
+            Encounter = encounter,
             StateJson = JsonSerializer.Serialize(state, PveEngine.Json),
             UpdatedAt = DateTimeOffset.UtcNow
         });
@@ -175,6 +183,7 @@ public sealed class GameService(AppDbContext db)
                 var kind = RequiredString(input, "kind");
                 if (kind == "move") PveEngine.Move(state, "player", input.GetProperty("lane").GetInt32());
                 if (kind == "skill") PveEngine.Cast(state, "player", input.GetProperty("slot").GetInt32());
+                if (kind == "switch") PveEngine.Switch(state, input.GetProperty("slot").GetInt32());
             }
         }
         if (state.Status == "won" && !row.RewardApplied)

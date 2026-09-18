@@ -57,7 +57,12 @@ describe('onboarding and encounter gate', () => {
 
 describe('real-time lane combat', () => {
   it('telegraphs attacks and lets the player dodge by changing lane', () => {
-    const battle = createPve('battle', 'su-anasy', 1, 'shurale', 'training')
+    const battle = createPve(
+      'battle',
+      [{ id: 'su-anasy', level: 1 }],
+      'shurale',
+      'training',
+    )
     battle.paused = false
     battle.player.lane = 1
     battle.enemy.lane = 1
@@ -70,7 +75,12 @@ describe('real-time lane combat', () => {
   })
 
   it('comb roots movement but wave remains usable and cleanses it', () => {
-    const battle = createPve('battle', 'su-anasy', 1, 'shurale', 'training')
+    const battle = createPve(
+      'battle',
+      [{ id: 'su-anasy', level: 1 }],
+      'shurale',
+      'training',
+    )
     battle.paused = false
     battle.player.rootUntil = 50
     expect(move(battle, 'player', 0)).toBe(false)
@@ -80,7 +90,12 @@ describe('real-time lane combat', () => {
   })
 
   it('reflects projectiles but not ground skills', () => {
-    const projectile = createPve('one', 'su-anasy', 1, 'shurale', 'training')
+    const projectile = createPve(
+      'one',
+      [{ id: 'su-anasy', level: 1 }],
+      'shurale',
+      'training',
+    )
     projectile.paused = false
     projectile.player.reflectUntil = 100
     projectile.player.lane = projectile.enemy.lane = 1
@@ -91,7 +106,12 @@ describe('real-time lane combat', () => {
     expect(projectile.player.hp).toBe(projectile.player.maxHp)
     expect(projectile.enemy.hp).toBeLessThan(enemyHp)
 
-    const ground = createPve('two', 'su-anasy', 1, 'kereml', 'training')
+    const ground = createPve(
+      'two',
+      [{ id: 'su-anasy', level: 1 }],
+      'kereml',
+      'training',
+    )
     ground.paused = false
     ground.player.reflectUntil = 100
     ground.enemy.skillReady[1] = 0

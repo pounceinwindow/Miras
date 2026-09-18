@@ -10,7 +10,7 @@ public class PveTests
     [Fact]
     public void Wave_CleansesRoot_AndReflectsProjectile()
     {
-        var battle = PveEngine.Create(Guid.NewGuid(), "su-anasy", 1, "shurale", "training");
+        var battle = PveEngine.Create(Guid.NewGuid(), [("su-anasy", 1)], "shurale", "training");
         battle.Paused = false;
         battle.Player.RootUntil = 50;
         battle.Player.Lane = battle.Enemy.Lane = 1;
@@ -29,7 +29,7 @@ public class PveTests
     [Fact]
     public void Seal_IsGroundDamage_AndClosesLane()
     {
-        var battle = PveEngine.Create(Guid.NewGuid(), "su-anasy", 1, "kereml", "training");
+        var battle = PveEngine.Create(Guid.NewGuid(), [("su-anasy", 1)], "kereml", "training");
         battle.Paused = false;
         battle.Player.ReflectUntil = 100;
 

@@ -44,6 +44,7 @@ public sealed class PveState
     public string Mode { get; set; } = "training";
     public string Target { get; set; } = "";
     public CombatantState Player { get; set; } = new();
+    public List<CombatantState> Reserves { get; set; } = [];
     public CombatantState Enemy { get; set; } = new();
     public int Tick { get; set; }
     public string Status { get; set; } = "active";
@@ -91,18 +92,20 @@ public static class PveEngine
             ["seal"] = new("Печать ворот", 100, 16, 16, 40)
         };
 
-    public static PveState Create(Guid id, string playerId, int level, string target, string mode)
+    public static PveState Create(Guid id, IReadOnlyList<(string Id, int Level)> heroes, string target, string mode)
     {
-        if (!Fighters.ContainsKey(playerId) || !Fighters.ContainsKey(target))
+        if (heroes.Count == 0 || heroes.Count > 3 || heroes.Any(hero => !Fighters.ContainsKey(hero.Id)) || !Fighters.ContainsKey(target))
             throw new InvalidOperationException("Неизвестный хранитель.");
-        var enemy = Fighter(target, mode == "training" ? level : 1);
-        enemy.Hp = enemy.MaxHp = (int)Math.Round(enemy.Hp * 1.1, MidpointRounding.AwayFromZero);
+        var enemy = Fighter(target, mode == "training" ? heroes[0].Level : 1);
+        var scale = heroes.Count == 1 ? 0.78 : heroes.Count == 2 ? 0.92 : 1.1;
+        enemy.Hp = enemy.MaxHp = (int)Math.Round(enemy.Hp * scale, MidpointRounding.AwayFromZero);
         return new PveState
         {
             Id = id.ToString(),
             Mode = mode,
             Target = target,
-            Player = Fighter(playerId, level),
+            Player = Fighter(heroes[0].Id, heroes[0].Level),
+            Reserves = heroes.Skip(1).Select(hero => Fighter(hero.Id, hero.Level)).ToList(),
             Enemy = enemy,
             Log = ["Следи за отмеченными позициями. Обычная атака срабатывает на одной дорожке с врагом."]
         };
@@ -181,6 +184,15 @@ public static class PveEngine
             battle.Threats.RemoveAll(item => item.Due <= battle.Tick);
             foreach (var threat in due) Resolve(battle, threat);
 
+            if (battle.Player.Hp <= 0 && battle.Reserves.Any(item => item.Hp > 0))
+            {
+                var next = battle.Reserves.FindIndex(item => item.Hp > 0);
+                var defeated = battle.Player;
+                battle.Player = battle.Reserves[next];
+                battle.Reserves[next] = defeated;
+                Note(battle, $"В бой выходит {battle.Player.Id}");
+            }
+
             if (battle.Player.Hp <= 0 || battle.Tick >= MaxTicks) battle.Status = "lost";
             else if (battle.Enemy.Hp <= 0) battle.Status = "won";
             if (battle.Status != "active")
@@ -205,6 +217,18 @@ public static class PveEngine
             AutoAttack(battle, "player");
             AutoAttack(battle, "enemy");
         }
+    }
+
+    public static bool Switch(PveState battle, int slot)
+    {
+        if (slot < 0 || slot >= battle.Reserves.Count || battle.Reserves[slot].Hp <= 0 || battle.Player.MoveReady > battle.Tick)
+            return false;
+        var lane = battle.Player.Lane;
+        (battle.Player, battle.Reserves[slot]) = (battle.Reserves[slot], battle.Player);
+        battle.Player.Lane = lane;
+        battle.Player.MoveReady = battle.Tick + 15;
+        Note(battle, $"В бой выходит {battle.Player.Id}");
+        return true;
     }
 
     private static void AutoAttack(PveState battle, string side)

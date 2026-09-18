@@ -1855,6 +1855,22 @@ main {
   padding: 16px;
   background: #0e1a14;
 }
+.party-switcher {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: #132019;
+  font-size: 11px;
+}
+.party-switcher button {
+  border: 1px solid #ffffff2b;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: #f3eedf12;
+  color: #f3eedf;
+  cursor: pointer;
+}
 .pve-controls button,
 .move-hint {
   display: grid;

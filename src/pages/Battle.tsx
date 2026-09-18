@@ -22,7 +22,11 @@ export default function Battle() {
   const [params] = useSearchParams()
   const requestedTarget = params.get('target') as CharacterId | null
   const encounter = params.get('mode') === 'encounter'
+  const tagId = params.get('tag') ?? undefined
   const owned = progress.collection[0]
+  const [party, setParty] = useState<CharacterId[]>(() =>
+    progress.collection.slice(0, 3).map((item) => item.id),
+  )
   const [target, setTarget] = useState<CharacterId>(
     requestedTarget ?? 'shurale',
   )
@@ -112,12 +116,34 @@ export default function Battle() {
         </div>
         <section className="panel battle-brief">
           <div>
-            <span className="eyebrow">ТВОЙ ХРАНИТЕЛЬ</span>
-            <h2>
-              {getCharacter(owned.id)?.name} · уровень {owned.level}
-            </h2>
+            <span className="eyebrow">КОМАНДА · ДО ТРЁХ</span>
+            <h2>Выбери хранителей</h2>
             <p>Клавиши 1–3 — позиции, Q и E — умения.</p>
           </div>
+          <div className="fighter-selection">
+            {progress.collection.map((item) => (
+              <button
+                key={item.id}
+                className={party.includes(item.id) ? 'selected' : ''}
+                onClick={() =>
+                  setParty((current) =>
+                    current.includes(item.id)
+                      ? current.length > 1
+                        ? current.filter((id) => id !== item.id)
+                        : current
+                      : current.length < 3
+                        ? [...current, item.id]
+                        : current,
+                  )
+                }
+              >
+                <CharacterArt id={item.id} />
+                <b>{getCharacter(item.id)?.name}</b>
+                <span>Уровень {item.level}</span>
+              </button>
+            ))}
+          </div>
+          <span className="eyebrow">БОСС</span>
           <div className="fighter-selection">
             {availableTargets.map((item) => (
               <button
@@ -133,26 +159,21 @@ export default function Battle() {
           </div>
           <button
             className="button"
-            disabled={
-              !ready || (encounter && !progress.challenges.includes(target))
-            }
+            disabled={!ready || party.length === 0}
             onClick={() =>
               void run({
                 type: 'pveStart',
-                characterId: owned.id,
+                characterId: party[0],
+                party,
                 target,
                 mode: encounter ? 'encounter' : 'training',
+                tagId,
               })
             }
           >
             <Swords size={18} />{' '}
             {encounter ? 'Принять испытание' : 'Начать тренировку'}
           </button>
-          {encounter && !progress.challenges.includes(target) && (
-            <p className="muted">
-              Сначала открой встречу с NFC-метки и ответь на вопросы.
-            </p>
-          )}
         </section>
       </>
     )
@@ -163,6 +184,7 @@ export default function Battle() {
   const seconds = Math.max(0, Math.ceil((rules.maxTicks - battle.tick) / 10))
   const playerStatuses = statuses(battle.player, battle.tick)
   const enemyStatuses = statuses(battle.enemy, battle.tick)
+  const reserves = battle.reserves ?? []
   const castSkill = (slot: 0 | 1) =>
     void run({
       type: 'pve',
@@ -195,6 +217,27 @@ export default function Battle() {
             enemy
           />
         </header>
+        {reserves.length > 0 && (
+          <div className="party-switcher">
+            <span>Активен: {getCharacter(battle.player.id)?.name}</span>
+            {reserves.map((fighter, slot) => (
+              <button
+                key={`${fighter.id}-${slot}`}
+                disabled={fighter.hp <= 0}
+                onClick={() =>
+                  void run({
+                    type: 'pve',
+                    battleId: battle.id,
+                    action: 'poll',
+                    input: { kind: 'switch', slot },
+                  })
+                }
+              >
+                {getCharacter(fighter.id)?.name} · {fighter.hp}/{fighter.maxHp}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="lane-arena" aria-label="Арена из трёх позиций">
           {[0, 1, 2].map((lane) => {
@@ -297,9 +340,11 @@ export default function Battle() {
               onClick={() =>
                 void run({
                   type: 'pveStart',
-                  characterId: owned.id,
+                  characterId: party[0] ?? owned.id,
+                  party,
                   target: battle.target,
                   mode: battle.mode,
+                  tagId,
                 })
               }
             >
