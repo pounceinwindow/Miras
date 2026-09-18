@@ -1716,3 +1716,198 @@ main {
   flex: 1;
   min-width: 180px;
 }
+
+.battle-brief {
+  display: grid;
+  gap: 24px;
+}
+.pve-shell {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--ink), transparent 78%);
+  border-radius: 28px;
+  background: #17251d;
+  color: #f3eedf;
+  box-shadow: 0 24px 70px #14231936;
+}
+.pve-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+  gap: 22px;
+  padding: 20px 24px;
+  background: #0e1a14;
+}
+.pve-fighter-bar > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+.pve-fighter-bar.enemy {
+  text-align: right;
+}
+.pve-fighter-bar progress {
+  width: 100%;
+  height: 9px;
+  accent-color: #d4b45f;
+}
+.pve-fighter-bar small {
+  display: block;
+  min-height: 18px;
+  color: #c9c1aa;
+  font-size: 10px;
+}
+.pve-timer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #ffffff24;
+  border-radius: 999px;
+  padding: 7px 11px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.lane-arena {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  min-height: 440px;
+  background:
+    radial-gradient(circle at 50% 40%, #43634855, transparent 42%),
+    linear-gradient(#263d2d, #17251d);
+}
+.combat-lane {
+  position: relative;
+  overflow: hidden;
+  border: 0;
+  border-right: 1px dashed #f3eedf2d;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+.combat-lane:last-child {
+  border-right: 0;
+}
+.combat-lane.current {
+  background: #f3eedf0b;
+}
+.combat-lane.threatened {
+  background: repeating-linear-gradient(-45deg, #b755312b 0 12px, #b7553114 12px 24px);
+  box-shadow: inset 0 0 0 2px #d97147;
+}
+.combat-lane.sealed {
+  background-color: #0d1512aa;
+}
+.lane-name,
+.threat-marker,
+.seal-marker {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  white-space: nowrap;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lane-name {
+  top: 14px;
+  color: #c9c1aa;
+}
+.threat-marker {
+  top: 48%;
+  padding: 7px 9px;
+  background: #d97147;
+  color: #fff;
+}
+.seal-marker {
+  top: 42px;
+  padding: 6px 9px;
+  background: #101814;
+  color: #d4b45f;
+}
+.lane-fighter {
+  position: absolute;
+  left: 50%;
+  width: min(145px, 92%);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.lane-fighter.enemy {
+  top: 55px;
+}
+.lane-fighter.player {
+  bottom: 8px;
+}
+.lane-fighter.player .character-art {
+  filter: drop-shadow(0 14px 18px #0007);
+}
+.lane-fighter.enemy .character-art {
+  transform: scale(0.8);
+  opacity: 0.9;
+}
+.pve-controls {
+  display: grid;
+  grid-template-columns: 0.7fr 1fr 1fr;
+  gap: 12px;
+  padding: 16px;
+  background: #0e1a14;
+}
+.pve-controls button,
+.move-hint {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 5px 10px;
+  min-height: 76px;
+  border: 1px solid #ffffff20;
+  border-radius: 16px;
+  padding: 13px;
+  background: #f3eedf0b;
+  color: #f3eedf;
+  text-align: left;
+}
+.pve-controls button:not(:disabled) {
+  cursor: pointer;
+}
+.pve-controls button:disabled {
+  opacity: 0.48;
+}
+.pve-controls small {
+  grid-column: 2;
+  color: #c9c1aa;
+  line-height: 1.3;
+}
+.move-hint {
+  display: flex;
+  color: #c9c1aa;
+}
+@media (max-width: 700px) {
+  .pve-header {
+    grid-template-columns: 1fr auto;
+    padding: 14px;
+  }
+  .pve-header .pve-fighter-bar.enemy {
+    grid-column: 1 / -1;
+  }
+  .lane-arena {
+    min-height: 360px;
+  }
+  .pve-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+  .move-hint {
+    grid-column: 1 / -1;
+    min-height: 48px;
+  }
+  .lane-fighter {
+    width: 105px;
+  }
+  .threat-marker {
+    max-width: 92%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

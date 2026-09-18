@@ -19,7 +19,7 @@ export default function Encounter() {
 function EncounterContent({ tagId }: { tagId?: string }) {
   const character = characters.find((c) => c.tag === tagId)
   const { progress, run, busy, ready } = useGame()
-  const [phase, setPhase] = useState<'story' | 'quiz' | 'captured' | 'failed'>(
+  const [phase, setPhase] = useState<'story' | 'quiz' | 'ready' | 'failed'>(
     'story',
   )
   const [answers, setAnswers] = useState<number[]>([])
@@ -53,9 +53,10 @@ function EncounterContent({ tagId }: { tagId?: string }) {
       const result = await run({
         type: 'capture',
         characterId: character.id,
+        tagId: character.tag,
         answers: next,
       })
-      if (result) setPhase(result)
+      if (result) setPhase(result === 'captured' ? 'ready' : result)
     } else {
       setAnswers(next)
       setSelected(null)
@@ -75,19 +76,22 @@ function EncounterContent({ tagId }: { tagId?: string }) {
           <p>{character.title}</p>
         </div>
         <section className="story-panel">
-          {phase === 'captured' ? (
+          {phase === 'ready' ? (
             <div className="result-panel" aria-live="polite">
               <span className="result-icon">
                 <Sparkles />
               </span>
-              <span className="eyebrow">НАЧАЛО НОВОЙ ДРУЖБЫ</span>
-              <h2>{character.name} теперь с тобой!</h2>
+              <span className="eyebrow">ИСТОРИЯ УСЛЫШАНА</span>
+              <h2>{character.name} принимает вызов</h2>
               <p>
-                Все три ответа верны. Хранитель добавлен в коллекцию с первым
-                уровнем.
+                Все три ответа верны. Победи хранителя на арене, чтобы он вошёл
+                в коллекцию с первым уровнем.
               </p>
-              <Link to="/collection" className="button">
-                Открыть коллекцию
+              <Link
+                to={`/battle?target=${character.id}&mode=encounter`}
+                className="button"
+              >
+                Начать испытание
                 <ArrowRight size={18} />
               </Link>
             </div>
@@ -165,8 +169,9 @@ function EncounterContent({ tagId }: { tagId?: string }) {
                 ) : (
                   <>
                     <p className="muted">
-                      Три вопроса по истории. Все ответы верны — хранитель твой.
-                      Ошибка — новая попытка через 24 часа.
+                      Три вопроса по истории откроют испытание. Победи хранителя
+                      — и он станет твоим. Ошибка в вопросах — новая попытка
+                      через 24 часа.
                     </p>
                     <button
                       disabled={busy || !ready}

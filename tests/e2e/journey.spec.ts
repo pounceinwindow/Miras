@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test'
-async function captureShurale(page: import('@playwright/test').Page) {
+import { expect, test } from '@playwright/test'
+
+async function openShuraleChallenge(page: import('@playwright/test').Page) {
   await page.goto('/encounter/forest-01')
   await page.getByRole('button', { name: 'Я готов к знакомству' }).click()
   for (const [index, answer] of [
@@ -15,77 +16,64 @@ async function captureShurale(page: import('@playwright/test').Page) {
       .click()
   }
   await expect(
-    page.getByRole('heading', { name: 'Шурале теперь с тобой!' }),
+    page.getByRole('heading', { name: 'Шурале принимает вызов' }),
   ).toBeVisible()
+  await page.getByRole('link', { name: 'Начать испытание' }).click()
 }
-test('NFC to collection, persistence, battle reward and upgrade', async ({
+
+test('starts with Su anasy and captures Shurale only after a real-time battle', async ({
   page,
 }) => {
-  await captureShurale(page)
-  await page.getByRole('link', { name: 'Открыть коллекцию' }).click()
-  await page.reload()
-  await expect(page.getByText('Уровень 1', { exact: true })).toBeVisible()
-  await page.getByRole('link', { name: 'Выбрать для поединка' }).click()
-  for (let match = 0; match < 2; match++) {
-    await page.getByRole('button', { name: 'Начать поединок' }).click()
-    await expect(
-      page.getByRole('button', { name: 'Атака +1 энергия', exact: true }),
-    ).toBeVisible()
-    while (
-      await page
-        .getByRole('button', { name: 'Атака +1 энергия', exact: true })
-        .isVisible()
-    ) {
-      const round = await page.locator('.arena-top').innerText()
-      const skill = page.getByRole('button', {
-        name: 'Особый приём Двойной урон · 3 энергии',
-        exact: true,
-      })
-      if (
-        await page
-          .getByText('Соперник готовит: Особый приём', { exact: true })
-          .isVisible()
-      )
-        await page
-          .getByRole('button', {
-            name: 'Защита −70% входящего урона · +1 энергия',
-            exact: true,
+  test.setTimeout(75_000)
+  await page.goto('/collection')
+  await expect(page.getByText('Найдено 1 из 4.')).toBeVisible()
+  await expect(
+    page.getByText('Су анасы', { exact: true }).first(),
+  ).toBeVisible()
+
+  await openShuraleChallenge(page)
+  await page.getByRole('button', { name: 'Принять испытание' }).click()
+  await expect(page.locator('.lane-arena')).toBeVisible()
+
+  for (let attempt = 0; attempt < 180; attempt++) {
+    if (await page.getByText('ПОБЕДА', { exact: true }).isVisible()) break
+    const enabled = page.locator('.combat-lane:not(:disabled)')
+    if ((await enabled.count()) === 0) break
+    const threatened = page.locator('.combat-lane.threatened')
+    const destination =
+      (await threatened.count()) > 0
+        ? page.locator('.combat-lane:not(.threatened):not(:disabled)').first()
+        : page.locator('.combat-lane:not(:disabled)').filter({
+            has: page.locator('.lane-fighter.enemy'),
           })
-          .click()
-      else if (
-        (await page
-          .getByText('Соперник готовит: Атака', { exact: true })
-          .isVisible()) &&
-        (await skill.isEnabled())
-      )
-        await skill.click()
-      else
-        await page
-          .getByRole('button', { name: 'Атака +1 энергия', exact: true })
-          .click()
-      await expect(page.locator('.arena-top')).not.toHaveText(round)
-    }
-    await expect(
-      page.getByRole('heading', { name: 'Победа! +25 чак-чака' }),
-    ).toBeVisible()
-    if (match === 0)
-      await page.getByRole('button', { name: 'Ещё поединок' }).click()
+    if (
+      !(await destination.evaluate((element) =>
+        element.classList.contains('current'),
+      ))
+    )
+      await destination.click()
+    for (const skill of await page.locator('.pve-controls button').all())
+      if (await skill.isEnabled()) await skill.click()
+    await page.waitForTimeout(250)
   }
-  await page.getByRole('link', { name: 'К коллекции', exact: true }).click()
-  await page.getByRole('button', { name: 'Улучшить · 30', exact: true }).click()
-  await expect(page.getByText('Уровень 2', { exact: true })).toBeVisible()
-  await expect(page.locator('.balance b')).toHaveText('20')
+
+  await expect(page.getByText('ПОБЕДА', { exact: true })).toBeVisible()
+  await expect(page.getByText('Шурале теперь в коллекции.')).toBeVisible()
+  await page.getByRole('link', { name: 'К коллекции' }).click()
+  await expect(page.getByText('Найдено 2 из 4.')).toBeVisible()
+  await expect(page.locator('.balance b')).toHaveText('25')
 })
-test('failed quiz stays locked after reload, unknown NFC is handled, mobile fits', async ({
+
+test('failed quiz survives reload and unknown NFC is handled on mobile', async ({
   page,
 }) => {
   await page.goto('/encounter/forest-01')
   await page.getByRole('button', { name: 'Я готов к знакомству' }).click()
-  for (let i = 0; i < 3; i++) {
-    await page.getByRole('radio').first().check()
+  for (let index = 0; index < 3; index++) {
+    await page.getByRole('radio').last().check()
     await page
       .getByRole('button', {
-        name: i === 2 ? 'Завершить знакомство' : 'Следующий вопрос',
+        name: index === 2 ? 'Завершить знакомство' : 'Следующий вопрос',
       })
       .click()
   }
@@ -98,7 +86,6 @@ test('failed quiz stays locked after reload, unknown NFC is handled, mobile fits
   await expect(
     page.getByRole('heading', { name: 'Метка не найдена' }),
   ).toBeVisible()
-  await page.goto('/')
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,

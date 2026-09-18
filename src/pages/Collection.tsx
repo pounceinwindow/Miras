@@ -27,10 +27,10 @@ export default function Collection() {
         <div className="callout">
           <div>
             <h2>Каждая дружба начинается со встречи</h2>
-            <p>Узнай историю первого хранителя и ответь на три вопроса.</p>
+            <p>Су анасы должна выдаваться при первом входе. Обнови прогресс.</p>
           </div>
-          <Link className="button" to="/encounter/forest-01">
-            Найти Шурале
+          <Link className="button" to="/">
+            Вернуться на карту
             <ArrowRight size={18} />
           </Link>
         </div>

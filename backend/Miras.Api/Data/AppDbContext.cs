@@ -12,6 +12,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<UserEntity> UserEntities => Set<UserEntity>();
     public DbSet<Encounter> Encounters => Set<Encounter>();
     public DbSet<Battle> Battles => Set<Battle>();
+    public DbSet<PveBattle> PveBattles => Set<PveBattle>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -21,6 +22,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasKey(u => u.Id);
             e.Property(u => u.Username).HasMaxLength(100).IsRequired();
             e.HasIndex(u => u.Username).IsUnique();
+            e.Property(u => u.GameTokenHash).HasMaxLength(64);
+            e.HasIndex(u => u.GameTokenHash).IsUnique();
         });
 
         // --- Entity ---
@@ -76,6 +79,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasOne(x => x.PlayerEntity).WithMany().HasForeignKey(x => x.PlayerEntityId);
             e.HasOne(x => x.EnemyEntity).WithMany().HasForeignKey(x => x.EnemyEntityId);
             e.Property(x => x.Result).HasMaxLength(20);
+        });
+
+        modelBuilder.Entity<PveBattle>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.StateJson).HasColumnType("jsonb");
+            e.Property(x => x.Version).IsConcurrencyToken();
+            e.HasOne(x => x.User).WithMany(x => x.PveBattles).HasForeignKey(x => x.UserId);
+            e.HasOne(x => x.Encounter).WithMany().HasForeignKey(x => x.EncounterId);
+            e.HasIndex(x => new { x.UserId, x.UpdatedAt });
         });
 
         // ========== SEED DATA ==========

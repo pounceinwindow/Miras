@@ -3,6 +3,7 @@ namespace Miras.Api.Models;
 public enum EncounterStatus
 {
     Started,
+    ReadyForBattle,
     Failed,
     Completed
 }

@@ -1,8 +1,8 @@
 # Мирас — легенды рядом
 
-Основа хакатонной игры о татарской культуре. Игрок открывает NFC-ссылку, читает историю, отвечает на три вопроса и приглашает хранителя в коллекцию. Дальше — дружеские поединки и развитие за чак-чак.
+Основа хакатонной игры о татарской культуре. Су анасы выдаётся как стартовый хранитель. Игрок открывает NFC-ссылку, читает историю, отвечает на три вопроса и побеждает нового хранителя в PvE-испытании. Только после победы хранитель попадает в коллекцию.
 
-**Frontend:** React + TypeScript + Vite, Tailwind CSS, Motion, React Router, Zustand, PixiJS. **Backend:** C# / ASP.NET Core 10 + EF Core. **Основная БД:** PostgreSQL; для быстрого локального запуска есть SQLite. Supabase используется опционально как PostgreSQL + Auth. Edge Functions не используются.
+**Frontend:** React + TypeScript + Vite, Tailwind CSS, Motion, React Router, Zustand. **Backend:** C# / ASP.NET Core 10 + EF Core. **БД:** PostgreSQL. PvE рассчитывается сервером и сохраняется в PostgreSQL; автономный TypeScript-движок нужен для быстрого показа без backend.
 
 ## Быстрый запуск
 
@@ -23,7 +23,7 @@ npm run dev
 dotnet run --project backend/Miras.Api
 ```
 
-API: http://localhost:5080, проверка: http://localhost:5080/health. В Development без строки подключения автоматически создаётся локальная SQLite-база `backend/Miras.Api/miras.db`. Гостевой токен действителен 30 дней, в БД хранится его SHA-256 хеш.
+API: http://localhost:5080, проверка: http://localhost:5080/health. API требует PostgreSQL и сам применяет EF Core migrations. Для стандартной локальной строки подключения сначала подними `db` через Compose. Гостевой токен хранится в браузере, а в БД сохраняется только его SHA-256 хеш.
 
 Скопировать `.env.example` в `.env.local` и указать:
 
@@ -47,18 +47,18 @@ docker compose up --build
 
 Поднимутся PostgreSQL на `127.0.0.1:54329` и API на `127.0.0.1:5080`. Данные хранятся в Docker volume. Frontend запускается отдельно, с `VITE_API_URL` выше. Пароль в compose предназначен только для локальной разработки. Остановить: `docker compose down` (данные сохранятся).
 
-Для своей PostgreSQL-базы передать API конфигурацию `ConnectionStrings__Game` (через окружение или .NET user-secrets), например `Host=localhost;Port=54329;Database=miras;Username=miras;Password=...`.
+Для своей PostgreSQL-базы передать API конфигурацию `ConnectionStrings__PostgreSql` (через окружение или .NET user-secrets), например `Host=localhost;Port=54329;Database=miras;Username=miras;Password=...`.
 
 ## Что реализовано
 
 - Четыре персонажа: Шурале, Сююмбике, Су анасы, Керемль.
-- Отдельная история и три вопроса для каждого; успешная встреча даёт уровень 1.
+- Су анасы сразу доступна на первом уровне. Для остальных история и три верных ответа открывают PvE-испытание; победа даёт персонажа первого уровня.
 - Неудача закрывает следующую попытку на 24 часа; перезагрузка страницы не снимает ограничение.
 - Коллекция, уровни 1–10, стоимость улучшения: текущий уровень × 30 чак-чака.
-- Пошаговый бой с ИИ и видимым намерением соперника. Атака даёт 1 энергию; защита даёт 1 энергию и снижает входящий урон на 70%; особый приём стоит 3 энергии и наносит двойной урон.
-- Защита соперника снижает твой урон на 60%. Каждые три хода соперник использует особый приём. Поединок ограничен 40 раундами.
+- Real-time PvE до 90 секунд: три позиции, автоматическая обычная атака и два активных умения. Опасная позиция и время до удара показаны заранее.
+- Восемь лорных умений: удержание без потери управления, отражение снарядов, морок, щиты, ослабление атаки и закрытие позиции. Полное описание — в `docs/BATTLE_DESIGN.md`.
 - Победа даёт 25 чак-чака один раз. Соперник равен по уровню, проигрыш не списывает валюту.
-- Сохранение активного боя. Повтор уже обработанного хода отвергается по ID боя и номеру хода.
+- Активный бой сохраняется. При скрытии вкладки или разрыве связи дольше 1,5 секунды бой ставится на паузу; награда и поимка применяются ровно один раз.
 - Мобильная навигация, обратная связь ошибок, поддержка reduced motion.
 - Схематичная карта и авторские SVG-персонажи. PixiJS рисует арену и эффекты; интерфейс и персонажи остаются доступными DOM/SVG-элементами. При недоступном WebGL бой работает с упрощённой сценой.
 
@@ -86,25 +86,21 @@ docker compose up --build
 
 ```dotenv
 ASPNETCORE_ENVIRONMENT=Production
-ConnectionStrings__Game=YOUR_POSTGRES_CONNECTION_STRING
-Supabase__Url=https://YOUR_PROJECT.supabase.co
-Supabase__AnonKey=YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY
+ConnectionStrings__PostgreSql=YOUR_POSTGRES_CONNECTION_STRING
 Cors__Origins__0=https://YOUR_FRONTEND_DOMAIN
 ```
 
-API подключается как владелец таблицы либо выделенная backend-роль с подходящими правами/RLS. Для сетевого подключения к Supabase использовать SSL-параметры из его connection string. Production не создаёт таблицы автоматически и не разрешает локальный гостевой вход. Игровой профиль определяется по проверенному Auth user ID: токен валидируется запросом к `/auth/v1/user`, а не чтением неподписанных claims.
+Для сетевого подключения к Supabase PostgreSQL использовать строку подключения с SSL-параметрами из панели проекта. Текущая ветка использует собственную гостевую сессию C# API. Проверка Supabase Auth JWT остаётся отдельной задачей перед production.
 
 5. Импортировать репозиторий в Vercel: framework Vite, build `npm run build`, output `dist`, Node 24. Задать:
 
 ```dotenv
 VITE_API_URL=https://YOUR_CSHARP_API_DOMAIN
-VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY
 ```
 
 `VITE_*` доступны всем посетителям. Строка подключения PostgreSQL и service_role key **никогда** не должны там находиться. Service role key приложению не нужен. SPA rewrite для прямых NFC-ссылок уже в `vercel.json`.
 
-Анонимный Supabase-аккаунт привязан к сессии браузера. Привязка email/OAuth и восстановление доступа ещё не реализованы. Supabase Storage не нужен для текущих SVG; можно подключить позже для иллюстраций и аудио.
+Привязка email/OAuth и восстановление доступа ещё не реализованы. Supabase Storage не нужен для текущих SVG; можно подключить позже для иллюстраций и аудио.
 
 ## API и данные
 
@@ -114,15 +110,16 @@ VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY
 
 ```json
 {"type":"sync"}
-{"type":"capture","characterId":"shurale","answers":[0,1,2]}
+{"type":"capture","characterId":"shurale","tagId":"forest-01","answers":[0,1,2]}
 {"type":"upgrade","characterId":"shurale"}
-{"type":"startBattle","characterId":"shurale"}
-{"type":"battleTurn","battleId":"ID_FROM_SERVER","turn":1,"action":"attack"}
+{"type":"pveStart","characterId":"su-anasy","target":"shurale","mode":"encounter"}
+{"type":"pve","battleId":"ID_FROM_SERVER","action":"poll","input":{"kind":"move","lane":0}}
+{"type":"pve","battleId":"ID_FROM_SERVER","action":"poll","input":{"kind":"skill","slot":1}}
 ```
 
-Указанные JSON-объекты — отдельные примеры запросов. Ответ: `{ "progress": { ... }, "outcome": "captured" | "failed" | null }`. Ошибки: `{ "error": "..." }`, HTTP 400/401/409/429. После конфликта 409 обновить состояние. Не повторять денежные операции автоматически после сетевого сбоя: сначала `sync`.
+Указанные JSON-объекты — отдельные примеры запросов. Ответ: `{ "progress": { ... }, "outcome": "ready" | "failed" | null }`. Ошибки: `{ "error": "..." }`, HTTP 400/401/409. После конфликта 409 обновить состояние.
 
-Для прототипа весь прогресс игрока хранится одним JSON-агрегатом в строке `Players`. Поле `Version` — EF Core concurrency token. Изменения коллекции и баланса сохраняются атомарно; при конкурентном изменении устаревшая запись отклоняется. Отдельные таблицы персонажей, журнал транзакций и миграции EF — следующий этап развития. SQL-скрипт — начальная схема, не система обновления существующей БД.
+Пользователи, коллекция, встречи, вопросы и бои хранятся в отдельных EF Core таблицах. Снимок real-time боя лежит в `PveBattles.StateJson` (`jsonb`), а `Version` используется как concurrency token. Награда, завершение встречи и добавление в коллекцию сохраняются одной транзакцией `SaveChanges`.
 
 ## Структура
 
@@ -132,7 +129,7 @@ src/components/            Навигация, SVG-иллюстрации, PixiJ
 src/store/game.ts          Zustand + разделение demo/API
 src/lib/api.ts             HTTP-клиент C# API, гостевой и Supabase Auth
 shared/characters.ts       Истории, вопросы, отображаемые характеристики
-shared/battle.ts           TypeScript BattleEngine для автономного демо
+shared/pve/                TypeScript PvE-движок и единый баланс демо
 shared/demo.ts             Локальные игровые команды
 shared/quiz.ts             Демо-ответы; не средство защиты
 backend/Miras.Api/         ASP.NET Core, серверный GameEngine, EF Core, Auth
@@ -140,7 +137,7 @@ backend/Miras.Api.Tests/   Тесты правил, API и конкурентн�
 backend/schema.sql        Начальная PostgreSQL-схема и RLS
 ```
 
-C# GameEngine — источник истины в серверном режиме. TypeScript-движок поддерживает автономное демо и отображение намерений; при изменении баланса синхронизировать обе реализации. Ответы викторины видны в демо-бандле/исходниках: основа не рассчитана на защиту от изучения клиента. В облаке клиент не может напрямую записать валюту или коллекцию.
+C# PvEEngine — источник истины в серверном режиме. TypeScript-движок поддерживает автономное демо; тесты фиксируют одинаковые ключевые правила. Ответы викторины видны в демо-бандле/исходниках: автономный режим не рассчитан на защиту от изучения клиента. В серверном режиме клиент не может напрямую записать валюту или коллекцию.
 
 ## Проверки
 
@@ -151,7 +148,7 @@ npm run test:e2e
 dotnet test backend/Miras.Api.Tests -c Release
 ```
 
-Playwright проверяет полный цикл на desktop и мобильном размере. По умолчанию он поднимает демо; если на порту 5173 уже запущен frontend с C# API, тот же сценарий проходит через backend. GitHub Actions запускает frontend checks, браузерные сценарии и C# tests.
+Playwright проверяет полный цикл на desktop и мобильном размере и использует отдельный порт 41739, чтобы не подхватить чужой dev-сервер. GitHub Actions запускает frontend checks, браузерные сценарии и C# tests.
 
 ```bash
 npm run format
@@ -168,4 +165,4 @@ npm run format
 - [Татарская энциклопедия: Су анасы](https://tatarica.org/ru/razdely/narody/tatary/verovaniya-i-mifologiya/mifologicheskie-personazhi/su-anasy).
 - [Материалы о Су анасы на портале Габдуллы Тукая](https://gabdullatukay.ru/news/heritage/ahmetova-dina-kazan-raznoobrazie-stilistiki-obraza-su-anasy-v-sovremennom-izobrazitelnom-iskusstve).
 
-Не входят в основу: PvP, реальные географические координаты, подтверждение присутствия у метки, аудиоистории, восстановление аккаунта, удалённое редактирование контента и полноценная защита экономики от ботов.
+Не входят в основу: PvP (флаг режима всегда `false`), реальные географические координаты, подтверждение присутствия у метки, аудиоистории, восстановление аккаунта, удалённое редактирование контента и полноценная защита экономики от ботов.
