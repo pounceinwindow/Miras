@@ -22,7 +22,7 @@ services:
       - '127.0.0.1:5080:8080'
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__Game: Host=db;Database=miras;Username=miras;Password=local-development-only
+      ConnectionStrings__PostgreSql: Host=db;Database=miras;Username=miras;Password=local-development-only
     depends_on:
       db:
         condition: service_healthy
