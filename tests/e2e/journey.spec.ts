@@ -31,38 +31,55 @@ test('NFC to collection, persistence, battle reward and upgrade', async ({
     await expect(
       page.getByRole('button', { name: 'Атака +1 энергия', exact: true }),
     ).toBeVisible()
-    while (
-      await page
-        .getByRole('button', { name: 'Атака +1 энергия', exact: true })
-        .isVisible()
-    ) {
+    while (await page.locator('.battle-controls').isVisible()) {
+      if (
+        await page
+          .getByRole('heading', { name: 'Победа! +25 чак-чака' })
+          .isVisible()
+      ) {
+        break
+      }
+
       const round = await page.locator('.arena-top').innerText()
       const skill = page.getByRole('button', {
         name: 'Особый приём Двойной урон · 3 энергии',
         exact: true,
       })
+      const guard = page.getByRole('button', {
+        name: 'Защита −70% входящего урона · +1 энергия',
+        exact: true,
+      })
+      const attack = page.getByRole('button', {
+        name: 'Атака +1 энергия',
+        exact: true,
+      })
+
+      if (!(await attack.isVisible())) break
+
       if (
         await page
           .getByText('Соперник готовит: Особый приём', { exact: true })
           .isVisible()
-      )
-        await page
-          .getByRole('button', {
-            name: 'Защита −70% входящего урона · +1 энергия',
-            exact: true,
-          })
-          .click()
-      else if (
+      ) {
+        await guard.click()
+      } else if (
         (await page
           .getByText('Соперник готовит: Атака', { exact: true })
           .isVisible()) &&
         (await skill.isEnabled())
-      )
+      ) {
         await skill.click()
-      else
+      } else {
+        await attack.click()
+      }
+
+      if (
         await page
-          .getByRole('button', { name: 'Атака +1 энергия', exact: true })
-          .click()
+          .getByRole('heading', { name: 'Победа! +25 чак-чака' })
+          .isVisible()
+      ) {
+        break
+      }
       await expect(page.locator('.arena-top')).not.toHaveText(round)
     }
     await expect(

@@ -37,7 +37,8 @@ export default function MapPage() {
   const collection = useGame((s) => s.progress.collection)
 
   const [locations, setLocations] = useState<LocationPoint[]>([])
-  const [selectedLocation, setSelectedLocation] = useState<LocationPoint | null>(null)
+  const [selectedLocation, setSelectedLocation] =
+    useState<LocationPoint | null>(null)
   const [playerPosition, setPlayerPosition] = useState<GeoPoint | null>(null)
   const [geoError, setGeoError] = useState<string | null>(() =>
     typeof navigator !== 'undefined' && !navigator.geolocation
@@ -133,7 +134,9 @@ export default function MapPage() {
       },
       (err) => {
         if (err.code === err.PERMISSION_DENIED) {
-          setGeoError('Доступ к геолокации запрещён в браузере. Вы можете включить симуляцию для теста.')
+          setGeoError(
+            'Доступ к геолокации запрещён в браузере. Вы можете включить симуляцию для теста.',
+          )
         } else {
           setGeoError('Не удалось определить координаты GPS.')
         }
@@ -255,9 +258,13 @@ export default function MapPage() {
     setPlayerPosition(simulated)
     setIsSimulating(true)
     setGeoError(null)
-    mapInstanceRef.current?.setView([simulated.latitude, simulated.longitude], 16, {
-      animate: true,
-    })
+    mapInstanceRef.current?.setView(
+      [simulated.latitude, simulated.longitude],
+      16,
+      {
+        animate: true,
+      },
+    )
   }
 
   const handleSimulateNearKremlin = () => {
@@ -268,9 +275,13 @@ export default function MapPage() {
     setPlayerPosition(simulated)
     setIsSimulating(true)
     setGeoError(null)
-    mapInstanceRef.current?.setView([simulated.latitude, simulated.longitude], 16, {
-      animate: true,
-    })
+    mapInstanceRef.current?.setView(
+      [simulated.latitude, simulated.longitude],
+      16,
+      {
+        animate: true,
+      },
+    )
   }
 
   // Расчёт расстояния до выбранной точки
@@ -284,7 +295,8 @@ export default function MapPage() {
         )
       : null
 
-  const isNearby = distanceToSelected !== null && distanceToSelected <= INTERACTION_RADIUS
+  const isNearby =
+    distanceToSelected !== null && distanceToSelected <= INTERACTION_RADIUS
 
   return (
     <div className="map-page-wrapper">
@@ -326,7 +338,10 @@ export default function MapPage() {
       {isSimulating && (
         <div className="map-sim-notice">
           <Footprints size={15} />
-          <span>Включён режим симуляции: вы у Казанского Кремля (GPS: 55.7986, 49.1054)</span>
+          <span>
+            Включён режим симуляции: вы у Казанского Кремля (GPS: 55.7986,
+            49.1054)
+          </span>
         </div>
       )}
 
@@ -374,7 +389,10 @@ export default function MapPage() {
       {/* Карточка выбранной точки (Нижний Bottom Sheet) */}
       {selectedLocation && (
         <div className="location-bottom-card">
-          <div className="card-drag-handle" onClick={() => setSelectedLocation(null)} />
+          <div
+            className="card-drag-handle"
+            onClick={() => setSelectedLocation(null)}
+          />
           <div className="location-card-content">
             <div className="location-card-top">
               <div>
@@ -433,17 +451,26 @@ export default function MapPage() {
                   <div className="distance-notice">
                     {distanceToSelected !== null ? (
                       <span>
-                        Вы находитесь в {formatDistance(distanceToSelected)} от точки. Нужно подойти ближе {INTERACTION_RADIUS} м.
+                        Вы находитесь в {formatDistance(distanceToSelected)} от
+                        точки. Нужно подойти ближе {INTERACTION_RADIUS} м.
                       </span>
                     ) : (
-                      <span>Геолокация не включена. Используйте симуляцию для проверки.</span>
+                      <span>
+                        Геолокация не включена. Используйте симуляцию для
+                        проверки.
+                      </span>
                     )}
                   </div>
                   <button
                     type="button"
                     onClick={() => handleSimulateNearLocation(selectedLocation)}
                     className="button cream full-w"
-                    style={{ background: '#eef6f2', borderColor: '#a8dab5', color: '#174a3b', fontWeight: 600 }}
+                    style={{
+                      background: '#eef6f2',
+                      borderColor: '#a8dab5',
+                      color: '#174a3b',
+                      fontWeight: 600,
+                    }}
                   >
                     📍 Я на месте (симулировать GPS)
                   </button>

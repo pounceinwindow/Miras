@@ -43,9 +43,7 @@ export default function Explore() {
               Открыть карту <ArrowRight size={16} />
             </Link>
           </div>
-          <Link to="/map" style={{ display: 'block', position: 'relative' }}>
-            <MapScene />
-          </Link>
+          <MapScene />
         </section>
         <motion.section
           className="feature-card"

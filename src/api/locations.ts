@@ -33,7 +33,8 @@ export const MOCK_LOCATIONS: LocationPoint[] = [
     entityId: 2,
     entityName: 'Су анасы',
     status: 'available',
-    description: 'Таинственные воды озера Кабан, хранящие золотой гребень водяной.',
+    description:
+      'Таинственные воды озера Кабан, хранящие золотой гребень водяной.',
     tag: 'water-01',
   },
   {
@@ -44,7 +45,8 @@ export const MOCK_LOCATIONS: LocationPoint[] = [
     entityId: 3,
     entityName: 'Башня Сююмбике',
     status: 'available',
-    description: 'Семиярусная жемчужина Кремля, символ мудрости и стойкости царицы.',
+    description:
+      'Семиярусная жемчужина Кремля, символ мудрости и стойкости царицы.',
     tag: 'tower-01',
   },
   {
@@ -60,7 +62,8 @@ export const MOCK_LOCATIONS: LocationPoint[] = [
   },
 ]
 
-const API_BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? ''
+const API_BASE =
+  (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? ''
 
 /**
  * Получить список всех игровых точек на карте
@@ -85,10 +88,20 @@ export async function getLocations(userId?: number): Promise<LocationPoint[]> {
     if (Array.isArray(data) && data.length > 0) {
       // Сопоставляем tags для перехода к encounter
       return data.map((loc) => {
-        const mockMatch = MOCK_LOCATIONS.find((m) => m.id === loc.id || m.entityId === loc.entityId)
+        const mockMatch = MOCK_LOCATIONS.find(
+          (m) => m.id === loc.id || m.entityId === loc.entityId,
+        )
         return {
           ...loc,
-          tag: mockMatch?.tag ?? (loc.entityId === 1 ? 'forest-01' : loc.entityId === 2 ? 'water-01' : loc.entityId === 3 ? 'tower-01' : 'stone-01'),
+          tag:
+            mockMatch?.tag ??
+            (loc.entityId === 1
+              ? 'forest-01'
+              : loc.entityId === 2
+                ? 'water-01'
+                : loc.entityId === 3
+                  ? 'tower-01'
+                  : 'stone-01'),
           description: mockMatch?.description,
         }
       })
@@ -103,7 +116,10 @@ export async function getLocations(userId?: number): Promise<LocationPoint[]> {
 /**
  * Получить детальную информацию о конкретной точке по ID
  */
-export async function getLocation(id: number, userId?: number): Promise<LocationPoint | null> {
+export async function getLocation(
+  id: number,
+  userId?: number,
+): Promise<LocationPoint | null> {
   const all = await getLocations(userId)
   return all.find((loc) => loc.id === id) ?? null
 }
