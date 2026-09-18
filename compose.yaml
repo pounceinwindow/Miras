@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: miras
+      POSTGRES_USER: miras
+      POSTGRES_PASSWORD: local-development-only
+    ports:
+      - '127.0.0.1:54329:5432'
+    volumes:
+      - miras-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U miras -d miras']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - '127.0.0.1:5080:8080'
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Game: Host=db;Database=miras;Username=miras;Password=local-development-only
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  miras-data:
