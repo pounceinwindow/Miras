@@ -7,6 +7,7 @@ const Encounter = lazy(() => import('./pages/Encounter'))
 const Collection = lazy(() => import('./pages/Collection'))
 const Battle = lazy(() => import('./pages/Battle'))
 const Profile = lazy(() => import('./pages/Profile'))
+const MapPage = lazy(() => import('./pages/MapPage'))
 export default function App() {
   return (
     <MotionConfig reducedMotion="user">
@@ -21,6 +22,7 @@ export default function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route index element={<Explore />} />
+              <Route path="map" element={<MapPage />} />
               <Route path="encounter/:tagId" element={<Encounter />} />
               <Route path="collection" element={<Collection />} />
               <Route path="battle" element={<Battle />} />

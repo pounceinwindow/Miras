@@ -162,10 +162,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         // --- Seed Locations ---
         modelBuilder.Entity<Location>().HasData(
-            new Location { Id = 1, Name = "Лесопарк Лебяжье", EntityId = 1, NfcToken = "SHURALE_NFC" },
-            new Location { Id = 2, Name = "Озеро Кабан", EntityId = 2, NfcToken = "SUANASY_NFC" },
-            new Location { Id = 3, Name = "Башня Сююмбике", EntityId = 3, NfcToken = "SYUYUMBIKE_NFC" },
-            new Location { Id = 4, Name = "Казанский Кремль", EntityId = 4, NfcToken = "ABC123" }
+            new Location { Id = 1, Name = "Лесопарк Лебяжье", EntityId = 1, NfcToken = "SHURALE_NFC", Latitude = 55.7972, Longitude = 49.1495 },
+            new Location { Id = 2, Name = "Озеро Кабан", EntityId = 2, NfcToken = "SUANASY_NFC", Latitude = 55.7797, Longitude = 49.1235 },
+            new Location { Id = 3, Name = "Башня Сююмбике", EntityId = 3, NfcToken = "SYUYUMBIKE_NFC", Latitude = 55.8005, Longitude = 49.1051 },
+            new Location { Id = 4, Name = "Казанский Кремль", EntityId = 4, NfcToken = "ABC123", Latitude = 55.7984, Longitude = 49.1052 }
         );
 
         // --- Seed Questions: Шурале ---

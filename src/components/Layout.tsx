@@ -15,6 +15,7 @@ import { useGame } from '../store/game'
 import { isCloud } from '../lib/api'
 const nav = [
   { to: '/', label: 'Исследовать', icon: Compass },
+  { to: '/map', label: 'Карта', icon: MapPin },
   { to: '/collection', label: 'Коллекция', icon: BookOpen },
   { to: '/battle', label: 'Поединки', icon: Swords },
   { to: '/profile', label: 'Мой путь', icon: UserRound },

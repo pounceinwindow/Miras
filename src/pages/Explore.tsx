@@ -35,10 +35,17 @@ export default function Explore() {
       <div className="explore-grid">
         <section className="map-section">
           <div className="section-title">
-            <h2>Там, где живут истории</h2>
-            <span>4 места для открытий</span>
+            <div>
+              <h2>Там, где живут истории</h2>
+              <span>4 места для открытий</span>
+            </div>
+            <Link className="text-link" to="/map">
+              Открыть карту <ArrowRight size={16} />
+            </Link>
           </div>
-          <MapScene />
+          <Link to="/map" style={{ display: 'block', position: 'relative' }}>
+            <MapScene />
+          </Link>
         </section>
         <motion.section
           className="feature-card"

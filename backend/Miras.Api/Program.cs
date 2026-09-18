@@ -58,6 +58,7 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "miras-api
 // --- Map all endpoints ---
 app.MapEntityEndpoints();
 app.MapUserEndpoints();
+app.MapLocationEndpoints();
 app.MapEncounterEndpoints();
 app.MapUpgradeEndpoints();
 app.MapBattleEndpoints();
