@@ -1,24 +1,25 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useState, useEffect, useRef } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Swords, Shield, Zap, ArrowRight, Trophy } from 'lucide-react'
-import { characters, getCharacter } from '../../shared/characters'
-import { enemyIntent } from '../../shared/battle'
-import type { CharacterId, Fighter } from '../../shared/types'
+import { enemyIntent } from '../api/battles'
+import type { CharacterId, Fighter } from '../api/types'
 import { useGame } from '../store/game'
 import { CharacterArt } from '../components/CharacterArt'
+import { getBattleFeedback, type BattleFeedback } from '../game/battle/feedback'
 const BattleCanvas = lazy(() => import('../components/BattleCanvas'))
 const actionLabels = { attack: 'Атака', guard: 'Защита', skill: 'Особый приём' }
 function FighterHud({ fighter }: { fighter: Fighter }) {
+  const name = useGame((s) => s.entities.find((c) => c.id === fighter.id)?.name)
   return (
     <div className="fighter-hud">
       <div>
-        <b>{getCharacter(fighter.id)?.name}</b>
+        <b>{name}</b>
         <span>Ур. {fighter.level}</span>
       </div>
       <progress
         value={fighter.hp}
         max={fighter.maxHp}
-        aria-label={`Здоровье ${getCharacter(fighter.id)?.name}`}
+        aria-label={`Здоровье ${name}`}
       />
       <small>
         {fighter.hp} / {fighter.maxHp} здоровья
@@ -27,7 +28,12 @@ function FighterHud({ fighter }: { fighter: Fighter }) {
   )
 }
 export default function Battle() {
-  const { progress, run, busy, ready } = useGame()
+  const { progress, entities: characters, run, busy, ready } = useGame()
+  const [animating, setAnimating] = useState(false)
+  const [feedback, setFeedback] = useState<BattleFeedback | null>(null)
+  const actionLock = useRef(false)
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  useEffect(() => () => clearTimeout(timer.current), [])
   const [params] = useSearchParams()
   const [selected, setSelected] = useState<CharacterId | null>(null)
   const [choosing, setChoosing] = useState(false)
@@ -70,7 +76,7 @@ export default function Battle() {
                 aria-pressed={selection === c.id}
               >
                 <CharacterArt id={c.id} />
-                <b>{getCharacter(c.id)?.name}</b>
+                <b>{characters.find((entity) => entity.id === c.id)?.name}</b>
                 <span>Уровень {c.level}</span>
               </button>
             ))}
@@ -107,19 +113,33 @@ export default function Battle() {
               <FighterHud fighter={battle.enemy} />
             </div>
             <div className="battle-scene">
-              <Suspense fallback={null}>
-                <BattleCanvas turn={battle.turn} />
+              <Suspense fallback={<span role="status">Готовим арену…</span>}>
+                <BattleCanvas
+                  key={battle.id}
+                  battle={battle}
+                  entities={characters}
+                />
               </Suspense>
-              <div
-                className={`battle-character player ${battle.player.hp === 0 ? 'defeated' : ''}`}
-              >
-                <CharacterArt id={battle.player.id} />
-              </div>
-              <div
-                className={`battle-character enemy ${battle.enemy.hp === 0 ? 'defeated' : ''}`}
-              >
-                <CharacterArt id={battle.enemy.id} />
-              </div>
+              {feedback && (
+                <div
+                  className="damage-announcement"
+                  key={`${battle.id}-${feedback.turn}`}
+                  role="status"
+                  data-testid="battle-feedback"
+                  data-turn={feedback.turn}
+                >
+                  {feedback.enemyDamage > 0 && (
+                    <span className="damage-number enemy-damage">
+                      −{feedback.enemyDamage} HP соперника
+                    </span>
+                  )}
+                  {feedback.playerDamage > 0 && (
+                    <span className="damage-number player-damage">
+                      −{feedback.playerDamage} HP хранителя
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
             <div className="arena-caption">
               {active
@@ -156,17 +176,28 @@ export default function Battle() {
                     key={action}
                     disabled={
                       busy ||
+                      animating ||
                       !ready ||
                       (action === 'skill' && battle.player.energy < 3)
                     }
-                    onClick={() =>
-                      void run({
+                    onClick={async () => {
+                      if (actionLock.current) return
+                      actionLock.current = true
+                      setAnimating(true)
+                      await run({
                         type: 'battleTurn',
                         battleId: battle.id,
                         turn: battle.turn,
                         action,
                       })
-                    }
+                      const next = useGame.getState().progress.battle
+                      setFeedback(next ? getBattleFeedback(battle, next) : null)
+                      timer.current = setTimeout(() => {
+                        actionLock.current = false
+                        setAnimating(false)
+                        setFeedback(null)
+                      }, 1200)
+                    }}
                   >
                     <Icon size={22} />
                     <b>{actionLabels[action]}</b>
@@ -190,7 +221,14 @@ export default function Battle() {
                     : 'Хранитель готов попробовать снова. Ты ничего не теряешь.'}
                 </p>
               </div>
-              <button className="button" onClick={() => setChoosing(true)}>
+              <button
+                className="button"
+                disabled={animating}
+                onClick={() => {
+                  setFeedback(null)
+                  setChoosing(true)
+                }}
+              >
                 Ещё поединок
               </button>
               <Link className="text-link" to="/collection">

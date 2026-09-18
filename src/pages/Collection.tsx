@@ -6,10 +6,10 @@ import {
   Hexagon,
   Swords,
 } from 'lucide-react'
-import { characters, MAX_LEVEL, upgradeCost } from '../../shared/characters'
 import { useGame } from '../store/game'
 import { CharacterArt } from '../components/CharacterArt'
 export default function Collection() {
+  const characters = useGame((s) => s.entities)
   const { progress, run, busy, ready } = useGame()
   return (
     <>
@@ -38,7 +38,7 @@ export default function Collection() {
       <div className="collection-grid">
         {characters.map((c) => {
           const owned = progress.collection.find((o) => o.id === c.id)
-          const cost = owned ? upgradeCost(owned.level) : 0
+          const cost = c.nextUpgradeCost ?? 0
           return (
             <article
               key={c.id}
@@ -54,16 +54,24 @@ export default function Collection() {
                 <span className="eyebrow">
                   {c.element} · {c.kind}
                 </span>
-                <h2>{c.name}</h2>
+                <h2>
+                  <Link to={`/entity/${c.id}`}>{c.name}</Link>
+                </h2>
                 <p>{c.description}</p>
+                <Link
+                  className="text-link entity-detail-link"
+                  to={`/entity/${c.id}`}
+                >
+                  О хранителе <ArrowRight size={16} />
+                </Link>
                 {owned ? (
                   <>
                     <div className="stats-row">
                       <span>
-                        Здоровье <b>{c.health + (owned.level - 1) * 12}</b>
+                        Здоровье <b>{c.hp}</b>
                       </span>
                       <span>
-                        Атака <b>{c.attack + (owned.level - 1) * 3}</b>
+                        Атака <b>{c.attack}</b>
                       </span>
                     </div>
                     <button
@@ -71,7 +79,7 @@ export default function Collection() {
                       disabled={
                         busy ||
                         !ready ||
-                        owned.level >= MAX_LEVEL ||
+                        c.nextUpgradeCost === null ||
                         progress.balance < cost
                       }
                       onClick={() =>
@@ -79,12 +87,12 @@ export default function Collection() {
                       }
                     >
                       <TrendingUp size={17} />
-                      {owned.level >= MAX_LEVEL
+                      {c.nextUpgradeCost === null
                         ? 'Максимальный уровень'
                         : `Улучшить · ${cost}`}{' '}
-                      {owned.level < MAX_LEVEL && <Hexagon size={15} />}
+                      {c.nextUpgradeCost !== null && <Hexagon size={15} />}
                     </button>
-                    {owned.level < MAX_LEVEL && progress.balance < cost && (
+                    {c.nextUpgradeCost !== null && progress.balance < cost && (
                       <small className="muted">
                         Не хватает {cost - progress.balance} чак-чака. Награда
                         за победу — 25.

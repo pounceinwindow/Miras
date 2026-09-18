@@ -12,15 +12,15 @@ import {
   LoaderCircle,
 } from 'lucide-react'
 import { useGame } from '../store/game'
-import { isCloud } from '../lib/api'
+import { isCloud } from '../api/client'
 const nav = [
-  { to: '/', label: 'Исследовать', icon: Compass },
+  { to: '/home', label: 'Исследовать', icon: Compass },
   { to: '/collection', label: 'Коллекция', icon: BookOpen },
   { to: '/battle', label: 'Поединки', icon: Swords },
   { to: '/profile', label: 'Мой путь', icon: UserRound },
 ]
 export function Layout() {
-  const { progress, error, busy, run, clearError } = useGame()
+  const { progress, error, busy, ready, run, clearError } = useGame()
   const location = useLocation()
   useEffect(() => {
     void run({ type: 'sync' })
@@ -34,7 +34,7 @@ export function Layout() {
         К содержимому
       </a>
       <aside className="sidebar">
-        <NavLink to="/" className="brand" aria-label="Мирас — главная">
+        <NavLink to="/home" className="brand" aria-label="Мирас — главная">
           <Flower2 size={36} />
           <span>
             мирас<small>ЛЕГЕНДЫ РЯДОМ</small>
@@ -46,7 +46,7 @@ export function Layout() {
             <NavLink
               key={to}
               to={to}
-              end={to === '/'}
+              end={to === '/home'}
               className={({ isActive }) =>
                 `nav-link ${isActive ? 'active' : ''}`
               }
@@ -103,7 +103,13 @@ export function Layout() {
           </div>
         )}
         <main id="main" tabIndex={-1}>
-          <Outlet />
+          {ready ? (
+            <Outlet />
+          ) : (
+            <div className="panel" role="status">
+              Загружаем мир Мирас…
+            </div>
+          )}
         </main>
         <footer className="page-footer">
           <span>МИРАС · ХРАНИМ ИСТОРИИ, СОЗДАЁМ СВОЮ</span>

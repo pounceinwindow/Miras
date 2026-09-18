@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BookOpen, Trophy, Hexagon, Nfc, Copy, Check } from 'lucide-react'
-import { characters } from '../../shared/characters'
 import { useGame } from '../store/game'
-import { isCloud } from '../lib/api'
+import { isCloud } from '../api/client'
 export default function Profile() {
+  const characters = useGame((s) => s.entities)
   const { progress, resetDemo, busy } = useGame()
   const [confirm, setConfirm] = useState(false)
   const [copied, setCopied] = useState('')

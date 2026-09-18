@@ -1716,3 +1716,137 @@ main {
   flex: 1;
   min-width: 180px;
 }
+
+.entity-stats {
+  margin: 24px 0 12px;
+}
+.entity-stats > div {
+  background: #edf1e4;
+  border-radius: 12px;
+  padding: 16px 12px;
+}
+.entity-stats dt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.entity-stats dd {
+  font-size: 28px;
+  margin: 10px 0 0;
+  font-weight: 600;
+}
+.ability-panel {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  border-block: 1px solid var(--border);
+  padding: 22px 0;
+  margin-bottom: 22px;
+}
+.ability-panel h3 {
+  margin-bottom: 8px;
+}
+.ability-panel p {
+  margin: 0;
+}
+.entity-wallet {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+.entity-actions {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+.entity-actions p {
+  margin-bottom: 0;
+}
+.entity-story {
+  margin-top: 24px;
+}
+.entity-story summary {
+  min-height: 44px;
+}
+.entity-detail-link {
+  margin-bottom: 18px;
+}
+.character-card h3 {
+  overflow-wrap: anywhere;
+}
+.map-pin span {
+  max-width: 125px;
+  white-space: normal;
+  text-align: center;
+}
+.fighter-hud > div {
+  gap: 6px;
+  align-items: flex-start;
+}
+.fighter-hud > div span {
+  flex-shrink: 0;
+}
+.damage-announcement {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.damage-number {
+  position: absolute;
+  bottom: 5%;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffe6b0;
+  background: #153f32dc;
+  padding: 6px 10px;
+  border-radius: 20px;
+  animation: damage-float 1.2s ease-out both;
+}
+.enemy-damage {
+  right: 5%;
+}
+.player-damage {
+  left: 5%;
+}
+@keyframes damage-float {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+}
+.fallback-attack {
+  animation: fallback-lunge 0.35s ease-in-out;
+}
+.fallback-hit {
+  animation: fallback-flash 0.5s ease-in-out;
+}
+@keyframes fallback-lunge {
+  50% {
+    translate: 25px 0;
+  }
+}
+@keyframes fallback-flash {
+  40% {
+    filter: brightness(1.7);
+    translate: 8px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .damage-number,
+  .fallback-attack,
+  .fallback-hit {
+    animation: none;
+  }
+}

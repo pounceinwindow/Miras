@@ -1,0 +1,14 @@
+import { request } from './client'
+import type { Action, CharacterId, Progress } from './types'
+export { enemyIntent } from '../../shared/battle'
+export function startBattle(id: CharacterId, progress: Progress) {
+  return request({ type: 'startBattle', characterId: id }, progress)
+}
+export function attack(
+  battleId: string,
+  turn: number,
+  action: Action,
+  progress: Progress,
+) {
+  return request({ type: 'battleTurn', battleId, turn, action }, progress)
+}

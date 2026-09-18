@@ -1,9 +1,14 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { initialProgress } from '../../shared/types'
-import type { Command, Progress } from '../../shared/types'
-import { cloudCommand, isCloud } from '../lib/api'
+import { getInitialProgress as initialProgress, getUser } from '../api/user'
+import { getEntities, upgradeEntity } from '../api/entities'
+import { submitQuiz } from '../api/encounters'
+import { startBattle, attack } from '../api/battles'
+import type { Entity } from '../api/types'
+import type { Command, Progress } from '../api/types'
+import { isCloud } from '../api/client'
 interface GameStore {
+  entities: Entity[]
   progress: Progress
   busy: boolean
   error: string | null
@@ -15,26 +20,39 @@ interface GameStore {
 export const useGame = create<GameStore>()(
   persist(
     (set, get) => ({
+      entities: [],
       progress: initialProgress(),
       busy: false,
       error: null,
-      ready: !isCloud,
+      ready: false,
       clearError: () => set({ error: null }),
       resetDemo: () => {
-        if (!isCloud && !get().busy)
+        if (!isCloud && !get().busy) {
           set({ progress: initialProgress(), error: null })
+          void get().run({ type: 'sync' })
+        }
       },
       run: async (command) => {
         if (get().busy) return
         set({ busy: true, error: null })
         try {
-          const result = isCloud
-            ? await cloudCommand(command)
-            : (await import('../../shared/demo')).executeDemo(
-                get().progress,
-                command,
-              )
-          set({ progress: result.progress, ready: true })
+          const progress = get().progress
+          const result = await (command.type === 'sync'
+            ? getUser(progress)
+            : command.type === 'capture'
+              ? submitQuiz(command.characterId, command.answers, progress)
+              : command.type === 'upgrade'
+                ? upgradeEntity(command.characterId, progress)
+                : command.type === 'startBattle'
+                  ? startBattle(command.characterId, progress)
+                  : attack(
+                      command.battleId,
+                      command.turn,
+                      command.action,
+                      progress,
+                    ))
+          const entities = await getEntities(result.progress)
+          set({ progress: result.progress, entities, ready: true })
           return result.outcome
         } catch (error) {
           set({

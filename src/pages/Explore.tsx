@@ -9,11 +9,11 @@ import {
   MapPin,
 } from 'lucide-react'
 import { motion } from 'motion/react'
-import { characters } from '../../shared/characters'
 import { useGame } from '../store/game'
 import { CharacterArt } from '../components/CharacterArt'
 import { MapScene } from '../components/MapScene'
 export default function Explore() {
+  const characters = useGame((s) => s.entities)
   const collection = useGame((s) => s.progress.collection)
   return (
     <>
