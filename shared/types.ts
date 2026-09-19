@@ -22,7 +22,6 @@ export interface Battle {
   log: string[]
 }
 export interface Progress {
-  balance: number
   collection: OwnedCharacter[]
   cooldowns: Partial<Record<CharacterId, string>>
   wins: number
@@ -54,7 +53,6 @@ export type Command =
       tagId: string
       answers: number[]
     }
-  | { type: 'upgrade'; characterId: CharacterId }
   | { type: 'startBattle'; characterId: CharacterId }
   | { type: 'battleTurn'; battleId: string; turn: number; action: Action }
 export interface GameResult {
@@ -62,7 +60,6 @@ export interface GameResult {
   outcome?: 'ready' | 'captured' | 'failed'
 }
 export const initialProgress = (): Progress => ({
-  balance: 0,
   collection: [
     { id: 'su-anasy', level: 1, capturedAt: new Date().toISOString() },
   ],

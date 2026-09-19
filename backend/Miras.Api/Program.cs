@@ -16,8 +16,6 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connect
 builder.Services.AddScoped<EncounterService>();
 builder.Services.AddScoped<QuizService>();
 builder.Services.AddScoped<CollectionService>();
-builder.Services.AddScoped<UpgradeService>();
-builder.Services.AddScoped<BattleService>();
 builder.Services.AddScoped<GameService>();
 
 // --- Swagger / OpenAPI ---
@@ -60,8 +58,6 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "miras-api
 app.MapEntityEndpoints();
 app.MapUserEndpoints();
 app.MapEncounterEndpoints();
-app.MapUpgradeEndpoints();
-app.MapBattleEndpoints();
 app.MapGameEndpoints();
 
 app.Run();

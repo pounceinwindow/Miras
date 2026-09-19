@@ -1,4 +1,4 @@
-import { COOLDOWN_MS, getCharacter, MAX_LEVEL, upgradeCost } from './characters'
+import { COOLDOWN_MS, getCharacter } from './characters'
 import { gradeQuiz } from './quiz'
 import { createPve, inputPve, rules, stepPve } from './pve/engine'
 import type { Command, GameResult, Progress } from './types'
@@ -35,7 +35,6 @@ export function executeDemo(
       if (command.input) inputPve(b, command.input)
     }
     if ((b.status as string) === 'won') {
-      progress.balance += rules.reward
       progress.wins++
       if (
         b.mode === 'encounter' &&
@@ -84,15 +83,7 @@ export function executeDemo(
   if (!owned) throw new Error('Сначала пригласи персонажа в коллекцию')
   if (progress.pve?.status === 'active')
     throw new Error('Сначала заверши текущий бой')
-  if (command.type === 'upgrade') {
-    if (owned.level >= MAX_LEVEL)
-      throw new Error('Достигнут максимальный уровень')
-    const cost = upgradeCost(owned.level)
-    if (progress.balance < cost)
-      throw new Error('Недостаточно чак-чака. Победи в поединке!')
-    progress.balance -= cost
-    owned.level++
-  } else if (command.type === 'pveStart') {
+  if (command.type === 'pveStart') {
     if (!progress.modes.pve) throw new Error('PvE временно отключено')
     if (!getCharacter(command.target)) throw new Error('Соперник не найден')
     if (command.mode === 'encounter') {

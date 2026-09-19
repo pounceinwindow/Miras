@@ -337,9 +337,7 @@ export default function Battle() {
                 {battle.status === 'won' ? 'ПОБЕДА' : 'ИСПЫТАНИЕ ОКОНЧЕНО'}
               </span>
               <h2>
-                {battle.status === 'won'
-                  ? `+${rules.reward} чак-чака`
-                  : 'Попробуй ещё раз'}
+                {battle.status === 'won' ? 'Босс побеждён' : 'Попробуй ещё раз'}
               </h2>
               <p>
                 {battle.status === 'won' && battle.mode === 'encounter'

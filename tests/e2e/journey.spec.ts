@@ -61,7 +61,6 @@ test('starts with Su anasy and captures Shurale only after a real-time battle', 
   await expect(page.getByText('Шурале теперь в коллекции.')).toBeVisible()
   await page.getByRole('link', { name: 'К коллекции' }).click()
   await expect(page.getByText('Найдено 2 из 4.')).toBeVisible()
-  await expect(page.locator('.balance b')).toHaveText('25')
 })
 
 test('failed quiz survives reload and unknown NFC is handled on mobile', async ({

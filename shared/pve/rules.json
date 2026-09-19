@@ -1,7 +1,6 @@
 {
   "tickMs": 100,
   "maxTicks": 900,
-  "reward": 25,
   "characters": {
     "su-anasy": { "hp": 110, "attack": 14, "skills": ["wave", "comb"] },
     "shurale": { "hp": 130, "attack": 9, "skills": ["tickle", "mist"] },

@@ -36,9 +36,6 @@ public sealed class GameService(AppDbContext db)
             case "capture":
                 outcome = await SubmitQuizAsync(user, command, ct);
                 break;
-            case "upgrade":
-                await UpgradeAsync(user, RequiredString(command, "characterId"), ct);
-                break;
             case "pveStart":
                 await StartBattleAsync(user, command, ct);
                 break;
@@ -99,18 +96,6 @@ public sealed class GameService(AppDbContext db)
             RetryAt = correct ? null : DateTimeOffset.UtcNow.AddHours(24)
         });
         return correct ? "ready" : "failed";
-    }
-
-    private async Task UpgradeAsync(User user, string slug, CancellationToken ct)
-    {
-        var owned = await db.UserEntities.Include(item => item.Entity)
-            .SingleOrDefaultAsync(item => item.UserId == user.Id && item.Entity.Slug == slug, ct)
-            ?? throw new InvalidOperationException("Сначала пригласи хранителя в коллекцию.");
-        if (owned.Level >= 10) throw new InvalidOperationException("Достигнут максимальный уровень.");
-        var cost = owned.Level * 30;
-        if (user.ChakChak < cost) throw new InvalidOperationException("Недостаточно чак-чака.");
-        user.ChakChak -= cost;
-        owned.Level++;
     }
 
     private async Task StartBattleAsync(User user, JsonElement command, CancellationToken ct)
@@ -188,7 +173,6 @@ public sealed class GameService(AppDbContext db)
         }
         if (state.Status == "won" && !row.RewardApplied)
         {
-            user.ChakChak += PveEngine.Reward;
             row.RewardApplied = true;
             if (state.Mode == "encounter" && row.Encounter is not null)
             {
@@ -221,7 +205,6 @@ public sealed class GameService(AppDbContext db)
             .OrderByDescending(item => item.UpdatedAt).FirstOrDefaultAsync(ct);
         var wins = await db.PveBattles.CountAsync(item => item.UserId == user.Id && item.RewardApplied, ct);
         return new GameProgressDto(
-            user.ChakChak,
             collection,
             cooldowns,
             wins,

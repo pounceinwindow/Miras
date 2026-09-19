@@ -68,7 +68,6 @@ public static class PveEngine
 {
     public const int TickMs = 100;
     public const int MaxTicks = 900;
-    public const int Reward = 25;
     public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
     public static readonly IReadOnlyDictionary<string, FighterRule> Fighters =

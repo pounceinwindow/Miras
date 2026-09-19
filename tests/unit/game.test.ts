@@ -148,14 +148,12 @@ describe('real-time lane combat', () => {
       now + 1400,
     ).progress
     expect(progress.pve!.status).toBe('won')
-    expect(progress.balance).toBe(rules.reward)
     expect(progress.collection.some((item) => item.id === 'shurale')).toBe(true)
     const replay = executeDemo(
       progress,
       { type: 'pve', battleId: 'battle-id', action: 'poll' },
       now + 1500,
     ).progress
-    expect(replay.balance).toBe(rules.reward)
     expect(replay.wins).toBe(1)
   })
 })

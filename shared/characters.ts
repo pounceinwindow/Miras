@@ -178,6 +178,4 @@ export const characters: Character[] = [
   },
 ]
 export const getCharacter = (id: string) => characters.find((c) => c.id === id)
-export const MAX_LEVEL = 10
-export const upgradeCost = (level: number) => level * 30
 export const COOLDOWN_MS = 24 * 60 * 60 * 1000

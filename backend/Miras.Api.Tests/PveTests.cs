@@ -41,7 +41,7 @@ public class PveTests
     }
 
     [Fact]
-    public async Task EncounterVictory_CapturesAndRewardsExactlyOnce()
+    public async Task EncounterVictory_CapturesExactlyOnce()
     {
         using var db = TestDbHelper.CreateContext();
         var user = await db.Users.SingleAsync(item => item.Id == 1);
@@ -70,11 +70,9 @@ public class PveTests
         var command = $$"""{"type":"pve","battleId":"{{battle.Id}}","action":"poll"}""";
         var won = await service.ExecuteAsync(user, Command(command), default);
         Assert.Equal("won", won.Progress.Pve!.Status);
-        Assert.Equal(PveEngine.Reward, won.Progress.Balance);
         Assert.Contains(won.Progress.Collection, item => item.Id == "shurale");
 
         var replay = await service.ExecuteAsync(user, Command(command), default);
-        Assert.Equal(PveEngine.Reward, replay.Progress.Balance);
         Assert.Equal(1, replay.Progress.Wins);
     }
 

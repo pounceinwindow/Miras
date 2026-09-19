@@ -3,7 +3,6 @@ namespace Miras.Api.Dtos;
 public record UserDto(
     int Id,
     string Username,
-    int ChakChak,
     DateTimeOffset CreatedAt
 );
 

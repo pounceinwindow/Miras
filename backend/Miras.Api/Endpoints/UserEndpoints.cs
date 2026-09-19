@@ -30,7 +30,7 @@ public static class UserEndpoints
             db.Users.Add(user);
             await db.SaveChangesAsync(ct);
 
-            return Results.Created($"/api/users/{user.Id}", new UserDto(user.Id, user.Username, user.ChakChak, user.CreatedAt));
+            return Results.Created($"/api/users/{user.Id}", new UserDto(user.Id, user.Username, user.CreatedAt));
         })
         .WithName("CreateUser")
         .WithSummary("Создать нового пользователя");
@@ -39,7 +39,7 @@ public static class UserEndpoints
         {
             var user = await db.Users
                 .Where(u => u.Id == userId)
-                .Select(u => new UserDto(u.Id, u.Username, u.ChakChak, u.CreatedAt))
+                .Select(u => new UserDto(u.Id, u.Username, u.CreatedAt))
                 .FirstOrDefaultAsync(ct);
             return user is null ? Results.NotFound(new { error = "Пользователь не найден." }) : Results.Ok(user);
         })

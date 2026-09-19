@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BookOpen, Trophy, Hexagon, Nfc, Copy, Check } from 'lucide-react'
+import { BookOpen, Trophy, Nfc, Copy, Check } from 'lucide-react'
 import { characters } from '../../shared/characters'
 import { useGame } from '../store/game'
 import { isCloud } from '../lib/api'
@@ -30,11 +30,6 @@ export default function Profile() {
             label: 'Хранителей найдено',
           },
           { icon: Trophy, value: progress.wins, label: 'Побед в поединках' },
-          {
-            icon: Hexagon,
-            value: progress.balance,
-            label: 'Чак-чака в запасе',
-          },
         ].map(({ icon: Icon, value, label }) => (
           <div className="stat-card" key={label}>
             <Icon size={24} />
@@ -104,9 +99,7 @@ export default function Profile() {
       {!isCloud && (
         <section className="panel">
           <h2>Начать демо заново</h2>
-          <p>
-            Удалит локальную коллекцию, чак-чак и ожидание повторной попытки.
-          </p>
+          <p>Удалит локальную коллекцию и историю поединков.</p>
           {confirm ? (
             <div className="button-row">
               <button
