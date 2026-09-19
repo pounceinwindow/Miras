@@ -1,11 +1,6 @@
 import { useEffect } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import {
-  UserRound,
-  Flower2,
-  X,
-  LoaderCircle,
-} from 'lucide-react'
+import { UserRound, Flower2, Swords, X, LoaderCircle } from 'lucide-react'
 import { useGame } from '../store/game'
 export function Layout() {
   const { error, busy, ready, run, clearError } = useGame()
@@ -35,6 +30,9 @@ export function Layout() {
             {busy && (
               <LoaderCircle className="spin" size={16} aria-label="Загрузка" />
             )}
+            <NavLink to="/pvp" className="avatar" aria-label="Бой с другом">
+              <Swords size={19} />
+            </NavLink>
             <NavLink to="/profile" className="avatar" aria-label="Мой профиль">
               <UserRound size={20} />
             </NavLink>

@@ -74,13 +74,12 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
         const targetId = event.data.entityId as CharacterId
         const starterId: CharacterId =
           targetId === 'su-anasy' ? 'shurale' : 'su-anasy'
-        let state = useGame.getState()
+        const state = useGame.getState()
         if (!state.progress.collection.some((item) => item.id === starterId)) {
           await run({
             type: 'capture',
             characterId: starterId,
           })
-          state = useGame.getState()
         }
         await run({
           type: 'capture',

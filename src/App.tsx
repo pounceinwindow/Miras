@@ -8,6 +8,7 @@ const Encounter = lazy(() => import('./pages/Encounter'))
 const Collection = lazy(() => import('./pages/Collection'))
 const Entity = lazy(() => import('./pages/Entity'))
 const Battle = lazy(() => import('./pages/Battle'))
+const Pvp = lazy(() => import('./pages/Pvp'))
 const Profile = lazy(() => import('./pages/Profile'))
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
           }
         >
           <Routes>
+            <Route path="pvp" element={<Pvp />} />
             <Route element={<Layout />}>
               <Route index element={<Navigate to="/home" replace />} />
               <Route path="home" element={<Explore />} />
