@@ -104,6 +104,9 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
         event.preventDefault()
         close()
       }}
+      onClick={(event) => {
+        if (event.target === dialog.current) close()
+      }}
     >
       <div className="scanner-sheet-content">
         <iframe

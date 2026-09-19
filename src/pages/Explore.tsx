@@ -108,7 +108,12 @@ export default function Explore() {
               className="hero-compact-card"
             >
               <div className={`hero-compact-art art-${hero.id}`}>
-                <CharacterArt id={hero.id} />
+                <img
+                  className="hero-compact-pixel"
+                  src={`/pixel/${hero.id}.png`}
+                  alt=""
+                  aria-hidden="true"
+                />
               </div>
               <div className="hero-compact-details">
                 <strong>{hero.name}</strong>
@@ -329,9 +334,7 @@ export default function Explore() {
                     </div>
                     <div className="fighter-card-info">
                       <strong>{entity?.name ?? hero.id}</strong>
-                      <small>
-                        Уровень {hero.level} · {entity?.element ?? 'Магия'}
-                      </small>
+                      <small>{entity?.element ?? 'Магия'}</small>
                     </div>
                     <span className="fighter-pick-action">
                       <Swords size={13} /> Выбрать

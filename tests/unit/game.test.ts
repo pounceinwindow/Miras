@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { afterEach, describe, it, expect, vi } from 'vitest'
 import { initialProgress } from '../../shared/types'
 import { executeDemo } from '../../shared/demo'
 import { createBattle, takeTurn, enemyIntent } from '../../shared/battle'
@@ -10,7 +10,19 @@ const capture = () =>
     { type: 'capture', characterId: 'shurale' },
     now,
   ).progress
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
+
 describe('capture and economy', () => {
+  it('loads without randomUUID support', () => {
+    vi.stubGlobal('crypto', {})
+    expect(executeDemo(initialProgress(), { type: 'sync' }).progress).toEqual(
+      initialProgress(),
+    )
+  })
+
   it('captures at level one and does not mutate input', () => {
     const input = initialProgress()
     const { progress, outcome } = executeDemo(
@@ -53,6 +65,17 @@ describe('capture and economy', () => {
   })
 })
 describe('battle', () => {
+  it('creates a battle id when randomUUID is unavailable', () => {
+    vi.stubGlobal('crypto', {})
+    const battle = executeDemo(capture(), {
+      type: 'startBattle',
+      characterId: 'shurale',
+    }).progress.battle
+    expect(battle?.id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+    )
+  })
+
   it('rejects skill without energy and protects input', () => {
     const p = createBattle('x', 'shurale', 1)
     expect(() => takeTurn(p, 'skill')).toThrow()

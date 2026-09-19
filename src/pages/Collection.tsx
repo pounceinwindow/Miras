@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, ArrowLeft, LockKeyhole, TrendingUp } from 'lucide-react'
+import { ArrowRight, ArrowLeft, LockKeyhole } from 'lucide-react'
 import { useGame } from '../store/game'
 import { CharacterArt } from '../components/CharacterArt'
 export default function Collection() {
   const characters = useGame((s) => s.entities)
-  const { progress, run, busy, ready } = useGame()
+  const { progress } = useGame()
   return (
     <>
       <Link className="back-link" to="/home">
@@ -17,7 +17,7 @@ export default function Collection() {
         </h1>
         <p>
           Найдено {progress.collection.length} из 4. Сканируй новые места и
-          помогай хранителям становиться сильнее.
+          собирай хранителей.
         </p>
       </div>
       {!progress.collection.length && (
@@ -42,7 +42,7 @@ export default function Collection() {
             >
               <div className={`collection-art art-${c.id}`}>
                 <span className="pill dark">
-                  {owned ? `Уровень ${owned.level}` : 'Ещё не знакомы'}
+                  {owned ? 'В коллекции' : 'Ещё не знакомы'}
                 </span>
                 <CharacterArt id={c.id} />
               </div>
@@ -61,32 +61,14 @@ export default function Collection() {
                   О хранителе <ArrowRight size={16} />
                 </Link>
                 {owned ? (
-                  <>
-                    <div className="stats-row">
-                      <span>
-                        Здоровье <b>{c.hp}</b>
-                      </span>
-                      <span>
-                        Атака <b>{c.attack}</b>
-                      </span>
-                    </div>
-                    <button
-                      className="button"
-                      disabled={
-                        busy ||
-                        !ready ||
-                        c.nextUpgradeCost === null
-                      }
-                      onClick={() =>
-                        void run({ type: 'upgrade', characterId: c.id })
-                      }
-                    >
-                      <TrendingUp size={17} />
-                      {c.nextUpgradeCost === null
-                        ? 'Максимальный уровень'
-                        : 'Улучшить'}
-                    </button>
-                  </>
+                  <div className="stats-row">
+                    <span>
+                      Здоровье <b>{c.hp}</b>
+                    </span>
+                    <span>
+                      Атака <b>{c.attack}</b>
+                    </span>
+                  </div>
                 ) : (
                   <Link to={`/encounter/${c.tag}`} className="button secondary">
                     <LockKeyhole size={17} /> Познакомиться

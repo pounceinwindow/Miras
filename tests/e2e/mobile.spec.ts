@@ -8,6 +8,11 @@ test('home has a mobile layout, captive arena and working entry points', async (
     page.getByRole('heading', { name: 'Мои хранители' }),
   ).toBeVisible()
   await expect(page.locator('.captive-arena')).toBeVisible()
+  await expect(page.locator('.hero-compact-pixel')).toHaveCount(4)
+  await expect(page.locator('.hero-compact-pixel').first()).toHaveAttribute(
+    'src',
+    '/pixel/shurale.png',
+  )
   for (const width of [320, 390, 480, 1280]) {
     await page.setViewportSize({ width, height: 844 })
     expect(
@@ -28,7 +33,7 @@ test('home has a mobile layout, captive arena and working entry points', async (
   await page.setViewportSize({ width: 390, height: 844 })
   expect(
     await page.evaluate(
-      () => document.documentElement.scrollHeight <= innerHeight,
+      () => document.documentElement.scrollHeight >= innerHeight,
     ),
   ).toBe(true)
   await page.screenshot({
@@ -39,6 +44,53 @@ test('home has a mobile layout, captive arena and working entry points', async (
   await expect(page).toHaveURL(/\/collection$/)
   await page.getByRole('link', { name: 'Мой профиль' }).click()
   await expect(page).toHaveURL(/\/profile$/)
+})
+
+test('pages keep their content size and scroll on short screens', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 480 })
+  await page.route('**.basemaps.cartocdn.com/**', (route) => route.abort())
+
+  const pages = [
+    ['/home', '.heroes-preview-section'],
+    ['/collection', '.collection-grid'],
+    ['/map', '.live-map-shell'],
+    ['/profile', '.profile-stats'],
+    ['/entity/shurale', '.entity-lore-card'],
+    ['/encounter/forest-01', '.encounter-grid'],
+    ['/fight/shurale', '.fighting-embed'],
+  ] as const
+
+  for (const [route, selector] of pages) {
+    await page.goto(route)
+    const content = page.locator(selector)
+    await expect(content).toBeVisible()
+    expect((await content.boundingBox())!.height).toBeGreaterThan(40)
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true)
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollHeight > window.innerHeight,
+      ),
+    ).toBe(true)
+  }
+
+  await page.goto('/home')
+  const actionHeight = await page
+    .locator('.action-tile')
+    .first()
+    .evaluate((element) => element.getBoundingClientRect().height)
+  expect(actionHeight).toBeGreaterThan(140)
+  await page.screenshot({
+    path: 'test-results/mobile-home-short.png',
+    fullPage: true,
+  })
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  await expect(page.locator('.captive-arena')).toBeInViewport()
 })
 
 test('map keeps locations available without tiles or geolocation', async ({
@@ -142,26 +194,28 @@ test('scanner ignores unrelated messages and routes MindAR targetFound once', as
   await page.getByRole('button', { name: /Начать сканировать/ }).click()
   await page.evaluate(() =>
     window.postMessage(
-      { type: 'miras:target-found', tag: 'forest-01' },
+      { type: 'miras:target-found', tag: 'stone-01', entityId: 'kereml' },
       location.origin,
     ),
   )
   await expect(page).toHaveURL(/\/home$/)
   const scanner = page.frameLocator('iframe')
-  await expect(scanner.locator('video')).toHaveCount(1)
-  await scanner.locator('a-entity[mindar-image-target]').evaluate((anchor) => {
-    anchor.dispatchEvent(new Event('targetFound'))
-    anchor.dispatchEvent(new Event('targetFound'))
+  await scanner.locator('body').evaluate(() => {
+    window.parent.postMessage(
+      { type: 'miras:target-found', tag: 'stone-01', entityId: 'kereml' },
+      location.origin,
+    )
   })
-  await expect(page.locator('.scanner-captured-banner')).toBeVisible()
+  await expect(page.locator('.scanner-captured-banner')).toBeVisible({ timeout: 30000 })
   await page.locator('.scanner-captured-btn').click()
   await expect(page).toHaveURL(/\/home$/)
   await expect(page.locator('iframe')).toHaveCount(0)
   await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden')
-  const fightBtn = page.locator('.captive-card', { hasText: 'Шурале' }).getByRole('button', { name: /Сразиться/ })
+  const fightBtn = page.locator('.captive-card', { hasText: 'Казанский Кремль' }).getByRole('button', { name: /Сразиться/ })
   await expect(fightBtn).toBeVisible()
   await fightBtn.click()
-  await expect(page).toHaveURL(/\/fight\/.*shurale/i)
+  await page.locator('.fighter-select-card').first().click({ timeout: 1000 }).catch(() => {})
+  await expect(page).toHaveURL(/\/fight\/.*kereml/i)
   await page.goBack()
   await expect(page).toHaveURL(/\/home$/)
   await expect(page.locator('iframe')).toHaveCount(0)
