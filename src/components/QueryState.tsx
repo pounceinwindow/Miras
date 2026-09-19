@@ -6,7 +6,7 @@ export function QueryState({ error }: { error?: string }) {
         <>
           <h1>{error}</h1>
           <p>Выбери хранителя на карте легенд.</p>
-          <Link className="button" to="/home">
+          <Link className="button" to="/map">
             К карте
           </Link>
         </>

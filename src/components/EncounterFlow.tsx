@@ -56,7 +56,7 @@ export function EncounterFlow({
   }
   return (
     <>
-      <Link to="/home" className="back-link">
+      <Link to="/map" className="back-link">
         <ArrowLeft size={17} /> К карте легенд
       </Link>
       <div className="encounter-grid">

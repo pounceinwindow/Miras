@@ -93,13 +93,10 @@ export default function EntityPage() {
               </button>
               {cost !== null && progress.balance < cost && (
                 <p className="muted">
-                  Не хватает {cost - progress.balance} чак-чака. Победа в бою
-                  принесёт 25.
+                  Не хватает {cost - progress.balance} чак-чака. Продолжай
+                  исследовать места, чтобы получить награды.
                 </p>
               )}
-              <Link className="button" to={`/battle?character=${entity.id}`}>
-                <Swords size={18} /> Перейти в бой <ArrowRight size={18} />
-              </Link>
             </div>
           ) : (
             <Link className="button" to={`/encounter/${entity.tag}`}>

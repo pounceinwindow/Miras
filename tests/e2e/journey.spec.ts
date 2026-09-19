@@ -1,9 +1,6 @@
 import { test, expect } from '@playwright/test'
 async function captureShurale(page: import('@playwright/test').Page) {
-  await page.goto('/home')
-  await page
-    .getByRole('link', { name: 'Встретить хранителя', exact: true })
-    .click()
+  await page.goto('/encounter/forest-01')
   await page.getByRole('link', { name: 'Я готов к знакомству' }).click()
   await expect(page).toHaveURL(/\/quiz\/shurale$/)
   for (const [index, answer] of [
@@ -22,10 +19,26 @@ async function captureShurale(page: import('@playwright/test').Page) {
     page.getByRole('heading', { name: 'Шурале теперь с тобой!' }),
   ).toBeVisible()
 }
-test('NFC to collection, persistence, battle reward and upgrade', async ({
+async function startScannedBattle(page: import('@playwright/test').Page) {
+  await page.goto('/home')
+  await page.getByRole('button', { name: /Начать сканировать/ }).click()
+  const scanner = page.frameLocator('iframe')
+  await expect(scanner.locator('a-entity[mindar-image-target]')).toHaveCount(1)
+  await scanner.locator('a-entity[mindar-image-target]').evaluate((anchor) => {
+    anchor.dispatchEvent(new Event('targetFound'))
+  })
+  await expect(page).toHaveURL(/\/fight\/shurale$/)
+  await expect(
+    page.getByRole('button', { name: 'Атака +1 энергия', exact: true }),
+  ).toBeVisible()
+}
+test('capture persists, scanning starts battle, result opens hero', async ({
   page,
 }) => {
   test.setTimeout(90000)
+  await page.addInitScript(() => {
+    navigator.mediaDevices.getUserMedia = () => new Promise(() => {})
+  })
   await page.route(
     (url) => url.pathname.startsWith('/api/'),
     (route) => route.abort(),
@@ -38,64 +51,48 @@ test('NFC to collection, persistence, battle reward and upgrade', async ({
   await expect(page).toHaveURL(/\/entity\/shurale$/)
   await expect(page.getByText('Следующее улучшение: 30 чак-чака')).toBeVisible()
   await expect(page.locator('.entity-stats')).toContainText('70%')
-  await page.getByRole('link', { name: 'Перейти в бой' }).click()
-  for (let match = 0; match < 2; match++) {
-    await page.getByRole('button', { name: 'Начать поединок' }).click()
+  await expect(page.getByRole('link', { name: 'Перейти в бой' })).toHaveCount(0)
+  await startScannedBattle(page)
+  await expect(page.locator('.battle-canvas')).toHaveAttribute(
+    'data-renderer',
+    'ready',
+  )
+  while (
+    await page
+      .getByRole('button', { name: 'Атака +1 энергия', exact: true })
+      .isVisible()
+  ) {
     await expect(
       page.getByRole('button', { name: 'Атака +1 энергия', exact: true }),
-    ).toBeVisible()
-    await expect(page.locator('.battle-canvas')).toHaveAttribute(
-      'data-renderer',
-      'ready',
+    ).toBeEnabled()
+    const skill = page.getByRole('button', {
+      name: 'Особый приём Двойной урон · 3 энергии',
+      exact: true,
+    })
+    if (
+      await page
+        .getByText('Соперник готовит: Особый приём', { exact: true })
+        .isVisible()
     )
-    while (
+      await page
+        .getByRole('button', {
+          name: 'Защита −70% входящего урона · +1 энергия',
+          exact: true,
+        })
+        .click()
+    else if (await skill.isEnabled()) await skill.click()
+    else
       await page
         .getByRole('button', { name: 'Атака +1 энергия', exact: true })
-        .isVisible()
-    ) {
-      await expect(
-        page.getByRole('button', { name: 'Атака +1 энергия', exact: true }),
-      ).toBeEnabled()
-      const round = await page.locator('.arena-top').innerText()
-      const skill = page.getByRole('button', {
-        name: 'Особый приём Двойной урон · 3 энергии',
-        exact: true,
-      })
-      if (
-        await page
-          .getByText('Соперник готовит: Особый приём', { exact: true })
-          .isVisible()
-      )
-        await page
-          .getByRole('button', {
-            name: 'Защита −70% входящего урона · +1 энергия',
-            exact: true,
-          })
-          .click()
-      else if (
-        (await page
-          .getByText('Соперник готовит: Атака', { exact: true })
-          .isVisible()) &&
-        (await skill.isEnabled())
-      )
-        await skill.click()
-      else
-        await page
-          .getByRole('button', { name: 'Атака +1 энергия', exact: true })
-          .click()
-      await expect(page.locator('.arena-top')).not.toHaveText(round)
-      await expect(page.getByTestId('battle-feedback')).toBeVisible()
-    }
-    await expect(
-      page.getByRole('heading', { name: 'Победа! +25 чак-чака' }),
-    ).toBeVisible()
-    if (match === 0)
-      await page.getByRole('button', { name: 'Ещё поединок' }).click()
+        .click()
+    await expect(page.getByTestId('battle-feedback')).toBeVisible()
   }
-  await page.getByRole('link', { name: 'К коллекции', exact: true }).click()
-  await page.getByRole('button', { name: 'Улучшить · 30', exact: true }).click()
-  await expect(page.getByText('Уровень 2', { exact: true })).toBeVisible()
-  await expect(page.locator('.balance b')).toHaveText('20')
+  await expect(
+    page.getByRole('heading', { name: 'Победа! +25 чак-чака' }),
+  ).toBeVisible()
+  await page.getByRole('link', { name: 'О герое' }).click()
+  await expect(page).toHaveURL(/\/entity\/shurale$/)
+  await expect(page.locator('.balance b')).toHaveText('25')
 })
 test('failed quiz stays locked after reload, unknown NFC is handled, mobile fits', async ({
   page,
@@ -127,13 +124,12 @@ test('failed quiz stays locked after reload, unknown NFC is handled, mobile fits
   ).toBe(true)
 })
 
-test('entity and quiz deep links, unknown IDs, locked collection and empty arena', async ({
+test('entity and quiz deep links, unknown IDs, locked collection and removed arena', async ({
   page,
 }) => {
   await page.goto('/battle')
-  await expect(
-    page.getByRole('heading', { name: 'Твоему приключению нужен хранитель' }),
-  ).toBeVisible()
+  await expect(page).toHaveURL(/\/home$/)
+  await expect(page.getByText('Арена', { exact: true })).toHaveCount(0)
   await page.goto('/collection')
   await expect(page.getByText('Ещё не знакомы', { exact: true })).toHaveCount(4)
   await page
@@ -162,9 +158,11 @@ test('entity and quiz deep links, unknown IDs, locked collection and empty arena
 test('an attack updates HP, blocks extra input during animation and persists the battle', async ({
   page,
 }) => {
+  await page.addInitScript(() => {
+    navigator.mediaDevices.getUserMedia = () => new Promise(() => {})
+  })
   await captureShurale(page)
-  await page.goto('/battle?character=shurale')
-  await page.getByRole('button', { name: 'Начать поединок' }).click()
+  await startScannedBattle(page)
   await expect(page.locator('.battle-canvas')).toHaveAttribute(
     'data-renderer',
     'ready',

@@ -1,11 +1,5 @@
 import { Link } from 'react-router-dom'
-import {
-  ArrowRight,
-  LockKeyhole,
-  TrendingUp,
-  Hexagon,
-  Swords,
-} from 'lucide-react'
+import { ArrowRight, LockKeyhole, TrendingUp, Hexagon } from 'lucide-react'
 import { useGame } from '../store/game'
 import { CharacterArt } from '../components/CharacterArt'
 export default function Collection() {
@@ -19,8 +13,8 @@ export default function Collection() {
           Твои хранители<span>.</span>
         </h1>
         <p>
-          Найдено {progress.collection.length} из 4. Побеждай в поединках и
-          помогай им становиться сильнее.
+          Найдено {progress.collection.length} из 4. Сканируй новые места и
+          помогай хранителям становиться сильнее.
         </p>
       </div>
       {!progress.collection.length && (
@@ -94,16 +88,10 @@ export default function Collection() {
                     </button>
                     {c.nextUpgradeCost !== null && progress.balance < cost && (
                       <small className="muted">
-                        Не хватает {cost - progress.balance} чак-чака. Награда
-                        за победу — 25.
+                        Не хватает {cost - progress.balance} чак-чака. Новые
+                        награды можно получить после сканирования.
                       </small>
                     )}
-                    <Link
-                      to={`/battle?character=${c.id}`}
-                      className="text-link"
-                    >
-                      <Swords size={17} /> Выбрать для поединка
-                    </Link>
                   </>
                 ) : (
                   <Link to={`/encounter/${c.tag}`} className="button secondary">

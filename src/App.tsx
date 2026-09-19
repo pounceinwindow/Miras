@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom'
 import { MotionConfig } from 'motion/react'
 import { Layout } from './components/Layout'
 import Explore from './pages/Explore'
+const MapPage = lazy(() => import('./pages/MapPage'))
 const Encounter = lazy(() => import('./pages/Encounter'))
 const Collection = lazy(() => import('./pages/Collection'))
 const Entity = lazy(() => import('./pages/Entity'))
@@ -24,11 +25,14 @@ export default function App() {
             <Route element={<Layout />}>
               <Route index element={<Navigate to="/home" replace />} />
               <Route path="home" element={<Explore />} />
+              <Route path="map" element={<MapPage />} />
+              <Route path="scan" element={<Navigate to="/home" replace />} />
               <Route path="entity/:id" element={<Entity />} />
               <Route path="quiz/:id" element={<Quiz />} />
               <Route path="encounter/:token" element={<Encounter />} />
               <Route path="collection" element={<Collection />} />
-              <Route path="battle" element={<Battle />} />
+              <Route path="fight/:character" element={<Battle />} />
+              <Route path="battle" element={<Navigate to="/home" replace />} />
               <Route path="profile" element={<Profile />} />
               <Route
                 path="*"
@@ -36,7 +40,7 @@ export default function App() {
                   <div className="empty-state">
                     <h1>Эта тропа ещё не открыта</h1>
                     <Link className="button" to="/">
-                      Вернуться к карте
+                      На главную
                     </Link>
                   </div>
                 }

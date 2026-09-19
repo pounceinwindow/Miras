@@ -1,151 +1,152 @@
+import { useState } from 'react'
+import { ScannerSheet } from '../components/ScannerSheet'
 import { Link } from 'react-router-dom'
 import {
   ArrowUpRight,
   ArrowRight,
-  Nfc,
-  BookOpen,
+  ScanLine,
+  Map,
+  Swords,
   Sparkles,
-  Check,
   MapPin,
 } from 'lucide-react'
-import { motion } from 'motion/react'
 import { useGame } from '../store/game'
-import { CharacterArt } from '../components/CharacterArt'
-import { MapScene } from '../components/MapScene'
+
 export default function Explore() {
-  const characters = useGame((s) => s.entities)
-  const collection = useGame((s) => s.progress.collection)
+  const [scannerOpen, setScannerOpen] = useState(false)
+  const count = useGame((s) => s.progress.collection.length)
   return (
-    <>
-      <div className="page-heading">
-        <div>
-          <span className="eyebrow">ОТКРОЙ СВОЁ НАСЛЕДИЕ</span>
-          <h1>
-            Легенды ближе,
-            <br className="mobile-break" /> чем кажется<span>.</span>
-          </h1>
-          <p>
-            Гуляй по городу. Знакомься с историями. Находи своих хранителей.
-          </p>
+    <div className="home-page">
+      {scannerOpen && <ScannerSheet onClosed={() => setScannerOpen(false)} />}
+      <section className="kazan-hero" aria-labelledby="home-title">
+        <div className="hero-location">
+          <MapPin size={12} /> КАЗАНЬ, ТАТАРСТАН<span>ГЛАВА 01</span>
         </div>
-        <span className="season-label">
-          <Sparkles size={15} /> Глава 01 · Начало пути
-        </span>
-      </div>
-      <div className="explore-grid">
-        <section className="map-section">
-          <div className="section-title">
-            <h2>Там, где живут истории</h2>
-            <span>4 места для открытий</span>
-          </div>
-          <MapScene />
-        </section>
-        <motion.section
-          className="feature-card"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
+        <h1 id="home-title">
+          Город знакомый.
+          <br />
+          <span>Мир — волшебный.</span>
+        </h1>
+        <p className="hero-intro">
+          Открой легенды Казани.
+          <br />
+          Собери свою команду хранителей.
+        </p>
+        <div className="city-art">
+          <img
+            src="/kazan.svg"
+            alt="Иллюстрация Казани: мечеть Кул-Шариф, башня Сююмбике и стены Кремля"
+            width="420"
+            height="260"
+          />
+          <span className="art-note note-left">
+            Истории
+            <br />
+            оживают здесь
+            <svg viewBox="0 0 45 28" aria-hidden="true">
+              <path d="M3 3Q8 25 39 19m-7-6 8 6-8 6" />
+            </svg>
+          </span>
+          <span className="art-note note-right">
+            <Sparkles size={18} />
+            Твоя легенда
+            <br />
+            начинается
+          </span>
+          <span className="city-label">КАЗАНЬ — ЭТО ТОЛЬКО НАЧАЛО</span>
+        </div>
+      </section>
+      <section className="home-actions" aria-label="Начать приключение">
+        <button
+          className="action-tile scan-tile"
+          type="button"
+          onClick={() => setScannerOpen(true)}
+          aria-haspopup="dialog"
+          aria-expanded={scannerOpen}
         >
-          <div className="feature-top">
-            <span className="pill">ПЕРВАЯ ВСТРЕЧА</span>
-            <ArrowUpRight size={22} />
-          </div>
-          <CharacterArt id="shurale" className="feature-art" />
-          <span className="feature-kicker">ЛЕС ХРАНИТ СВОИ СЕКРЕТЫ</span>
-          <h2>Шурале</h2>
-          <p>
-            Один шаг с привычной тропы —<br />и ты уже внутри легенды.
-          </p>
-          <Link className="button cream" to="/encounter/forest-01">
-            Встретить хранителя
-            <ArrowRight size={18} />
-          </Link>
-        </motion.section>
-      </div>
-      <section className="how-strip">
-        <div>
-          <span className="step-icon">
-            <Nfc size={21} />
+          <span className="tile-top">
+            <ScanLine size={32} strokeWidth={1.5} />
+            <ArrowUpRight size={21} />
           </span>
-          <p>
-            <b>01. Найди</b>
-            <span>Поднеси телефон к NFC-метке</span>
-          </p>
-        </div>
-        <div>
-          <span className="step-icon">
-            <BookOpen size={21} />
+          <span>
+            <strong>
+              Начать
+              <br />
+              сканировать
+            </strong>
+            <small>Найди скрытую легенду</small>
           </span>
-          <p>
-            <b>02. Узнай</b>
-            <span>Послушай историю и ответь на вопросы</span>
-          </p>
-        </div>
-        <div>
-          <span className="step-icon">
-            <Sparkles size={21} />
+        </button>
+        <Link className="action-tile map-tile" to="/map">
+          <span className="tile-top">
+            <Map size={32} strokeWidth={1.5} />
+            <ArrowUpRight size={21} />
           </span>
-          <p>
-            <b>03. Подружись</b>
-            <span>Собирай и развивай хранителей</span>
-          </p>
-        </div>
+          <span>
+            <strong>
+              Открыть
+              <br />
+              карту
+            </strong>
+            <small>Места с характером</small>
+          </span>
+        </Link>
       </section>
-      <section>
-        <div className="section-title">
-          <div>
-            <span className="eyebrow">ЧЕТЫРЕ ИСТОРИИ · ОДНО НАСЛЕДИЕ</span>
-            <h2>Хранители Татарстана</h2>
-          </div>
-          <Link className="text-link" to="/collection">
-            Моя коллекция <ArrowRight size={16} />
-          </Link>
-        </div>
-        <div className="character-grid">
-          {characters.map((c, i) => (
-            <motion.div
-              key={c.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
-            >
-              <Link
-                to={`/encounter/${c.tag}`}
-                className={`character-card art-${c.id}`}
-              >
-                <div className="character-card-top">
-                  <span>{c.element}</span>
-                  <span>
-                    {collection.some((o) => o.id === c.id) ? (
-                      <Check size={18} />
-                    ) : (
-                      String(i + 1).padStart(2, '0')
-                    )}
-                  </span>
-                </div>
-                <CharacterArt id={c.id} />
-                <div className="character-card-info">
-                  <h3>
-                    {c.name}
-                    <ArrowUpRight size={18} />
-                  </h3>
-                  <p>{c.title}</p>
-                  <span className="location-line">
-                    <MapPin size={12} />
-                    {c.location}
-                  </span>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-      <div className="demo-note">
-        <Nfc size={18} />
-        <span>
-          Нет метки под рукой? В прототипе можно открыть встречу прямо с карты
-          или карточки.
+      <Link className="fighters-link" to="/collection">
+        <span className="fighters-icon">
+          <Swords size={23} />
         </span>
-      </div>
-    </>
+        <span>
+          <strong>Мои бойцы</strong>
+          <small>
+            {count
+              ? `${count} из 4 хранителей уже с тобой`
+              : 'Собери команду для больших историй'}
+          </small>
+        </span>
+        <ArrowRight size={20} />
+      </Link>
+      <section className="home-guide" aria-labelledby="guide-title">
+        <div className="guide-heading">
+          <h2 id="guide-title">Как это работает</h2>
+          <span>3 ПРОСТЫХ ШАГА</span>
+        </div>
+        <ol>
+          <li>
+            <span className="guide-number">01</span>
+            <div>
+              <h3>Отсканируй место</h3>
+              <p>
+                Найди метку и наведи камеру —<br />
+                за ней скрывается целая история.
+              </p>
+            </div>
+            <ScanLine size={22} />
+          </li>
+          <li>
+            <span className="guide-number">02</span>
+            <div>
+              <h3>Пройди испытание</h3>
+              <p>
+                После сканирования сразу начнётся
+                <br />испытание найденного хранителя.
+              </p>
+            </div>
+            <Swords size={22} />
+          </li>
+          <li>
+            <span className="guide-number">03</span>
+            <div>
+              <h3>Познакомься с героем</h3>
+              <p>
+                После боя откроется его история,
+                <br />способности и место в коллекции.
+              </p>
+            </div>
+            <Sparkles size={22} />
+          </li>
+        </ol>
+      </section>
+    </div>
   )
 }
