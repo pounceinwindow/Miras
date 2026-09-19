@@ -33,7 +33,7 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
     const previousFocus = document.activeElement
     const overflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    element.showModal()
+    if (!element.open) element.showModal()
     element
       .querySelector<HTMLButtonElement>('button')
       ?.focus({ preventScroll: true })

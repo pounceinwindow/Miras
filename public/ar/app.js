@@ -37,6 +37,8 @@ function loadLibraries() {
   return libraries
 }
 function closeSession() {
+  if (!pending && !session) return
+  console.warn('[miras] closeSession called', new Error().stack)
   pending?.abort()
   pending = null
   session?.stop()
@@ -102,6 +104,7 @@ async function startCamera() {
       'Наведи камеру на тестовую метку и держи её целиком в рамке.'
   } catch (error) {
     if (controller.signal.aborted) return
+    console.error('startCamera error:', error)
     closeSession()
     status.textContent = 'Не удалось включить камеру'
     hint.textContent =
@@ -123,11 +126,4 @@ document.addEventListener('keydown', (event) => {
     window.parent.postMessage({ type: 'miras:close' }, window.location.origin)
   }
 })
-window.addEventListener('pagehide', closeSession)
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    closeSession()
-    status.textContent = 'Камера приостановлена'
-    hint.textContent = 'Нажми «Включить камеру», чтобы продолжить.'
-  }
-})
+window.addEventListener('beforeunload', closeSession)
