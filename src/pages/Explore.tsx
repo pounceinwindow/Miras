@@ -196,7 +196,7 @@ export default function Explore() {
               <Swords size={20} />
             </span>
             <div>
-              <h2 id="captive-title">Враги в плену</h2>
+              <h2 id="captive-title">Хранители в плену</h2>
               <small>Выбери соперника для поединка</small>
             </div>
           </div>
