@@ -92,12 +92,7 @@ export default function Explore() {
         aria-labelledby="heroes-title"
       >
         <div className="heroes-preview-header">
-          <div>
-            <h1 id="heroes-title">Мои хранители</h1>
-          </div>
-          <span className="heroes-owned-count">
-            {ownedIds.size} из {entities.length}
-          </span>
+          <h1 id="heroes-title">Мои хранители</h1>
         </div>
 
         <div className="heroes-compact-grid">

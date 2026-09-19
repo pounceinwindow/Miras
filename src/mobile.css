@@ -164,23 +164,11 @@
 }
 .heroes-preview-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
   gap: 10px;
   margin-bottom: 9px;
-}
-.heroes-owned-count {
-  flex-shrink: 0;
-  margin-top: 3px;
-  padding: 5px 9px;
-  border: 1px solid rgba(226, 188, 94, 0.42);
-  border-radius: 999px;
-  color: #ead596;
-  background: rgba(255, 250, 226, 0.08);
-  font-family: 'Unbounded', sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  line-height: 1;
+  text-align: center;
 }
 .heroes-preview-header h1,
 .mobile-app .heroes-preview-header h1 {
