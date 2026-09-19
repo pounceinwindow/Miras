@@ -7,7 +7,6 @@ import {
   ScanLine,
   Map,
   Swords,
-  Sparkles,
   Lock,
 } from 'lucide-react'
 import { useGame } from '../store/game'
@@ -68,10 +67,6 @@ export default function Explore() {
       <section className="heroes-preview-section" aria-labelledby="heroes-title">
         <div className="heroes-preview-header">
           <div>
-            <div className="heroes-step-pill">
-              <Sparkles size={10} />
-              <span>Шаг 03 · Коллекция</span>
-            </div>
             <h1 id="heroes-title">Мои хранители</h1>
             <p className="hero-intro">
               Герои древних сказаний рядом с тобой.
@@ -113,7 +108,7 @@ export default function Explore() {
           </span>
         </div>
         <div className="step-bridge-icon">
-          <ScanLine size={15} />
+          <ScanLine size={17} />
         </div>
       </div>
 
@@ -163,7 +158,7 @@ export default function Explore() {
           </span>
         </div>
         <div className="step-bridge-icon">
-          <Swords size={15} />
+          <Swords size={17} />
         </div>
       </div>
 
