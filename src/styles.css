@@ -1875,11 +1875,6 @@ main {
   color: #f3eedf;
   cursor: pointer;
 }
-.party-switcher.enemy-party {
-  justify-content: flex-end;
-  border-top: 1px solid #ffffff12;
-  color: #c9c1aa;
-}
 .pve-controls button,
 .move-hint {
   display: grid;

@@ -35,7 +35,7 @@ export interface PveBattle {
   player: Combatant
   reserves: Combatant[]
   enemy: Combatant
-  enemyReserves: Combatant[]
+  bossDamageScale: number
   tick: number
   status: 'active' | 'won' | 'lost'
   paused: boolean
@@ -79,29 +79,19 @@ export function createPve(
 ): PveBattle {
   const party = heroes.slice(0, 3)
   if (!party.length) throw new Error('Выбери хотя бы одного хранителя')
-  const enemyIds = [
-    target,
-    ...(Object.keys(rules.characters) as CharacterId[]).filter(
-      (id) => id !== target,
-    ),
-  ].slice(0, party.length)
-  const enemyParty = enemyIds.map((id) =>
-    fighter(id, mode === 'training' ? party[0].level : 1),
-  )
-  const scale = party.length === 1 ? 0.78 : party.length === 2 ? 0.92 : 1.1
-  for (const enemy of enemyParty)
-    enemy.hp = enemy.maxHp = Math.max(
-      35,
-      Math.round((enemy.hp * scale) / enemyParty.length),
-    )
+  const enemy = fighter(target, mode === 'training' ? party[0].level : 1)
+  const hpScale = party.length === 1 ? 0.78 : party.length === 2 ? 1.25 : 1.75
+  const bossDamageScale =
+    party.length === 1 ? 0.65 : party.length === 2 ? 0.85 : 1.05
+  enemy.hp = enemy.maxHp = Math.round(enemy.hp * hpScale)
   return {
     id,
     mode,
     target,
     player: fighter(party[0].id, party[0].level),
     reserves: party.slice(1).map((hero) => fighter(hero.id, hero.level)),
-    enemy: enemyParty[0],
-    enemyReserves: enemyParty.slice(1),
+    enemy,
+    bossDamageScale,
     tick: 0,
     status: 'active',
     paused: true,
@@ -178,14 +168,16 @@ export function cast(b: PveBattle, side: Side, slot: 0 | 1): boolean {
   const skill = rules.characters[f.id].skills[slot] as SkillId,
     r = rules.skills[skill]
   f.skillReady[slot] = b.tick + r.cooldown
-  const damage = r.damage + (f.level - 1) * 2
+  const baseDamage = r.damage + (f.level - 1) * 2
+  const damage =
+    side === 'enemy' ? Math.ceil(baseDamage * b.bossDamageScale) : baseDamage
   if (skill === 'wave') {
     f.rootUntil = 0
     f.reflectUntil = b.tick + r.duration
     threat(b, side, skill, [f.lane], damage, r.windup)
   } else if (skill === 'mist') f.mistUntil = b.tick + r.duration
   else if (skill === 'will' || skill === 'wall') {
-    f.shield = damage
+    f.shield = baseDamage
     f.shieldUntil = b.tick + r.duration
     f.rootUntil = skill === 'wall' ? b.tick + 20 : 0
   } else
@@ -248,11 +240,8 @@ export function stepPve(b: PveBattle, ticks = 1): PveBattle {
       b.reserves[next] = defeated
       note(b, `В бой выходит ${b.player.id}`)
     }
-    if (b.enemy.hp <= 0 && b.enemyReserves.some((item) => item.hp > 0))
-      switchEnemy(b)
     if (b.player.hp <= 0 || b.tick >= rules.maxTicks) b.status = 'lost'
-    else if (b.enemy.hp <= 0 && !b.enemyReserves.some((item) => item.hp > 0))
-      b.status = 'won'
+    else if (b.enemy.hp <= 0) b.status = 'won'
     if (b.status !== 'active') {
       b.threats = []
       note(
@@ -266,11 +255,6 @@ export function stepPve(b: PveBattle, ticks = 1): PveBattle {
       break
     }
     if (b.tick >= b.nextEnemyMove) {
-      if (
-        b.enemy.hp / b.enemy.maxHp <= 0.35 &&
-        b.enemyReserves.some((item) => item.hp > 0)
-      )
-        switchEnemy(b)
       // Different opponents use different deterministic movement patterns.
       const lane = ((b.enemy.lane + (b.enemy.id === 'shurale' ? 2 : 1)) %
         3) as Lane
@@ -290,7 +274,9 @@ export function stepPve(b: PveBattle, ticks = 1): PveBattle {
       if (side === 'enemy' || f.lane === target.lane) {
         const baseDamage = rules.characters[f.id].attack + (f.level - 1) * 2
         const damage =
-          side === 'enemy' ? Math.ceil(baseDamage * 0.7) : baseDamage
+          side === 'enemy'
+            ? Math.ceil(baseDamage * b.bossDamageScale)
+            : baseDamage
         threat(
           b,
           side,
@@ -306,15 +292,6 @@ export function stepPve(b: PveBattle, ticks = 1): PveBattle {
   return b
 }
 
-function switchEnemy(b: PveBattle) {
-  const next = b.enemyReserves.findIndex((item) => item.hp > 0)
-  if (next < 0) return
-  const previous = b.enemy
-  b.enemy = b.enemyReserves[next]
-  b.enemyReserves[next] = previous
-  b.enemy.lane = previous.lane
-  note(b, `Соперник выпускает ${b.enemy.id}`)
-}
 export function statuses(f: Combatant, tick: number): string[] {
   return [
     f.rootUntil > tick
