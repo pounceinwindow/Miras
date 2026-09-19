@@ -16,8 +16,7 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connect
 builder.Services.AddScoped<EncounterService>();
 builder.Services.AddScoped<QuizService>();
 builder.Services.AddScoped<CollectionService>();
-builder.Services.AddScoped<UpgradeService>();
-builder.Services.AddScoped<BattleService>();
+builder.Services.AddScoped<GameService>();
 
 // --- Swagger / OpenAPI ---
 builder.Services.AddEndpointsApiExplorer();
@@ -28,7 +27,7 @@ builder.Services.AddSwaggerGen(options =>
 
 // --- CORS ---
 var origins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>()
-    ?? ["http://localhost:5173", "http://127.0.0.1:5173"];
+    ?? ["http://localhost:5173", "http://127.0.0.1:5173", "http://127.0.0.1:41739"];
 builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
         policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod()));
@@ -59,8 +58,7 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "miras-api
 app.MapEntityEndpoints();
 app.MapUserEndpoints();
 app.MapEncounterEndpoints();
-app.MapUpgradeEndpoints();
-app.MapBattleEndpoints();
+app.MapGameEndpoints();
 
 app.Run();
 

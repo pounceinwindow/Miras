@@ -42,7 +42,9 @@ public class QuizService(AppDbContext db)
             .Where(q => q.EntityId == encounter.EntityId)
             .ToListAsync(ct);
 
-        if (request.Answers.Count != questions.Count)
+        if (request.Answers.Count != questions.Count ||
+            request.Answers.Select(a => a.QuestionId).Distinct().Count() != questions.Count ||
+            request.Answers.Any(a => questions.All(q => q.Id != a.QuestionId)))
             throw new InvalidOperationException($"Нужно ответить на все {questions.Count} вопроса.");
 
         var allCorrect = request.Answers.All(a =>
@@ -53,36 +55,9 @@ public class QuizService(AppDbContext db)
 
         if (allCorrect)
         {
-            encounter.Status = EncounterStatus.Completed;
-            encounter.CompletedAt = DateTimeOffset.UtcNow;
-
-            var userEntity = new UserEntity
-            {
-                UserId = encounter.UserId,
-                EntityId = encounter.EntityId,
-                Level = 1,
-                Xp = 0,
-                ObtainedAt = DateTimeOffset.UtcNow
-            };
-            db.UserEntities.Add(userEntity);
+            encounter.Status = EncounterStatus.ReadyForBattle;
             await db.SaveChangesAsync(ct);
-
-            var entity = encounter.Entity;
-            var item = new UserCollectionItemDto(
-                userEntity.Id,
-                entity.Id,
-                entity.Name,
-                entity.Slug,
-                entity.Category,
-                1, 0,
-                userEntity.ObtainedAt,
-                entity.BaseHp,
-                entity.BaseAttack,
-                entity.BaseDefense,
-                entity.AbilityName
-            );
-
-            return new QuizResultDto(true, "Completed", "Персонаж добавлен в коллекцию!", null, item);
+            return new QuizResultDto(true, "ReadyForBattle", "Ответы верны. Победи хранителя, чтобы добавить его в коллекцию!", null, null);
         }
         else
         {

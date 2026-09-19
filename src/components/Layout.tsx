@@ -7,7 +7,6 @@ import {
   UserRound,
   Flower2,
   MapPin,
-  Hexagon,
   X,
   LoaderCircle,
 } from 'lucide-react'
@@ -81,11 +80,6 @@ export function Layout() {
             {busy && (
               <LoaderCircle className="spin" size={18} aria-label="Загрузка" />
             )}
-            <span className="balance" title="Игровая валюта">
-              <Hexagon size={18} />
-              <b>{progress.balance}</b>
-              <span>чак-чак</span>
-            </span>
             <NavLink to="/profile" className="avatar" aria-label="Мой профиль">
               П
             </NavLink>

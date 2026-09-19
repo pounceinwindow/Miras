@@ -56,7 +56,7 @@ public class EncounterAndQuizTests
     }
 
     [Fact]
-    public async Task Quiz_CorrectAnswers_AddsCharacterToCollection()
+    public async Task Quiz_CorrectAnswers_OpensBattleWithoutCapturing()
     {
         using var db = TestDbHelper.CreateContext();
         var encounterService = new EncounterService(db);
@@ -78,12 +78,12 @@ public class EncounterAndQuizTests
         var result = await quizService.SubmitAnswersAsync(encounter.EncounterId, new SubmitQuizRequest(answers), default);
 
         Assert.True(result.Success);
-        Assert.Equal("Completed", result.Status);
-        Assert.NotNull(result.ObtainedEntity);
+        Assert.Equal("ReadyForBattle", result.Status);
+        Assert.Null(result.ObtainedEntity);
 
         // Verify in DB
         var owned = await db.UserEntities.AnyAsync(ue => ue.UserId == 1 && ue.EntityId == 4);
-        Assert.True(owned);
+        Assert.False(owned);
     }
 
     [Fact]

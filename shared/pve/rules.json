@@ -1,0 +1,76 @@
+{
+  "tickMs": 100,
+  "maxTicks": 900,
+  "characters": {
+    "su-anasy": { "hp": 110, "attack": 14, "skills": ["wave", "comb"] },
+    "shurale": { "hp": 130, "attack": 9, "skills": ["tickle", "mist"] },
+    "syuyumbike": { "hp": 140, "attack": 8, "skills": ["will", "voice"] },
+    "kereml": { "hp": 155, "attack": 8, "skills": ["wall", "seal"] }
+  },
+  "skills": {
+    "wave": {
+      "name": "Обратная волна",
+      "description": "Снимает удержание. На 1,6 с отражает снаряды; бьёт по своей дорожке сквозь морок.",
+      "cooldown": 60,
+      "damage": 14,
+      "windup": 4,
+      "duration": 16
+    },
+    "comb": {
+      "name": "Золотой гребень",
+      "description": "Помечает позицию врага. Через 0,8 с наносит урон и запрещает перемещение на 2 с. Умения доступны.",
+      "cooldown": 90,
+      "damage": 8,
+      "windup": 8,
+      "duration": 20
+    },
+    "tickle": {
+      "name": "Щекотка",
+      "description": "Через 1,4 с ловит врага на отмеченной позиции: урон и 2 с без перемещения. Можно освободиться волной.",
+      "cooldown": 85,
+      "damage": 12,
+      "windup": 14,
+      "duration": 20
+    },
+    "mist": {
+      "name": "Лесной морок",
+      "description": "На 3 с скрывает от обычных снарядов. Умения проходят сквозь морок.",
+      "cooldown": 100,
+      "damage": 0,
+      "windup": 0,
+      "duration": 30
+    },
+    "will": {
+      "name": "Воля ханбике",
+      "description": "Снимает удержание и даёт щит на 22 урона на 4 с.",
+      "cooldown": 100,
+      "damage": 22,
+      "windup": 0,
+      "duration": 40
+    },
+    "voice": {
+      "name": "Глас Казани",
+      "description": "Через 1,5 с ударяет по двум позициям. На 4 с вдвое ослабляет обычную атаку врага.",
+      "cooldown": 100,
+      "damage": 12,
+      "windup": 15,
+      "duration": 40
+    },
+    "wall": {
+      "name": "Белокаменная стена",
+      "description": "Щит на 32 урона на 4 с. За крепость приходится платить: 2 с нельзя перемещаться.",
+      "cooldown": 100,
+      "damage": 32,
+      "windup": 0,
+      "duration": 40
+    },
+    "seal": {
+      "name": "Печать ворот",
+      "description": "Через 1,6 с ударяет по позиции и закрывает вход на неё на 4 с. Выйти можно. Волна не отражает печать.",
+      "cooldown": 100,
+      "damage": 16,
+      "windup": 16,
+      "duration": 40
+    }
+  }
+}
