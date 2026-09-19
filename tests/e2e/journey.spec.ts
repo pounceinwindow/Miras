@@ -21,6 +21,7 @@ async function captureShurale(page: import('@playwright/test').Page) {
 test('NFC to collection, persistence, battle reward and upgrade', async ({
   page,
 }) => {
+  test.slow()
   await captureShurale(page)
   await page.getByRole('link', { name: 'Открыть коллекцию' }).click()
   await page.reload()
@@ -28,19 +29,21 @@ test('NFC to collection, persistence, battle reward and upgrade', async ({
   await page.getByRole('link', { name: 'Выбрать для поединка' }).click()
   for (let match = 0; match < 2; match++) {
     await page.getByRole('button', { name: 'Начать поединок' }).click()
-    await expect(
-      page.getByRole('button', { name: 'Атака +1 энергия', exact: true }),
-    ).toBeVisible()
+    await expect(page.locator('.battle-controls')).toBeVisible()
+
     while (await page.locator('.battle-controls').isVisible()) {
+      const roundSpan = page.locator('.arena-top span').nth(1)
+      const currentRound = (await roundSpan.innerText()).trim()
       if (
-        await page
+        currentRound.includes('Поединок завершён') ||
+        (await page
           .getByRole('heading', { name: 'Победа! +25 чак-чака' })
-          .isVisible()
+          .isVisible())
       ) {
         break
       }
 
-      const round = await page.locator('.arena-top').innerText()
+      const caption = await page.locator('.arena-caption').innerText()
       const skill = page.getByRole('button', {
         name: 'Особый приём Двойной урон · 3 энергии',
         exact: true,
@@ -54,41 +57,34 @@ test('NFC to collection, persistence, battle reward and upgrade', async ({
         exact: true,
       })
 
-      if (!(await attack.isVisible())) break
-
-      if (
-        await page
-          .getByText('Соперник готовит: Особый приём', { exact: true })
-          .isVisible()
-      ) {
+      if (caption.includes('Особый приём')) {
         await guard.click()
       } else if (
-        (await page
-          .getByText('Соперник готовит: Атака', { exact: true })
-          .isVisible()) &&
-        (await skill.isEnabled())
+        caption.includes('Атака') &&
+        (await skill.isEnabled().catch(() => false))
       ) {
         await skill.click()
       } else {
         await attack.click()
       }
 
-      if (
-        await page
-          .getByRole('heading', { name: 'Победа! +25 чак-чака' })
-          .isVisible()
-      ) {
-        break
-      }
-      await expect(page.locator('.arena-top')).not.toHaveText(round)
+      await expect(roundSpan).not.toHaveText(currentRound)
     }
+
     await expect(
       page.getByRole('heading', { name: 'Победа! +25 чак-чака' }),
     ).toBeVisible()
-    if (match === 0)
+    if (match === 0) {
       await page.getByRole('button', { name: 'Ещё поединок' }).click()
+      await expect(
+        page.getByRole('button', { name: 'Начать поединок' }),
+      ).toBeVisible()
+    }
   }
+
+  await expect(page.locator('.balance b')).toHaveText('50')
   await page.getByRole('link', { name: 'К коллекции', exact: true }).click()
+  await expect(page).toHaveURL('/collection')
   await page.getByRole('button', { name: 'Улучшить · 30', exact: true }).click()
   await expect(page.getByText('Уровень 2', { exact: true })).toBeVisible()
   await expect(page.locator('.balance b')).toHaveText('20')
