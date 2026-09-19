@@ -1,159 +1,123 @@
-import { describe, expect, it } from 'vitest'
-import { COOLDOWN_MS } from '../../shared/characters'
-import { executeDemo } from '../../shared/demo'
-import { cast, createPve, move, rules, stepPve } from '../../shared/pve/engine'
+import { describe, it, expect } from 'vitest'
 import { initialProgress } from '../../shared/types'
-
+import { executeDemo } from '../../shared/demo'
+import { createBattle, takeTurn, enemyIntent } from '../../shared/battle'
+import { characters } from '../../shared/characters'
 const now = Date.UTC(2026, 8, 18, 12)
-const correctQuiz = {
-  type: 'capture' as const,
-  characterId: 'shurale' as const,
-  tagId: 'forest-01',
-  answers: [0, 1, 2],
-}
-
-describe('onboarding and encounter gate', () => {
-  it('starts with Su anasy and opens a challenge after the quiz', () => {
+const capture = () =>
+  executeDemo(
+    initialProgress(),
+    { type: 'capture', characterId: 'shurale' },
+    now,
+  ).progress
+describe('capture and economy', () => {
+  it('captures at level one and does not mutate input', () => {
     const input = initialProgress()
-    expect(input.collection.map((item) => item.id)).toEqual(['su-anasy'])
-    const result = executeDemo(input, correctQuiz, now)
-    expect(result.outcome).toBe('ready')
-    expect(result.progress.challenges).toEqual(['shurale'])
-    expect(result.progress.collection.map((item) => item.id)).toEqual([
-      'su-anasy',
-    ])
-    expect(input.challenges).toEqual([])
-  })
-
-  it('requires the NFC tag and applies the quiz cooldown for 24 hours', () => {
-    expect(() =>
-      executeDemo(initialProgress(), { ...correctQuiz, tagId: 'wrong' }, now),
-    ).toThrow('Неверная метка')
-    const failed = executeDemo(
-      initialProgress(),
-      { ...correctQuiz, answers: [1, 1, 1] },
+    const { progress, outcome } = executeDemo(
+      input,
+      { type: 'capture', characterId: 'shurale' },
       now,
-    ).progress
-    expect(Date.parse(failed.cooldowns.shurale!)).toBe(now + COOLDOWN_MS)
-    expect(() =>
-      executeDemo(failed, correctQuiz, now + COOLDOWN_MS - 1),
-    ).toThrow('через сутки')
-    expect(executeDemo(failed, correctQuiz, now + COOLDOWN_MS).outcome).toBe(
-      'ready',
     )
+    expect(outcome).toBe('captured')
+    expect(progress.collection[0].level).toBe(1)
+    expect(input.collection).toEqual([])
   })
-
-  it('does not allow an encounter battle before the quiz', () => {
+  it('treats a repeated scan as an idempotent capture', () => {
+    const first = capture()
+    const second = executeDemo(first, {
+      type: 'capture',
+      characterId: 'shurale',
+    })
+    expect(second.outcome).toBe('captured')
+    expect(second.progress.collection).toHaveLength(1)
+  })
+  it('charges upgrades and enforces limits', () => {
+    const p = capture()
+    const result = executeDemo(p, {
+      type: 'upgrade',
+      characterId: 'shurale',
+    }).progress
+    expect(result.collection[0].level).toBe(2)
+    p.collection[0].level = 10
+    expect(() =>
+      executeDemo(p, { type: 'upgrade', characterId: 'shurale' }),
+    ).toThrow()
+  })
+  it('rejects unowned fighters', () => {
     expect(() =>
       executeDemo(initialProgress(), {
-        type: 'pveStart',
-        characterId: 'su-anasy',
-        target: 'shurale',
-        mode: 'encounter',
+        type: 'startBattle',
+        characterId: 'shurale',
       }),
-    ).toThrow('ответь на вопросы')
+    ).toThrow()
   })
 })
-
-describe('real-time lane combat', () => {
-  it('telegraphs attacks and lets the player dodge by changing lane', () => {
-    const battle = createPve(
-      'battle',
-      [{ id: 'su-anasy', level: 1 }],
-      'shurale',
-      'training',
-    )
-    battle.paused = false
-    battle.player.lane = 1
-    battle.enemy.lane = 1
-    stepPve(battle, 25)
-    expect(battle.threats.some((item) => item.owner === 'enemy')).toBe(true)
-    expect(move(battle, 'player', 0)).toBe(true)
-    const hp = battle.player.hp
-    stepPve(battle, 12)
-    expect(battle.player.hp).toBe(hp)
+describe('battle', () => {
+  it('rejects skill without energy and protects input', () => {
+    const p = createBattle('x', 'shurale', 1)
+    expect(() => takeTurn(p, 'skill')).toThrow()
+    const result = takeTurn(p, 'attack')
+    expect(p.turn).toBe(1)
+    expect(result.turn).toBe(2)
+    expect(result.player.energy).toBe(3)
   })
-
-  it('comb roots movement but wave remains usable and cleanses it', () => {
-    const battle = createPve(
-      'battle',
-      [{ id: 'su-anasy', level: 1 }],
-      'shurale',
-      'training',
+  it('guard reduces incoming damage', () => {
+    const p = createBattle('x', 'shurale', 1)
+    expect(takeTurn(p, 'guard').player.hp).toBeGreaterThan(
+      takeTurn(p, 'attack').player.hp,
     )
-    battle.paused = false
-    battle.player.rootUntil = 50
-    expect(move(battle, 'player', 0)).toBe(false)
-    expect(cast(battle, 'player', 0)).toBe(true)
-    expect(battle.player.rootUntil).toBe(0)
-    expect(move(battle, 'player', 0)).toBe(true)
   })
-
-  it('reflects projectiles but not ground skills', () => {
-    const projectile = createPve(
-      'one',
-      [{ id: 'su-anasy', level: 1 }],
-      'shurale',
-      'training',
-    )
-    projectile.paused = false
-    projectile.player.reflectUntil = 100
-    projectile.player.lane = projectile.enemy.lane = 1
-    projectile.nextPlayerAttack = 999
-    projectile.nextEnemyAttack = 1
-    const enemyHp = projectile.enemy.hp
-    stepPve(projectile, 13)
-    expect(projectile.player.hp).toBe(projectile.player.maxHp)
-    expect(projectile.enemy.hp).toBeLessThan(enemyHp)
-
-    const ground = createPve(
-      'two',
-      [{ id: 'su-anasy', level: 1 }],
-      'kereml',
-      'training',
-    )
-    ground.paused = false
-    ground.player.reflectUntil = 100
-    ground.enemy.skillReady[1] = 0
-    expect(cast(ground, 'enemy', 1)).toBe(true)
-    stepPve(ground, rules.skills.seal.windup)
-    expect(ground.player.hp).toBeLessThan(ground.player.maxHp)
-  })
-
-  it('freezes after a disconnect and pays/captures exactly once', () => {
-    let progress = executeDemo(initialProgress(), correctQuiz, now).progress
-    progress = executeDemo(
-      progress,
-      {
-        type: 'pveStart',
-        characterId: 'su-anasy',
-        target: 'shurale',
-        mode: 'encounter',
-      },
+  for (const c of characters)
+    it(`${c.id} can win with a telegraphed strategy`, () => {
+      let battle = createBattle('x', c.id, 1)
+      while (battle.status === 'active') {
+        const action =
+          enemyIntent(battle.turn) === 'skill'
+            ? 'guard'
+            : enemyIntent(battle.turn) !== 'guard' && battle.player.energy >= 3
+              ? 'skill'
+              : 'attack'
+        battle = takeTurn(battle, action)
+      }
+      expect(battle.status).toBe('won')
+    })
+  it('rewards exactly once, rejects a replay and survives serialization', () => {
+    let p = executeDemo(
+      capture(),
+      { type: 'startBattle', characterId: 'shurale' },
       now,
       'battle-id',
     ).progress
-    progress.pve!.paused = false
-    progress.pve!.enemy.hp = 1
-    progress.pve!.enemy.lane = progress.pve!.player.lane
-    progress.pve!.nextPlayerAttack = 1
-    progress = executeDemo(
-      progress,
-      { type: 'pve', battleId: 'battle-id', action: 'poll' },
-      now + 100,
-    ).progress
-    progress = executeDemo(
-      progress,
-      { type: 'pve', battleId: 'battle-id', action: 'poll' },
-      now + 1400,
-    ).progress
-    expect(progress.pve!.status).toBe('won')
-    expect(progress.collection.some((item) => item.id === 'shurale')).toBe(true)
-    const replay = executeDemo(
-      progress,
-      { type: 'pve', battleId: 'battle-id', action: 'poll' },
-      now + 1500,
-    ).progress
-    expect(replay.wins).toBe(1)
+    const original = p.battle!
+    while (p.battle!.status === 'active') {
+      const b = p.battle!
+      p = executeDemo(p, {
+        type: 'battleTurn',
+        battleId: b.id,
+        turn: b.turn,
+        action:
+          enemyIntent(b.turn) === 'skill'
+            ? 'guard'
+            : enemyIntent(b.turn) !== 'guard' && b.player.energy >= 3
+              ? 'skill'
+              : 'attack',
+      }).progress
+    }
+    expect(p.wins).toBe(1)
+    expect(() =>
+      executeDemo(p, {
+        type: 'battleTurn',
+        battleId: original.id,
+        turn: original.turn,
+        action: 'attack',
+      }),
+    ).toThrow()
+    expect(JSON.parse(JSON.stringify(p))).toEqual(p)
+  })
+  it('terminates repeated guarding', () => {
+    let b = createBattle('x', 'kereml', 10)
+    while (b.status === 'active') b = takeTurn(b, 'guard')
+    expect(b.status).toBe('lost')
+    expect(b.turn).toBeLessThanOrEqual(41)
   })
 })

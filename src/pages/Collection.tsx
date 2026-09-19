@@ -1,30 +1,33 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, LockKeyhole, Swords } from 'lucide-react'
-import { characters } from '../../shared/characters'
+import { ArrowRight, ArrowLeft, LockKeyhole, TrendingUp } from 'lucide-react'
 import { useGame } from '../store/game'
 import { CharacterArt } from '../components/CharacterArt'
 export default function Collection() {
-  const { progress } = useGame()
+  const characters = useGame((s) => s.entities)
+  const { progress, run, busy, ready } = useGame()
   return (
     <>
+      <Link className="back-link" to="/home">
+        <ArrowLeft size={17} /> На главную
+      </Link>
       <div className="page-heading">
         <span className="eyebrow">ИСТОРИИ, КОТОРЫЕ ТЕПЕРЬ С ТОБОЙ</span>
         <h1>
           Твои хранители<span>.</span>
         </h1>
         <p>
-          Найдено {progress.collection.length} из 4. Собирай команду и выбирай
-          подходящих хранителей для следующего босса.
+          Найдено {progress.collection.length} из 4. Сканируй новые места и
+          помогай хранителям становиться сильнее.
         </p>
       </div>
       {!progress.collection.length && (
         <div className="callout">
           <div>
             <h2>Каждая дружба начинается со встречи</h2>
-            <p>Су анасы должна выдаваться при первом входе. Обнови прогресс.</p>
+            <p>Узнай историю первого хранителя и ответь на три вопроса.</p>
           </div>
-          <Link className="button" to="/">
-            Вернуться на карту
+          <Link className="button" to="/encounter/forest-01">
+            Найти Шурале
             <ArrowRight size={18} />
           </Link>
         </div>
@@ -47,24 +50,42 @@ export default function Collection() {
                 <span className="eyebrow">
                   {c.element} · {c.kind}
                 </span>
-                <h2>{c.name}</h2>
+                <h2>
+                  <Link to={`/entity/${c.id}`}>{c.name}</Link>
+                </h2>
                 <p>{c.description}</p>
+                <Link
+                  className="text-link entity-detail-link"
+                  to={`/entity/${c.id}`}
+                >
+                  О хранителе <ArrowRight size={16} />
+                </Link>
                 {owned ? (
                   <>
                     <div className="stats-row">
                       <span>
-                        Здоровье <b>{c.health + (owned.level - 1) * 12}</b>
+                        Здоровье <b>{c.hp}</b>
                       </span>
                       <span>
-                        Атака <b>{c.attack + (owned.level - 1) * 3}</b>
+                        Атака <b>{c.attack}</b>
                       </span>
                     </div>
-                    <Link
-                      to={`/battle?character=${c.id}`}
-                      className="text-link"
+                    <button
+                      className="button"
+                      disabled={
+                        busy ||
+                        !ready ||
+                        c.nextUpgradeCost === null
+                      }
+                      onClick={() =>
+                        void run({ type: 'upgrade', characterId: c.id })
+                      }
                     >
-                      <Swords size={17} /> Выбрать для поединка
-                    </Link>
+                      <TrendingUp size={17} />
+                      {c.nextUpgradeCost === null
+                        ? 'Максимальный уровень'
+                        : 'Улучшить'}
+                    </button>
                   </>
                 ) : (
                   <Link to={`/encounter/${c.tag}`} className="button secondary">

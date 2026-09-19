@@ -1,78 +1,73 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { initialProgress } from '../../shared/types'
-import type { Command, Progress } from '../../shared/types'
-import { cloudCommand, isCloud } from '../lib/api'
+import { getInitialProgress as initialProgress, getUser } from '../api/user'
+import { getEntities, upgradeEntity } from '../api/entities'
+import { captureEncounter } from '../api/encounters'
+import { startBattle, attack } from '../api/battles'
+import type { Entity } from '../api/types'
+import type { Command, Progress } from '../api/types'
+import { isCloud } from '../api/client'
 interface GameStore {
+  entities: Entity[]
   progress: Progress
   busy: boolean
   error: string | null
   ready: boolean
-  run: (
-    command: Command,
-  ) => Promise<'ready' | 'captured' | 'failed' | undefined>
+  run: (command: Command) => Promise<'captured' | undefined>
   clearError: () => void
   resetDemo: () => void
 }
-let commands = Promise.resolve<unknown>(undefined)
 export const useGame = create<GameStore>()(
   persist(
     (set, get) => ({
+      entities: [],
       progress: initialProgress(),
       busy: false,
       error: null,
-      ready: !isCloud,
+      ready: false,
       clearError: () => set({ error: null }),
       resetDemo: () => {
-        if (!isCloud && !get().busy)
+        if (!isCloud && !get().busy) {
           set({ progress: initialProgress(), error: null })
+          void get().run({ type: 'sync' })
+        }
       },
-      run: (command) => {
-        // Polls are expendable; player commands are serialized and never silently dropped.
-        if (
-          command.type === 'pve' &&
-          command.action === 'poll' &&
-          !command.input &&
-          get().busy
-        )
-          return Promise.resolve(undefined)
-        const task = commands.then(async () => {
-          set({ busy: true, error: null })
-          try {
-            const result = isCloud
-              ? await cloudCommand(command)
-              : (await import('../../shared/demo')).executeDemo(
-                  get().progress,
-                  command,
-                )
-            set({ progress: result.progress, ready: true })
-            return result.outcome
-          } catch (error) {
-            set({
-              error:
-                error instanceof Error
-                  ? error.message
-                  : 'Не удалось выполнить действие',
-            })
-          } finally {
-            set({ busy: false })
-          }
-        })
-        commands = task.catch(() => undefined)
-        return task
+      run: async (command) => {
+        if (get().busy) return
+        set({ busy: true, error: null })
+        try {
+          const progress = get().progress
+          const result = await (command.type === 'sync'
+            ? getUser(progress)
+            : command.type === 'capture'
+              ? captureEncounter(command.characterId, progress)
+              : command.type === 'upgrade'
+                ? upgradeEntity(command.characterId, progress)
+                : command.type === 'startBattle'
+                  ? startBattle(command.characterId, progress, command.enemyId)
+                  : attack(
+                      command.battleId,
+                      command.turn,
+                      command.action,
+                      progress,
+                    ))
+          const entities = await getEntities(result.progress)
+          set({ progress: result.progress, entities, ready: true })
+          return result.outcome
+        } catch (error) {
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Не удалось выполнить действие',
+          })
+        } finally {
+          set({ busy: false })
+        }
       },
     }),
     {
-      name: isCloud ? 'miras-cloud-ui-v1' : 'miras-demo-v2',
-      version: 2,
-      merge: (persisted, current) => {
-        const saved = persisted as Partial<GameStore>
-        return {
-          ...current,
-          ...saved,
-          progress: { ...initialProgress(), ...saved.progress },
-        }
-      },
+      name: isCloud ? 'miras-cloud-ui-v1' : 'miras-demo-v1',
       partialize: (state) => (isCloud ? {} : { progress: state.progress }),
     },
   ),

@@ -1,16 +1,19 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BookOpen, Trophy, Nfc, Copy, Check } from 'lucide-react'
-import { characters } from '../../shared/characters'
+import { BookOpen, Trophy, ArrowLeft, Nfc, Copy, Check } from 'lucide-react'
 import { useGame } from '../store/game'
-import { isCloud } from '../lib/api'
+import { isCloud } from '../api/client'
 export default function Profile() {
+  const characters = useGame((s) => s.entities)
   const { progress, resetDemo, busy } = useGame()
   const [confirm, setConfirm] = useState(false)
   const [copied, setCopied] = useState('')
   const [copyError, setCopyError] = useState(false)
   return (
     <>
+      <Link className="back-link" to="/home">
+        <ArrowLeft size={17} /> На главную
+      </Link>
       <div className="page-heading">
         <span className="eyebrow">ТВОЯ СОБСТВЕННАЯ ИСТОРИЯ</span>
         <h1>
@@ -99,7 +102,9 @@ export default function Profile() {
       {!isCloud && (
         <section className="panel">
           <h2>Начать демо заново</h2>
-          <p>Удалит локальную коллекцию и историю поединков.</p>
+          <p>
+            Удалит локальную коллекцию и историю поединков.
+          </p>
           {confirm ? (
             <div className="button-row">
               <button

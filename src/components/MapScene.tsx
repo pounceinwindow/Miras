@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { MapPin, Navigation } from 'lucide-react'
-import { characters } from '../../shared/characters'
 import { useGame } from '../store/game'
 const positions = [
   { left: '26%', top: '31%' },
@@ -9,6 +8,7 @@ const positions = [
   { left: '77%', top: '56%' },
 ]
 export function MapScene() {
+  const characters = useGame((s) => s.entities)
   const owned = useGame((s) => s.progress.collection)
   return (
     <div className="map-scene">

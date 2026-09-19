@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 :root {
   font-family:
-    Inter,
+    'Rubik',
     -apple-system,
     BlinkMacSystemFont,
     'Segoe UI',
@@ -69,8 +69,9 @@ p {
 h1,
 h2,
 h3 {
-  font-weight: 600;
-  letter-spacing: -0.045em;
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 h1 {
   font-size: clamp(30px, 3.3vw, 47px);
@@ -116,11 +117,11 @@ svg {
   color: var(--green);
 }
 .brand > span {
-  font-family: Georgia, serif;
-  font-weight: bold;
-  font-size: 42px;
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 800;
+  font-size: 34px;
   line-height: 0.9;
-  letter-spacing: -3px;
+  letter-spacing: -2px;
 }
 .brand small {
   display: block;
@@ -170,9 +171,10 @@ svg {
   margin-bottom: 17px;
 }
 .sidebar-bottom p {
-  font:
-    italic 22px/1.4 Georgia,
-    serif;
+  font-family: 'Rubik', sans-serif;
+  font-size: 19px;
+  line-height: 1.4;
+  font-style: italic;
   color: #445940;
   margin-bottom: 10px;
 }
@@ -455,10 +457,10 @@ main {
   margin-top: 2px;
 }
 .feature-card h2 {
-  font-family: Georgia, serif;
-  font-size: 33px;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 26px;
   margin: 7px 0 8px;
-  letter-spacing: -1px;
+  letter-spacing: -0.5px;
 }
 .feature-card p {
   font-size: 11px;
@@ -467,6 +469,7 @@ main {
   margin-bottom: 19px;
 }
 .button {
+  font-family: 'Unbounded', sans-serif;
   border: 0;
   background: var(--green);
   color: #fffdf2;
@@ -476,8 +479,9 @@ main {
   gap: 12px;
   padding: 13px 18px;
   border-radius: 7px;
-  font-size: 12px;
-  font-weight: 550;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
   min-height: 45px;
   line-height: 1.5;
 }
@@ -673,9 +677,9 @@ main {
   max-height: 330px;
 }
 .portrait-panel h1 {
-  font-family: Georgia, serif;
+  font-family: 'Unbounded', sans-serif;
   margin: 10px 0;
-  font-size: 38px;
+  font-size: 30px;
 }
 .portrait-panel p {
   font-size: 12px;
@@ -1033,9 +1037,10 @@ main {
   color: #bfd0af;
 }
 .versus {
-  font:
-    italic 27px Georgia,
-    serif;
+  font-family: 'Unbounded', sans-serif;
+  font-style: italic;
+  font-weight: 800;
+  font-size: 24px;
   text-align: center;
   color: #96ad8a;
 }
@@ -1717,217 +1722,136 @@ main {
   min-width: 180px;
 }
 
-.battle-brief {
-  display: grid;
-  gap: 24px;
+.entity-stats {
+  margin: 24px 0 12px;
 }
-.pve-shell {
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--ink), transparent 78%);
-  border-radius: 28px;
-  background: #17251d;
-  color: #f3eedf;
-  box-shadow: 0 24px 70px #14231936;
+.entity-stats > div {
+  background: #edf1e4;
+  border-radius: 12px;
+  padding: 16px 12px;
 }
-.pve-header {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: start;
-  gap: 22px;
-  padding: 20px 24px;
-  background: #0e1a14;
-}
-.pve-fighter-bar > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 13px;
-}
-.pve-fighter-bar.enemy {
-  text-align: right;
-}
-.pve-fighter-bar progress {
-  width: 100%;
-  height: 9px;
-  accent-color: #d4b45f;
-}
-.pve-fighter-bar small {
-  display: block;
-  min-height: 18px;
-  color: #c9c1aa;
-  font-size: 10px;
-}
-.pve-timer {
+.entity-stats dt {
   display: flex;
   align-items: center;
   gap: 6px;
-  border: 1px solid #ffffff24;
-  border-radius: 999px;
-  padding: 7px 11px;
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 12px;
 }
-.lane-arena {
+.entity-stats dd {
+  font-size: 28px;
+  margin: 10px 0 0;
+  font-weight: 600;
+}
+.ability-panel {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  border-block: 1px solid var(--border);
+  padding: 22px 0;
+  margin-bottom: 22px;
+}
+.ability-panel h3 {
+  margin-bottom: 8px;
+}
+.ability-panel p {
+  margin: 0;
+}
+.entity-wallet {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+.entity-actions {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  min-height: 440px;
-  background:
-    radial-gradient(circle at 50% 40%, #43634855, transparent 42%),
-    linear-gradient(#263d2d, #17251d);
+  gap: 12px;
+  justify-items: start;
 }
-.combat-lane {
-  position: relative;
-  overflow: hidden;
-  border: 0;
-  border-right: 1px dashed #f3eedf2d;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  transition: background 160ms ease;
+.entity-actions p {
+  margin-bottom: 0;
 }
-.combat-lane:last-child {
-  border-right: 0;
+.entity-story {
+  margin-top: 24px;
 }
-.combat-lane.current {
-  background: #f3eedf0b;
+.entity-story summary {
+  min-height: 44px;
 }
-.combat-lane.threatened {
-  background: repeating-linear-gradient(
-    -45deg,
-    #b755312b 0 12px,
-    #b7553114 12px 24px
-  );
-  box-shadow: inset 0 0 0 2px #d97147;
+.entity-detail-link {
+  margin-bottom: 18px;
 }
-.combat-lane.sealed {
-  background-color: #0d1512aa;
+.character-card h3 {
+  overflow-wrap: anywhere;
 }
-.lane-name,
-.threat-marker,
-.seal-marker {
+.map-pin span {
+  max-width: 125px;
+  white-space: normal;
+  text-align: center;
+}
+.fighter-hud > div {
+  gap: 6px;
+  align-items: flex-start;
+}
+.fighter-hud > div span {
+  flex-shrink: 0;
+}
+.damage-announcement {
   position: absolute;
-  z-index: 3;
-  left: 50%;
-  transform: translateX(-50%);
-  border-radius: 999px;
-  white-space: nowrap;
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.lane-name {
-  top: 14px;
-  color: #c9c1aa;
-}
-.threat-marker {
-  top: 48%;
-  padding: 7px 9px;
-  background: #d97147;
-  color: #fff;
-}
-.seal-marker {
-  top: 42px;
-  padding: 6px 9px;
-  background: #101814;
-  color: #d4b45f;
-}
-.lane-fighter {
-  position: absolute;
-  left: 50%;
-  width: min(145px, 92%);
-  transform: translateX(-50%);
+  inset: 0;
   pointer-events: none;
 }
-.lane-fighter.enemy {
-  top: 55px;
+.damage-number {
+  position: absolute;
+  bottom: 5%;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffe6b0;
+  background: #153f32dc;
+  padding: 6px 10px;
+  border-radius: 20px;
+  animation: damage-float 1.2s ease-out both;
 }
-.lane-fighter.player {
-  bottom: 8px;
+.enemy-damage {
+  right: 5%;
 }
-.lane-fighter.player .character-art {
-  filter: drop-shadow(0 14px 18px #0007);
+.player-damage {
+  left: 5%;
 }
-.lane-fighter.enemy .character-art {
-  transform: scale(0.8);
-  opacity: 0.9;
-}
-.pve-controls {
-  display: grid;
-  grid-template-columns: 0.7fr 1fr 1fr;
-  gap: 12px;
-  padding: 16px;
-  background: #0e1a14;
-}
-.party-switcher {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
-  background: #132019;
-  font-size: 11px;
-}
-.party-switcher button {
-  border: 1px solid #ffffff2b;
-  border-radius: 999px;
-  padding: 8px 12px;
-  background: #f3eedf12;
-  color: #f3eedf;
-  cursor: pointer;
-}
-.pve-controls button,
-.move-hint {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 5px 10px;
-  min-height: 76px;
-  border: 1px solid #ffffff20;
-  border-radius: 16px;
-  padding: 13px;
-  background: #f3eedf0b;
-  color: #f3eedf;
-  text-align: left;
-}
-.pve-controls button:not(:disabled) {
-  cursor: pointer;
-}
-.pve-controls button:disabled {
-  opacity: 0.48;
-}
-.pve-controls small {
-  grid-column: 2;
-  color: #c9c1aa;
-  line-height: 1.3;
-}
-.move-hint {
-  display: flex;
-  color: #c9c1aa;
-}
-@media (max-width: 700px) {
-  .pve-header {
-    grid-template-columns: 1fr auto;
-    padding: 14px;
+@keyframes damage-float {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
-  .pve-header .pve-fighter-bar.enemy {
-    grid-column: 1 / -1;
+  20%,
+  80% {
+    opacity: 1;
   }
-  .lane-arena {
-    min-height: 360px;
+  to {
+    opacity: 0;
+    transform: translateY(-16px);
   }
-  .pve-controls {
-    grid-template-columns: 1fr 1fr;
+}
+.fallback-attack {
+  animation: fallback-lunge 0.35s ease-in-out;
+}
+.fallback-hit {
+  animation: fallback-flash 0.5s ease-in-out;
+}
+@keyframes fallback-lunge {
+  50% {
+    translate: 25px 0;
   }
-  .move-hint {
-    grid-column: 1 / -1;
-    min-height: 48px;
+}
+@keyframes fallback-flash {
+  40% {
+    filter: brightness(1.7);
+    translate: 8px 0;
   }
-  .lane-fighter {
-    width: 105px;
-  }
-  .threat-marker {
-    max-width: 92%;
-    overflow: hidden;
-    text-overflow: ellipsis;
+}
+@media (prefers-reduced-motion: reduce) {
+  .damage-number,
+  .fallback-attack,
+  .fallback-hit {
+    animation: none;
   }
 }

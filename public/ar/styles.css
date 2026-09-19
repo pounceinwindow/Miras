@@ -1,0 +1,196 @@
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #062f25;
+  color: #fff8e8;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+  min-height: 48px;
+  border: 0;
+  border-radius: 14px;
+  padding: 14px 20px;
+  font-weight: 600;
+  background: #f0d17c;
+  color: #12362a;
+  width: 100%;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+button:focus-visible {
+  outline: 3px solid #f0d17c;
+  outline-offset: 3px;
+}
+button span {
+  float: right;
+}
+#stop {
+  background: #ffffff20;
+  color: #fff;
+}
+#camera {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+#camera > video {
+  z-index: 0 !important;
+  display: block !important;
+  min-width: 100%;
+  min-height: 100%;
+  object-fit: cover;
+}
+#camera a-scene {
+  position: absolute !important;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background: transparent !important;
+}
+#camera canvas {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 1;
+  background: transparent !important;
+}
+.scanner-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 22px;
+  background: linear-gradient(0deg, #03271fe8, transparent 65%);
+  z-index: 2;
+}
+.camera-label {
+  align-self: flex-start;
+  font-size: 10px;
+  letter-spacing: 1.7px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.camera-label i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f0d17c;
+}
+.reticle {
+  margin: auto;
+  width: 185px;
+  height: 185px;
+  border: 1px solid #f0d17c66;
+  border-radius: 24px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(#ffffff04, #ffffff00);
+}
+.reticle:before,
+.reticle:after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 3px solid #f0d17c;
+  border-radius: 24px;
+  clip-path: polygon(
+    0 0,
+    20% 0,
+    20% 4%,
+    4% 4%,
+    4% 20%,
+    0 20%,
+    0 0,
+    100% 0,
+    100% 20%,
+    96% 20%,
+    96% 4%,
+    80% 4%,
+    80% 0
+  );
+}
+.reticle:after {
+  transform: rotate(180deg);
+}
+.reticle span {
+  color: #f0d17c;
+  font-size: 40px;
+}
+.scanner-bottom {
+  width: 100%;
+  pointer-events: auto;
+  text-align: center;
+}
+#status {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 12px 0 8px;
+}
+#hint {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #e6d8b4;
+  margin: 0 0 20px;
+}
+.a-enter-vr,
+.a-enter-ar,
+.a-orientation-modal {
+  display: none !important;
+}
+[hidden] {
+  display: none !important;
+}
+
+/* Keep the camera dominant inside the compact floating sheet. */
+#camera {
+  opacity: 0;
+  transition: opacity 350ms ease;
+}
+.camera-ready #camera {
+  opacity: 1;
+}
+.scanner-overlay {
+  padding: 24px 20px 20px;
+}
+.camera-label {
+  min-height: 24px;
+}
+.reticle {
+  width: min(38vw, 140px);
+  height: min(38vw, 140px);
+  flex-shrink: 0;
+}
+.reticle span {
+  font-size: 26px;
+}
+#status {
+  font-size: 15px;
+  margin: 10px 0 6px;
+}
+#hint {
+  font-size: 11px;
+  margin: 0 0 10px;
+}
+@media (prefers-reduced-motion: reduce) {
+  #camera {
+    transition: none;
+  }
+}

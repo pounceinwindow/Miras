@@ -7,6 +7,9 @@ export default tseslint.config(
   {
     ignores: [
       'dist',
+      'fighting',
+      'public/fighting',
+      'public/ar/vendor',
       'node_modules',
       'supabase/functions',
       'test-results',
@@ -28,4 +31,8 @@ export default tseslint.config(
     },
   },
   { files: ['*.js'], languageOptions: { globals: globals.node } },
+  {
+    files: ['public/ar/**/*.js'],
+    languageOptions: { globals: globals.browser },
+  },
 )

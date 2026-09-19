@@ -1,83 +1,68 @@
 import { useEffect, useRef, useState } from 'react'
-import { Application, Graphics } from 'pixi.js'
-export default function BattleCanvas({ turn }: { turn: number }) {
+import type { Battle, Entity } from '../api/types'
+import { BattleScene } from '../pixi/BattleScene'
+import { CharacterArt } from './CharacterArt'
+export default function BattleCanvas({
+  battle,
+  entities,
+}: {
+  battle: Battle
+  entities: Entity[]
+}) {
   const host = useRef<HTMLDivElement>(null)
-  const pulse = useRef(0)
-  const [failed, setFailed] = useState(false)
-  useEffect(() => {
-    pulse.current = 1
-  }, [turn])
+  const scene = useRef<BattleScene | null>(null)
+  const initial = useRef(battle)
+  const [status, setStatus] = useState<'loading' | 'ready' | 'failed'>(
+    'loading',
+  )
+  const playerImage = entities.find((c) => c.id === battle.player.id)!.imageUrl
+  const enemyImage = entities.find((c) => c.id === battle.enemy.id)!.imageUrl
   useEffect(() => {
     const element = host.current
     if (!element) return
-    const app = new Application()
-    let disposed = false,
-      initialized = false
-    const reduced = window.matchMedia(
-      '(prefers-reduced-motion: reduce)',
-    ).matches
-    void (async () => {
-      try {
-        await app.init({
-          resizeTo: element,
-          backgroundAlpha: 0,
-          antialias: true,
-          resolution: Math.min(devicePixelRatio, 2),
-          autoDensity: true,
-        })
-        initialized = true
-        if (disposed) {
-          app.destroy(true, { children: true })
-          return
-        }
-        element.appendChild(app.canvas)
-        app.canvas.setAttribute('aria-hidden', 'true')
-        const graphics = new Graphics()
-        app.stage.addChild(graphics)
-        let elapsed = 0
-        const draw = () => {
-          const w = app.screen.width,
-            h = app.screen.height
-          graphics.clear()
-          graphics
-            .ellipse(w * 0.25, h * 0.75, w * 0.19, 22)
-            .fill({ color: 0x9ab18a, alpha: 0.15 })
-          graphics
-            .ellipse(w * 0.75, h * 0.75, w * 0.19, 22)
-            .fill({ color: 0x9ab18a, alpha: 0.15 })
-          for (let i = 0; i < 22; i++) {
-            const x = (i * 97 + Math.sin(elapsed + i) * 14) % w
-            const y = h * 0.1 + ((i * 53 + elapsed * 8) % (h * 0.7))
-            graphics
-              .circle(x, y, 1.5 + (i % 3))
-              .fill({ color: 0xe5ce83, alpha: 0.2 + (i % 3) * 0.13 })
-          }
-          if (!reduced && pulse.current > 0) {
-            graphics
-              .circle(w * 0.5, h * 0.45, 25 + (1 - pulse.current) * 100)
-              .stroke({ color: 0xe5ce83, width: 2, alpha: pulse.current })
-            pulse.current = Math.max(0, pulse.current - 0.025)
-          }
-        }
-        draw()
-        if (!reduced)
-          app.ticker.add((t) => {
-            elapsed += t.deltaTime * 0.015
-            draw()
-          })
-      } catch {
-        if (!disposed) setFailed(true)
-        if (initialized) app.destroy(true, { children: true })
-      }
-    })()
+    const renderer = new BattleScene(initial.current)
+    scene.current = renderer
+    let cancelled = false
+    void renderer
+      .mount(element, playerImage, enemyImage)
+      .then(() => {
+        if (!cancelled) setStatus('ready')
+      })
+      .catch(() => {
+        renderer.destroy()
+        if (!cancelled) setStatus('failed')
+      })
     return () => {
-      disposed = true
-      if (initialized && app.renderer) app.destroy(true, { children: true })
+      cancelled = true
+      scene.current = null
+      renderer.destroy()
     }
-  }, [])
+  }, [playerImage, enemyImage])
+  useEffect(() => {
+    scene.current?.update(battle)
+  }, [battle])
   return (
-    <div className="battle-canvas" ref={host}>
-      {failed && <span className="canvas-fallback">Упрощённая сцена</span>}
-    </div>
+    <>
+      <div className="battle-canvas" data-renderer={status} ref={host} />
+      {status !== 'ready' && (
+        <>
+          <div
+            key={`player-${battle.turn}`}
+            className={`battle-character player ${battle.turn > 1 ? 'fallback-attack' : ''}`}
+          >
+            <CharacterArt id={battle.player.id} />
+          </div>
+          <div
+            key={`enemy-${battle.turn}`}
+            className={`battle-character enemy ${battle.turn > 1 ? 'fallback-hit' : ''}`}
+          >
+            <CharacterArt id={battle.enemy.id} />
+          </div>
+          {status === 'failed' && (
+            <span className="canvas-fallback">Упрощённая сцена</span>
+          )}
+        </>
+      )}
+    </>
   )
 }

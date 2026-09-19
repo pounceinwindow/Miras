@@ -14,8 +14,14 @@ export function createBattle(
   id: string,
   characterId: CharacterId,
   level: number,
+  enemyIdOverride?: CharacterId,
 ): Battle {
-  const enemyId = characterId === 'shurale' ? 'kereml' : 'shurale'
+  const enemyId =
+    enemyIdOverride && enemyIdOverride !== characterId
+      ? enemyIdOverride
+      : characterId === 'shurale'
+        ? 'kereml'
+        : 'shurale'
   return {
     id,
     player: fighter(characterId, level),
@@ -54,7 +60,7 @@ export function takeTurn(input: Battle, action: Action): Battle {
   }
   if (enemy.hp === 0) {
     battle.status = 'won'
-    log.push(`Победа! Награда: ${WIN_REWARD} чак-чака.`)
+    log.push('Победа! Хранитель усмирён.')
   } else if (intent !== 'guard') {
     const hit = Math.round(
       damage(enemy) *

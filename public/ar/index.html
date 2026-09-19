@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <title>Мирас — сканер</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="camera" aria-label="Камера"></div>
+    <div class="scanner-overlay">
+      <span class="camera-label"><i></i> AR-СКАНЕР</span>
+      <div class="reticle" aria-hidden="true"><span>✦</span></div>
+      <div class="scanner-bottom">
+        <p id="status" role="status" aria-live="polite">
+          Подготавливаем камеру…
+        </p>
+        <p id="hint">Наведи камеру на метку места</p>
+        <button id="start" type="button" hidden>
+          Включить камеру <span>↗</span>
+        </button>
+      </div>
+    </div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
