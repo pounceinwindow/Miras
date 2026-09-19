@@ -15,9 +15,8 @@ app.innerHTML=`
   <footer class="game-footer"><span id="battle-hint">Одно русло — автоматическая атака</span><button id="rules-button">Правила</button></footer>
 </main>
 <aside class="desktop-note"><span class="eyebrow">ТАТАР.БУ / ИГРОВОЙ ПРОТОТИП</span><h2>Выбери русло.<br>Измени исход.</h2><p>Четыре хранителя, три позиции.<br>Девяносто секунд на победу.</p><div class="key-guide"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><span>сменить русло</span></div><div class="key-guide"><kbd>Q</kbd><kbd>E</kbd><span>применить умения</span></div><button class="text-button" id="atlas-button">Смотреть все спрайты ↗</button><p class="small-note">Локальная тренировка · без PvP</p></aside>
-<dialog id="setup-dialog" class="panel-dialog"><div class="dialog-eyebrow">ТРЕНИРОВОЧНАЯ ДУЭЛЬ</div><h2>Кто ваш хранитель?</h2><p class="dialog-description">Ваш герой снизу, соперник сверху.<br>Выберите обоих хранителей перед боем.</p><div class="matchup"><div><img id="chosen-portrait" alt=""><strong id="chosen-name"></strong><small>ВЫ</small></div><button id="swap" class="swap-button" aria-label="Поменять героев местами">⇄</button><div><img id="opponent-portrait" alt=""><strong id="opponent-name"></strong><small>СОПЕРНИК</small></div></div><div class="hero-description" id="hero-description"></div><div class="intro-rules"><span><b>01</b> Нажимайте на русла, чтобы двигаться.</span><span><b>02</b> На одном русле атака автоматическая.</span><span><b>03</b> Уходите из красного или защищайтесь.</span></div><button class="primary-button" id="start" disabled>Загрузка…</button><button class="text-button" id="setup-atlas">Все позы персонажей</button></dialog>
-<dialog id="pause-dialog" class="panel-dialog"><div class="dialog-eyebrow">ВРЕМЯ ОСТАНОВЛЕНО</div><h2>Пауза</h2><p id="pause-reason" class="dialog-description">Можно перевести дух.</p><button class="primary-button" id="resume">Продолжить бой</button><button class="secondary-button" id="new-match">Поменять героев · новый бой</button><button class="secondary-button" id="pause-atlas">Все позы персонажей</button><button class="text-button" id="pause-rules">Как играть</button></dialog>
-<dialog id="result-dialog" class="panel-dialog"><div class="result-mark" id="result-mark">✦</div><div class="dialog-eyebrow">ДУЭЛЬ ЗАВЕРШЕНА</div><h2 id="result-title"></h2><p id="result-description" class="dialog-description"></p><div class="result-stats"><div><strong id="stat-damage"></strong><small>УРОНА</small></div><div><strong id="stat-dodges"></strong><small>УКЛОНЕНИЙ</small></div><div><strong id="stat-reflect"></strong><small>ОТРАЖЕНИЙ</small></div></div><button class="primary-button" id="rematch">Ещё бой</button><button class="secondary-button" id="result-swap">Сменить хранителя</button></dialog>
+<dialog id="pause-dialog" class="panel-dialog"><div class="dialog-eyebrow">ВРЕМЯ ОСТАНОВЛЕНО</div><h2>Пауза</h2><p id="pause-reason" class="dialog-description">Можно перевести дух.</p><button class="primary-button" id="resume">Продолжить бой</button><button class="text-button" id="pause-rules">Как играть</button></dialog>
+<dialog id="result-dialog" class="panel-dialog"><div class="result-mark" id="result-mark">✦</div><div class="dialog-eyebrow">ДУЭЛЬ ЗАВЕРШЕНА</div><h2 id="result-title"></h2><p id="result-description" class="dialog-description"></p><div class="result-stats"><div><strong id="stat-damage"></strong><small>УРОНА</small></div><div><strong id="stat-dodges"></strong><small>УКЛОНЕНИЙ</small></div><div><strong id="stat-reflect"></strong><small>ОТРАЖЕНИЙ</small></div></div><button class="primary-button" id="rematch">Ещё бой</button></dialog>
 <dialog id="rules-dialog" class="panel-dialog"><div class="dialog-eyebrow">ТРИ РУСЛА</div><h2>Два решения.<br>Много возможностей.</h2><div class="rules-list"><p><b>Двигайтесь.</b> Нажмите на русло или кнопку Ⅰ / Ⅱ / Ⅲ. Обычные снаряды летят автоматически, когда хранители стоят напротив друг друга.</p><p><b>Следите за предупреждениями.</b> Красное русло и таймер — вражеское умение. Золотое — ваше. Уйдите до попадания.</p><p><b>Удержание ≠ запрет умений.</b> Даже если движение запрещено, можно применить способность. Волна Су анасы и Воля ханбике снимают удержание.</p><p><b>Закрытые ворота.</b> Выйти из закрытого русла можно, войти обратно — нельзя до окончания таймера.</p><p><b>90 секунд.</b> Побеждает тот, кто первым обнулит здоровье врага. По времени сравнивается доля оставшегося здоровья.</p><p><b>Смена стороны.</b> В меню выберите «Поменять героев»: начнётся новая дуэль за другого хранителя.</p></div><button class="primary-button" id="close-rules">Понятно</button></dialog>
 <dialog id="atlas-dialog" class="atlas-dialog"><div class="atlas-header"><div><div class="dialog-eyebrow">40 ИСХОДНЫХ СПРАЙТОВ</div><h2>Все грани хранителей</h2></div><button class="icon-button" id="close-atlas" aria-label="Закрыть атлас">×</button></div><div id="atlas-content"></div><p class="small-note">В бою: снизу — вид со спины, сверху — вид спереди. Оба умения используют cast.</p></dialog>`;
 
@@ -26,11 +25,6 @@ let playerHero=Object.hasOwn(HEROES,requestedHero)?requestedHero:'su_anasy',enem
 const stateNames={idle:'Ожидание',attack:'Атака',cast:'Умение',hit:'Попадание',defeat:'Поражение'};
 const portraits=(hero,face='front',pose='idle')=>ASSET_URLS[`/${hero}/${face}/${pose}.png`];
 const abilityHints={su_anasy:['Отражение + очищение','Урон + удержание'],kremlin:['Щит · 32 урона','Урон + закрытие'],shurale:['Удержание · 2 с','Защита от автоатак'],syuyumbike:['Очищение + щит 22','Два русла + ослабление']};
-for(const [prefix,id,label]of [['chosen','player-select','Ваш хранитель'],['opponent','enemy-select','Хранитель соперника']]){
-  $(`#${prefix}-name`).insertAdjacentHTML('afterend',`<select id="${id}" aria-label="${label}">${Object.entries(HEROES).map(([key,hero])=>`<option value="${key}">${hero.name}</option>`).join('')}</select>`);
-}
-function selectHero(){playerHero=$('#player-select').value;enemyHero=$('#enemy-select').value;battle=new Battle({player:playerHero,enemy:enemyHero});renderer?.reset();updateSelection();updateHUD();}
-$('#player-select').onchange=selectHero;$('#enemy-select').onchange=selectHero;
 function toast(message){$('#toast').textContent=message;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),2100);}
 function closeDialogs(){document.querySelectorAll('dialog[open]').forEach(d=>d.close());}
 function playSound(type){
@@ -39,13 +33,10 @@ function playSound(type){
   oscillator.frequency.setValueAtTime(frequency,audio.currentTime);oscillator.frequency.exponentialRampToValueAtTime(frequency*.55,audio.currentTime+.09);gain.gain.setValueAtTime(.018,audio.currentTime);gain.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+.12);oscillator.connect(gain);gain.connect(audio.destination);oscillator.start();oscillator.stop(audio.currentTime+.13);
 }
 function updateSelection(){
-  $('#player-select').value=playerHero;$('#enemy-select').value=enemyHero;
-  for(const [prefix,hero]of [['chosen',playerHero],['opponent',enemyHero]]){$(`#${prefix}-portrait`).src=portraits(hero);$(`#${prefix}-portrait`).alt=HEROES[hero].name;$(`#${prefix}-name`).textContent=HEROES[hero].name;}
-  $('#hero-description').innerHTML=HEROES[playerHero].abilities.map(a=>`<p><b>${a.name}</b><span>${a.description}</span></p>`).join('');
   for(const [id,hero]of [['player',playerHero],['enemy',enemyHero]]){$(`#${id}-name`).textContent=HEROES[hero].name;$(`#${id}-portrait`).src=portraits(hero);}
   document.querySelectorAll('[data-ability]').forEach((button,i)=>{const a=HEROES[playerHero].abilities[i];button.querySelector('strong').textContent=a.short;button.querySelector('.ability-symbol').textContent=a.icon;button.querySelector('.ability-copy small').textContent=abilityHints[playerHero][i];button.setAttribute('aria-label',`${a.name}. ${a.description}`);button.title=a.description;});
 }
-function configure(){clearTimeout(resultTimer);closeDialogs();battle=new Battle({player:playerHero,enemy:enemyHero});renderer?.reset();updateSelection();$('#setup-dialog').showModal();updateHUD();}
+function configure(){clearTimeout(resultTimer);closeDialogs();battle=new Battle({player:playerHero,enemy:enemyHero});renderer?.reset();updateSelection();updateHUD();}
 function swap(){[playerHero,enemyHero]=[enemyHero,playerHero];battle=new Battle({player:playerHero,enemy:enemyHero});renderer?.reset();updateSelection();updateHUD();}
 function start(){if(!loaded)return;clearTimeout(resultTimer);closeDialogs();battle=new Battle({player:playerHero,enemy:enemyHero});renderer.reset();battle.start();updateHUD();audio?.resume();}
 function pause(reason='Можно перевести дух.'){
@@ -69,12 +60,11 @@ function showResult(event){
   $('#result-description').textContent=event.timeout?'Время вышло. Итог — по доле оставшегося здоровья.':event.result==='win'?'Русла на вашей стороне. Попробуете другого хранителя?':'Изучите предупреждения и используйте защиту вовремя.';
   $('#stat-damage').textContent=battle.stats.damage;$('#stat-dodges').textContent=battle.stats.dodges;$('#stat-reflect').textContent=battle.stats.reflections;$('#result-dialog').showModal();
 }
-$('#swap').onclick=swap;$('#start').onclick=start;$('#rematch').onclick=start;
-$('#result-swap').onclick=()=>{swap();configure();};$('#new-match').onclick=configure;
+$('#rematch').onclick=start;
 $('#resume').onclick=()=>{if(document.hidden||!navigator.onLine){$('#pause-reason').textContent='Вернитесь в игру и восстановите соединение.';return;}$('#pause-dialog').close();battle.resume();};
-$('#menu').onclick=()=>{if(battle.status==='playing')pause();else if(battle.status==='ready')$('#setup-dialog').showModal();else if(battle.status==='paused')$('#pause-dialog').showModal();};
+$('#menu').onclick=()=>{if(battle.status==='playing')pause();else if(battle.status==='paused')$('#pause-dialog').showModal();};
 $('#rules-button').onclick=()=>openSub('#rules-dialog');$('#pause-rules').onclick=()=>openSub('#rules-dialog');$('#close-rules').onclick=()=>closeSub('#rules-dialog');
-for(const id of ['atlas-button','setup-atlas','pause-atlas'])$('#'+id).onclick=()=>openSub('#atlas-dialog');
+for(const id of ['atlas-button','pause-atlas']){const el=$('#'+id);if(el)el.onclick=()=>openSub('#atlas-dialog');}
 $('#close-atlas').onclick=()=>closeSub('#atlas-dialog');
 $('#atlas-content').innerHTML=Object.entries(HEROES).map(([hero,config])=>`<section class="atlas-section"><h3>${config.name}</h3>${['front','back'].map(face=>`<p class="atlas-facing">${face==='front'?'СПЕРЕДИ · СОПЕРНИК':'СЗАДИ · ВАШ ГЕРОЙ'}</p><div class="sprite-grid">${Object.entries(stateNames).map(([state,label])=>`<figure><img loading="lazy" src="${portraits(hero,face,state)}" alt="${config.name}: ${label}, ${face==='front'?'спереди':'сзади'}"><figcaption>${label}<small>${state}</small></figcaption></figure>`).join('')}</div>`).join('')}</section>`).join('');
 document.querySelectorAll('[data-lane]').forEach(button=>button.onclick=()=>battle.move('player',Number(button.dataset.lane)));
@@ -93,13 +83,13 @@ let offlineTimer;window.addEventListener('offline',()=>{offlineTimer=setTimeout(
 updateSelection();updateHUD();
 try{
   renderer=new BattleRenderer($('#arena'),lane=>battle.move('player',lane));
-  await renderer.init(progress=>{$('#load-progress').value=progress;});loaded=true;$('#loading').hidden=true;$('#start').disabled=false;$('#start').textContent='Войти в бой';
+  await renderer.init(progress=>{$('#load-progress').value=progress;});loaded=true;$('#loading').hidden=true;
   let lastTime=performance.now(),lastHUD=0;
   const loop=now=>{const delta=(now-lastTime)/1000;lastTime=now;if(delta>1.5&&battle.status==='playing')pause('Бой приостановлен после перерыва.');battle.step(delta);
     for(const event of battle.drain()){renderer.event(event,battle);playSound(event.type);if(event.type==='BLOCKED')toast(event.reason);if(event.type==='FINISH'){clearTimeout(resultTimer);resultTimer=setTimeout(()=>showResult(event),1200);}}
     renderer.draw(battle,battle.status==='paused'?0:Math.min(delta,.05));if(now-lastHUD>50){updateHUD();lastHUD=now;}requestAnimationFrame(loop);
   };
-  requestAnimationFrame(loop);$('#setup-dialog').showModal();
+  requestAnimationFrame(loop);start();
   // Read-only diagnostic snapshot for local acceptance tests; gameplay has no test shortcuts.
   window.__battleSnapshot=()=>({status:battle.status,time:battle.time,result:battle.result,player:{...battle.entities.player},enemy:{...battle.entities.enemy},sprites:{...renderer.spriteStates},assets:Object.keys(renderer.textures).length});
 }catch(error){console.error(error);$('#loading-message').textContent='Не удалось загрузить игру. Обновите страницу в браузере с WebGL.';$('#load-progress').hidden=true;}

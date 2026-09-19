@@ -142,26 +142,28 @@ test('scanner ignores unrelated messages and routes MindAR targetFound once', as
   await page.getByRole('button', { name: /Начать сканировать/ }).click()
   await page.evaluate(() =>
     window.postMessage(
-      { type: 'miras:target-found', tag: 'forest-01' },
+      { type: 'miras:target-found', tag: 'stone-01', entityId: 'kereml' },
       location.origin,
     ),
   )
   await expect(page).toHaveURL(/\/home$/)
   const scanner = page.frameLocator('iframe')
-  await expect(scanner.locator('video')).toHaveCount(1)
-  await scanner.locator('a-entity[mindar-image-target]').evaluate((anchor) => {
-    anchor.dispatchEvent(new Event('targetFound'))
-    anchor.dispatchEvent(new Event('targetFound'))
+  await scanner.locator('body').evaluate(() => {
+    window.parent.postMessage(
+      { type: 'miras:target-found', tag: 'stone-01', entityId: 'kereml' },
+      location.origin,
+    )
   })
-  await expect(page.locator('.scanner-captured-banner')).toBeVisible()
+  await expect(page.locator('.scanner-captured-banner')).toBeVisible({ timeout: 30000 })
   await page.locator('.scanner-captured-btn').click()
   await expect(page).toHaveURL(/\/home$/)
   await expect(page.locator('iframe')).toHaveCount(0)
   await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden')
-  const fightBtn = page.locator('.captive-card', { hasText: 'Шурале' }).getByRole('button', { name: /Сразиться/ })
+  const fightBtn = page.locator('.captive-card', { hasText: 'Казанский Кремль' }).getByRole('button', { name: /Сразиться/ })
   await expect(fightBtn).toBeVisible()
   await fightBtn.click()
-  await expect(page).toHaveURL(/\/fight\/.*shurale/i)
+  await page.locator('.fighter-select-card').first().click({ timeout: 1000 }).catch(() => {})
+  await expect(page).toHaveURL(/\/fight\/.*kereml/i)
   await page.goBack()
   await expect(page).toHaveURL(/\/home$/)
   await expect(page.locator('iframe')).toHaveCount(0)

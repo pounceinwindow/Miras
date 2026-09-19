@@ -6,18 +6,16 @@ import {
   Swords,
   Shield,
   Sparkles,
-  TrendingUp,
 } from 'lucide-react'
 import { useGame } from '../store/game'
 import { CharacterArt } from '../components/CharacterArt'
 import { QueryState } from '../components/QueryState'
 export default function EntityPage() {
   const { id } = useParams()
-  const { entities, progress, run, busy } = useGame()
+  const { entities, progress } = useGame()
   const entity = entities.find((entity) => entity.id === id)
   if (!entity) return <QueryState error="Хранитель не найден" />
   const owned = progress.collection.some((c) => c.id === entity.id)
-  const cost = entity.nextUpgradeCost
   return (
     <>
       <Link to="/collection" className="back-link">
@@ -26,7 +24,7 @@ export default function EntityPage() {
       <div className="encounter-grid">
         <div className={`portrait-panel art-${entity.id}`}>
           <span className="pill dark">
-            {owned ? `Уровень ${entity.level}` : 'Ещё не найден'}
+            {owned ? 'В коллекции' : 'Ещё не найден'}
           </span>
           <CharacterArt id={entity.id} />
           <span className="eyebrow">{entity.tatar}</span>
@@ -69,20 +67,7 @@ export default function EntityPage() {
               <p>{entity.ability.description}</p>
             </div>
           </div>
-          {owned ? (
-            <div className="entity-actions">
-              <button
-                className="button secondary"
-                disabled={busy || cost === null}
-                onClick={() =>
-                  void run({ type: 'upgrade', characterId: entity.id })
-                }
-              >
-                <TrendingUp size={18} />
-                {cost === null ? 'Максимальный уровень' : 'Улучшить'}
-              </button>
-            </div>
-          ) : (
+          {!owned && (
             <Link className="button" to={`/encounter/${entity.tag}`}>
               Встретить хранителя <ArrowRight size={18} />
             </Link>

@@ -329,9 +329,7 @@ export default function Explore() {
                     </div>
                     <div className="fighter-card-info">
                       <strong>{entity?.name ?? hero.id}</strong>
-                      <small>
-                        Уровень {hero.level} · {entity?.element ?? 'Магия'}
-                      </small>
+                      <small>{entity?.element ?? 'Магия'}</small>
                     </div>
                     <span className="fighter-pick-action">
                       <Swords size={13} /> Выбрать

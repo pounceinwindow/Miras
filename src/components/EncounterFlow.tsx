@@ -82,7 +82,7 @@ export function EncounterFlow({ character }: { character: Entity }) {
           <div className="story-action">
             {owned && (
               <span className="success-line">
-                <Check size={18} /> Уже в коллекции · уровень {owned.level}
+                <Check size={18} /> Уже в коллекции
               </span>
             )}
             <p className="muted">
