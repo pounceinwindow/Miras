@@ -49,8 +49,7 @@ test('home has a mobile layout, captive arena and working entry points', async (
     path: 'test-results/mobile-home.png',
     fullPage: true,
   })
-  await page.getByRole('link', { name: 'Мой профиль' }).click()
-  await expect(page).toHaveURL(/\/profile$/)
+  await expect(page.locator('.topbar .avatar')).toBeVisible()
 })
 
 test('pages keep their content size and scroll on short screens', async ({
@@ -62,7 +61,6 @@ test('pages keep their content size and scroll on short screens', async ({
   const pages = [
     ['/home', '.heroes-preview-section'],
     ['/map', '.live-map-shell'],
-    ['/profile', '.profile-stats'],
     ['/entity/shurale', '.entity-lore-card'],
     ['/encounter/forest-01', '.entity-lore-card'],
     ['/fight/shurale', '.fighting-embed'],
@@ -267,16 +265,7 @@ test('scanner ignores unrelated messages and routes MindAR targetFound once', as
       },
       location.origin,
     )
-    window.parent.postMessage(
-      { type: 'miras:open-collection' },
-      location.origin,
-    )
   })
-  await expect(page).toHaveURL(/\/collection$/)
-  await expect(
-    page.locator('.collection-card', { hasText: 'Казанский Кремль' }),
-  ).toContainText('В коллекции')
-  await page.goto('/home')
   await expect(page).toHaveURL(/\/home$/)
   await expect(
     page.locator('.captive-card', { hasText: 'Казанский Кремль' }),

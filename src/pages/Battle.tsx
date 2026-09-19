@@ -23,7 +23,7 @@ export default function Battle() {
   const { character = 'su-anasy' } = useParams()
   const [searchParams] = useSearchParams()
   const frame = useRef<HTMLIFrameElement>(null)
-  const recruitment = useRef<Promise<unknown> | null>(null)
+  const battleFinished = useRef(false)
   const navigate = useNavigate()
   const run = useGame((state) => state.run)
   const source = useMemo(() => {
@@ -44,24 +44,22 @@ export default function Battle() {
         return
 
       if (
-        event.data?.type === 'miras:battle-finished' &&
-        event.data?.result === 'win'
-      ) {
+        event.data?.type !== 'miras:battle-finished' ||
+        battleFinished.current
+      )
+        return
+
+      battleFinished.current = true
+      if (event.data?.result === 'win') {
         const enemyId = appHeroIds[event.data?.enemy]
         if (enemyId) {
-          recruitment.current = run({
+          void run({
             type: 'recruit',
             characterId: enemyId,
           })
         }
       }
-
-      if (event.data?.type === 'miras:open-collection') {
-        void (async () => {
-          await recruitment.current
-          navigate('/collection')
-        })()
-      }
+      navigate('/home', { replace: true })
     }
 
     window.addEventListener('message', onMessage)
