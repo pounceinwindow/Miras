@@ -158,7 +158,7 @@
   background-size: auto, 64px 64px;
   border: 1.5px solid #235846;
   box-shadow: 0 6px 20px rgba(15, 56, 42, 0.2), inset 0 1px 0 rgba(226, 188, 94, 0.3);
-  padding: 12px 14px;
+  padding: 13px 14px;
   position: relative;
   overflow: hidden;
 }
@@ -167,13 +167,13 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 9px;
 }
 .heroes-preview-header h1,
 .mobile-app .heroes-preview-header h1 {
   font-family: 'Unbounded', sans-serif;
   margin: 0 0 2px;
-  font-size: clamp(17px, 5vw, 21px);
+  font-size: clamp(18px, 5vw, 22px);
   font-weight: 800;
   letter-spacing: -0.4px;
   color: #fffdf7 !important;
@@ -181,7 +181,7 @@
 }
 .heroes-preview-header .hero-intro,
 .mobile-app .heroes-preview-header .hero-intro {
-  font-size: 11px;
+  font-size: 11.5px;
   color: #cde0cc !important;
   margin: 0;
   line-height: 1.35;
@@ -193,10 +193,10 @@
   background: linear-gradient(135deg, #f2cd6d 0%, #cf9f33 100%);
   color: #0b2a1f !important;
   font-family: 'Unbounded', sans-serif;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 750;
   letter-spacing: -0.2px;
-  padding: 6.5px 11px;
+  padding: 7px 11.5px;
   border-radius: 10px;
   border: 1px solid #fae8a8;
   white-space: nowrap;
@@ -215,16 +215,16 @@
 .heroes-compact-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
+  gap: 7px;
 }
 .hero-compact-card {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   background: #fffffffa;
   border: 1px solid #dfd6c3;
-  border-radius: 11px;
-  padding: 6px 8px;
+  border-radius: 12px;
+  padding: 7px 8px;
   text-decoration: none;
   color: inherit;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -236,8 +236,8 @@
   border-color: #cf9f33;
 }
 .hero-compact-art {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 9px;
   background: #f5efe3;
   border: 1px solid #e2d7c3;
@@ -260,15 +260,15 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   font-family: 'Unbounded', sans-serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   color: #1a2520;
   line-height: 1.2;
-  min-height: 24px;
+  min-height: 25px;
 }
 .hero-compact-details small {
   display: block;
-  font-size: 8.5px;
+  font-size: 9px;
   letter-spacing: -0.2px;
   font-weight: 600;
   color: #797163;
@@ -282,21 +282,21 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6.5px 12px;
+  padding: 8px 13px;
   margin: 0;
   background: linear-gradient(90deg, #f7f3e8 0%, #ece2cb 50%, #f7f3e8 100%);
   border: 1px solid #ded2bb;
-  border-radius: 12px;
+  border-radius: 13px;
   box-shadow: 0 1px 4px rgba(35, 25, 15, 0.05);
 }
 .step-bridge-chip {
   font-family: 'Unbounded', sans-serif;
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 800;
   color: #0b2a1f;
   background: linear-gradient(135deg, #f2cd6d 0%, #cf9f33 100%);
   border: 1px solid #fae8a8;
-  padding: 2.5px 6px;
+  padding: 3px 7px;
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(207, 159, 51, 0.3);
   flex-shrink: 0;
@@ -309,7 +309,7 @@
 .step-bridge-title {
   display: block;
   font-family: 'Unbounded', sans-serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 750;
   color: #12372a;
   letter-spacing: -0.2px;
@@ -318,7 +318,7 @@
 .step-bridge-desc {
   display: block;
   font-family: 'Rubik', sans-serif;
-  font-size: 9px;
+  font-size: 9.5px;
   color: #55665c;
   line-height: 1.2;
   margin-top: 1px;
@@ -327,8 +327,8 @@
   text-overflow: ellipsis;
 }
 .step-bridge-icon {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 8px;
   background: #e2ede6;
   border: 1px solid #c4ded0;
@@ -468,7 +468,7 @@
   background: linear-gradient(175deg, #18241e 0%, #101814 100%);
   border: 1.5px solid #284437;
   border-radius: 18px;
-  padding: 10px 10px 11px;
+  padding: 11px 10px 12px;
   box-shadow:
     0 6px 20px rgba(6, 17, 13, 0.3),
     inset 0 1px 0 rgba(229, 190, 88, 0.25);
@@ -477,7 +477,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
 }
 .captive-title-wrap {
   display: flex;
@@ -485,8 +485,8 @@
   gap: 8px;
 }
 .captive-icon {
-  height: 32px;
-  width: 32px;
+  height: 34px;
+  width: 34px;
   background: #22382e;
   border: 1.2px solid #365b4b;
   border-radius: 9px;
@@ -498,7 +498,7 @@
 .captive-title-wrap h2,
 .mobile-app .captive-title-wrap h2 {
   font-family: 'Unbounded', sans-serif;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 750;
   color: #fffdf5 !important;
   margin: 0;
@@ -507,20 +507,20 @@
 .captive-title-wrap small,
 .mobile-app .captive-title-wrap small {
   display: block;
-  font-size: 9px;
+  font-size: 9.5px;
   color: #a0baa9 !important;
   margin-top: 1px;
   font-family: 'Rubik', sans-serif;
 }
 .captive-badge {
   font-family: 'Unbounded', sans-serif;
-  font-size: 7.5px;
+  font-size: 8px;
   font-weight: 750;
   letter-spacing: 0.5px;
   color: #f2cd6d;
   background: #22382e;
   border: 1px solid #365b4b;
-  padding: 3px 7px;
+  padding: 3.5px 8px;
   border-radius: 16px;
   text-transform: uppercase;
 }
@@ -534,7 +534,7 @@
   background: linear-gradient(180deg, #24342d 0%, #16201b 100%);
   border: 1.2px solid #395246;
   border-radius: 12px;
-  padding: 7px 5px 9px;
+  padding: 8px 5px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -585,7 +585,7 @@
 .captive-dungeon-cell {
   position: relative;
   width: 100%;
-  max-width: 66px;
+  max-width: 70px;
   aspect-ratio: 1;
   border-radius: 10px;
   background: #0b120f;
@@ -594,7 +594,7 @@
     inset 0 3px 10px rgba(0, 0, 0, 0.9),
     0 2px 5px rgba(0, 0, 0, 0.4);
   overflow: hidden;
-  margin: 1px auto 5px;
+  margin: 1px auto 6px;
   display: grid;
   place-items: center;
 }
@@ -679,15 +679,15 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   font-family: 'Unbounded', sans-serif;
-  font-size: 9.5px;
-  font-weight: 700;
+  font-size: 10px;
+  font-weight: 750;
   color: #fffdf8;
   line-height: 1.2;
-  min-height: 22px;
+  min-height: 23px;
 }
 .captive-status-desc {
   display: block;
-  font-size: 8px;
+  font-size: 8.5px;
   font-weight: 500;
   color: #9bb0a6;
   margin-top: 1px;
@@ -698,14 +698,14 @@
   z-index: 2;
   width: 100%;
   border: 1px solid #378b66;
-  border-radius: 7px;
+  border-radius: 8px;
   background: linear-gradient(135deg, #186045 0%, #0d3d2c 100%);
   color: #fffdf5;
   font-family: 'Unbounded', sans-serif;
-  font-size: 8.5px;
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: -0.2px;
-  padding: 6px 2px;
+  padding: 7px 2px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1378,7 +1378,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  padding: 20px 14px 12px;
+  padding: 17px 14px 10px;
   overflow: hidden;
 }
 
