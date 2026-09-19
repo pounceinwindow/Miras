@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { X, Lock, Check } from 'lucide-react'
-import { useGame } from '../store/game'
+import { Check, LoaderCircle, Lock, MapPin, RotateCcw, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { getActiveArTarget } from '../api/arTargets'
+import {
+  getNearbyArBundle,
+  NearbyArTargetsError,
+  type ArBundle,
+} from '../api/arTargets'
 import type { CharacterId } from '../api/types'
+import { useGame } from '../store/game'
 
 const characterIds: CharacterId[] = [
   'shurale',
@@ -12,20 +16,78 @@ const characterIds: CharacterId[] = [
   'kereml',
 ]
 
+function getCurrentPosition(): Promise<GeolocationPosition> {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('unsupported'))
+      return
+    }
+    navigator.geolocation.getCurrentPosition(resolve, reject, {
+      enableHighAccuracy: true,
+      timeout: 15_000,
+      maximumAge: 0,
+    })
+  })
+}
+
+function locationErrorMessage(error: unknown) {
+  if (error instanceof NearbyArTargetsError) return error.message
+  if (error && typeof error === 'object' && 'code' in error) {
+    const code = Number(error.code)
+    if (code === 1)
+      return 'Разреши доступ к геопозиции, чтобы найти доступные рядом метки.'
+    if (code === 3)
+      return 'Не удалось быстро получить GPS. Выйди на открытое место и повтори.'
+  }
+  return 'Не удалось определить местоположение. Проверь GPS и интернет.'
+}
+
 export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null)
   const frame = useRef<HTMLIFrameElement>(null)
   const closing = useRef(false)
   const handled = useRef(false)
+  const requestId = useRef(0)
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const startupTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  )
   const [isClosing, setIsClosing] = useState(false)
+  const [bundle, setBundle] = useState<ArBundle | null>(null)
+  const [locationGate, setLocationGate] = useState<{
+    state: 'checking' | 'error'
+    message: string
+  }>({ state: 'checking', message: 'Ищем доступные метки рядом…' })
+  const [capturedSpirit, setCapturedSpirit] = useState<CharacterId | null>(null)
   const run = useGame((state) => state.run)
+  const entities = useGame((state) => state.entities)
   const navigate = useNavigate()
+
+  const prepareScanner = useCallback(async () => {
+    const currentRequest = ++requestId.current
+    setBundle(null)
+    setLocationGate({
+      state: 'checking',
+      message: 'Ищем доступные метки рядом…',
+    })
+    try {
+      const position = await getCurrentPosition()
+      const nearbyBundle = await getNearbyArBundle(
+        position.coords.latitude,
+        position.coords.longitude,
+      )
+      if (closing.current || requestId.current !== currentRequest) return
+      setBundle(nearbyBundle)
+    } catch (error) {
+      if (closing.current || requestId.current !== currentRequest) return
+      setLocationGate({ state: 'error', message: locationErrorMessage(error) })
+    }
+  }, [])
 
   const close = useCallback(() => {
     if (closing.current) return
     closing.current = true
-    // Release the camera at the start of the exit animation.
+    requestId.current += 1
     frame.current?.contentWindow?.postMessage(
       { type: 'miras:stop' },
       window.location.origin,
@@ -46,17 +108,17 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
     element
       .querySelector<HTMLButtonElement>('button')
       ?.focus({ preventScroll: true })
+    startupTimer.current = setTimeout(() => void prepareScanner(), 0)
     return () => {
+      requestId.current += 1
+      clearTimeout(startupTimer.current)
       clearTimeout(timer.current)
       element.close()
       document.body.style.overflow = overflow
       if (previousFocus instanceof HTMLElement && previousFocus.isConnected)
         previousFocus.focus({ preventScroll: true })
     }
-  }, [])
-
-  const [capturedSpirit, setCapturedSpirit] = useState<CharacterId | null>(null)
-  const entities = useGame((state) => state.entities)
+  }, [prepareScanner])
 
   useEffect(() => {
     async function onMessage(event: MessageEvent) {
@@ -77,18 +139,14 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
         const starterId: CharacterId = 'su-anasy'
         const state = useGame.getState()
         if (!state.progress.collection.some((item) => item.id === starterId)) {
-          await run({
-            type: 'capture',
-            characterId: starterId,
-          })
+          await run({ type: 'capture', characterId: starterId })
         }
-        await run({
-          type: 'imprison',
-          characterId: targetId,
-        })
+        await run({ type: 'imprison', characterId: targetId })
         setCapturedSpirit(targetId)
         setTimeout(() => {
-          const tag = useGame.getState().entities.find((e) => e.id === targetId)?.tag
+          const tag = useGame
+            .getState()
+            .entities.find((entity) => entity.id === targetId)?.tag
           close()
           if (tag) setTimeout(() => navigate(`/encounter/${tag}`), 240)
         }, 1800)
@@ -96,7 +154,7 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
     }
     window.addEventListener('message', onMessage)
     return () => window.removeEventListener('message', onMessage)
-  }, [close, run, navigate])
+  }, [close, navigate, run])
 
   return (
     <dialog
@@ -112,21 +170,42 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
       }}
     >
       <div className="scanner-sheet-content">
-        <iframe
-          ref={frame}
-          src="/ar/index.html"
-          title="AR-сканер меток"
-          allow="camera; accelerometer; gyroscope"
-          onLoad={() => {
-            void getActiveArTarget().then((target) => {
+        {bundle ? (
+          <iframe
+            ref={frame}
+            src="/ar/index.html"
+            title="AR-сканер меток"
+            allow="camera; accelerometer; gyroscope"
+            onLoad={() => {
               if (!closing.current)
                 frame.current?.contentWindow?.postMessage(
-                  { type: 'miras:start', target },
+                  { type: 'miras:start', bundle },
                   window.location.origin,
                 )
-            })
-          }}
-        />
+            }}
+          />
+        ) : (
+          <div className="scanner-location-gate" role="status">
+            <div className="scanner-location-icon" aria-hidden="true">
+              {locationGate.state === 'checking' ? (
+                <LoaderCircle className="scanner-location-spinner" size={30} />
+              ) : (
+                <MapPin size={30} />
+              )}
+            </div>
+            <h2>
+              {locationGate.state === 'checking'
+                ? 'Проверяем местоположение'
+                : 'Сканирование недоступно'}
+            </h2>
+            <p>{locationGate.message}</p>
+            {locationGate.state === 'error' && (
+              <button type="button" onClick={() => void prepareScanner()}>
+                <RotateCcw size={16} /> Повторить
+              </button>
+            )}
+          </div>
+        )}
         {capturedSpirit && (
           <div
             className="scanner-captured-banner"
@@ -137,7 +216,8 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
               <Lock size={12} /> В плену!
             </div>
             <h2>
-              {entities.find((e) => e.id === capturedSpirit)?.name ?? 'Дух'}{' '}
+              {entities.find((entity) => entity.id === capturedSpirit)?.name ??
+                'Дух'}{' '}
               заточён!
             </h2>
             <p>
@@ -148,7 +228,9 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
               type="button"
               className="scanner-captured-btn"
               onClick={() => {
-                const tag = entities.find((e) => e.id === capturedSpirit)?.tag
+                const tag = entities.find(
+                  (entity) => entity.id === capturedSpirit,
+                )?.tag
                 close()
                 if (tag) setTimeout(() => navigate(`/encounter/${tag}`), 240)
               }}

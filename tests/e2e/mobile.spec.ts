@@ -1,4 +1,13 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
+
+async function setScannerLocation(
+  page: Page,
+  latitude = 55.79194444444444,
+  longitude = 49.102222222222224,
+) {
+  await page.context().grantPermissions(['geolocation'])
+  await page.context().setGeolocation({ latitude, longitude })
+}
 
 test('home has a mobile layout, captive arena and working entry points', async ({
   page,
@@ -114,6 +123,7 @@ test('map keeps locations available without tiles or geolocation', async ({
 test('scanner opens on home with one tap, handles denial and retries', async ({
   page,
 }) => {
+  await setScannerLocation(page)
   await page.addInitScript(() => {
     if (navigator.mediaDevices)
       navigator.mediaDevices.getUserMedia = async () => {
@@ -167,6 +177,7 @@ test('battle opens as an immersive page with compact header controls', async ({
 test('outside tap closes the sheet, inside tap keeps it open, Escape works and focus returns', async ({
   page,
 }) => {
+  await setScannerLocation(page)
   await page.addInitScript(() => {
     navigator.mediaDevices.getUserMedia = () => new Promise(() => {})
   })
@@ -205,6 +216,7 @@ test('old camera URL redirects to home without starting the camera', async ({
 test('scanner ignores unrelated messages and routes MindAR targetFound once', async ({
   page,
 }) => {
+  await setScannerLocation(page)
   await page.addInitScript(() => {
     navigator.mediaDevices.getUserMedia = () => new Promise(() => {})
   })
@@ -275,6 +287,7 @@ test('scanner ignores unrelated messages and routes MindAR targetFound once', as
 test('closing the sheet cancels a late camera permission before exit finishes', async ({
   page,
 }) => {
+  await setScannerLocation(page)
   await page.addInitScript(() => {
     navigator.mediaDevices.getUserMedia = () =>
       new Promise((resolve) => {
@@ -317,6 +330,7 @@ test('closing the sheet cancels a late camera permission before exit finishes', 
 test('sheet fits narrow screens and respects reduced motion', async ({
   page,
 }) => {
+  await setScannerLocation(page)
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.setViewportSize({ width: 320, height: 568 })
   await page.addInitScript(() => {
@@ -333,4 +347,16 @@ test('sheet fits narrow screens and respects reduced motion', async ({
   await page.screenshot({ path: 'test-results/scanner-sheet.png' })
   await page.getByRole('button', { name: 'Закрыть камеру' }).click()
   await expect(sheet).toHaveCount(0)
+})
+
+test('scanner does not start when every AR target is farther than 100 m', async ({
+  page,
+}) => {
+  await setScannerLocation(page, 55.82, 49.16)
+  await page.goto('/home')
+  await page.getByRole('button', { name: /Начать сканировать/ }).click()
+
+  await expect(page.locator('iframe')).toHaveCount(0)
+  await expect(page.getByText('Сканирование недоступно')).toBeVisible()
+  await expect(page.getByText('В радиусе 100 м нет доступных AR-меток.')).toBeVisible()
 })

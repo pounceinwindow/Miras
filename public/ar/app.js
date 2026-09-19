@@ -11,10 +11,15 @@ let confirmationTimer = null
 let armTimer = null
 let armed = false
 let targetVisible = false
-let activeTarget = {
-  tag: 'stone-01',
-  entityId: 'kereml',
+let activeBundle = {
   mindPath: '/ar/assets/target.mind',
+  targets: [
+    {
+      targetIndex: 0,
+      locationId: 'stone-01',
+      entityId: 'kereml',
+    },
+  ],
 }
 
 function loadScript(src) {
@@ -83,22 +88,19 @@ async function startCamera() {
   try {
     await loadLibraries()
     controller.signal.throwIfAborted()
-    const response = await fetch(activeTarget.mindPath, {
-      signal: controller.signal,
-    })
-    if (!response.ok)
-      throw new Error('Не удалось загрузить метку. Попробуй ещё раз.')
-    const mind = await response.blob()
+    let mind = activeBundle.mind
+    if (!(mind instanceof Blob)) {
+      const response = await fetch(activeBundle.mindPath, {
+        signal: controller.signal,
+      })
+      if (!response.ok)
+        throw new Error('Не удалось загрузить метку. Попробуй ещё раз.')
+      mind = await response.blob()
+    }
     const result = await startImageTracking({
       container: document.querySelector('#camera'),
       mind,
-      targets: [
-        {
-          targetIndex: 0,
-          locationId: activeTarget.tag,
-          entityId: activeTarget.entityId,
-        },
-      ],
+      targets: activeBundle.targets,
       signal: controller.signal,
       onFound(target) {
         if (found || controller.signal.aborted) return
@@ -166,7 +168,18 @@ window.addEventListener('message', (event) => {
   if (event.origin !== window.location.origin || event.source !== window.parent)
     return
   if (event.data?.type === 'miras:start') {
-    if (event.data.target) activeTarget = event.data.target
+    if (event.data.bundle) activeBundle = event.data.bundle
+    else if (event.data.target)
+      activeBundle = {
+        mindPath: event.data.target.mindPath,
+        targets: [
+          {
+            targetIndex: 0,
+            locationId: event.data.target.tag,
+            entityId: event.data.target.entityId,
+          },
+        ],
+      }
     void startCamera()
   }
   if (event.data?.type === 'miras:stop') closeSession()

@@ -20,7 +20,7 @@ if (Boolean(url) !== Boolean(key))
 export const supabase = url && key ? createClient(url, key) : null
 export const isCloud = supabase !== null
 
-async function authenticatedUserId(): Promise<string> {
+export async function authenticatedUserId(): Promise<string> {
   if (!supabase) throw new Error('Supabase не настроен')
   const {
     data: { session },
