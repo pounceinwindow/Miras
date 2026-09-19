@@ -96,10 +96,6 @@ export default function Explore() {
           <div>
             <h1 id="heroes-title">Мои хранители</h1>
           </div>
-          <Link className="button-show-all" to="/collection">
-            <span>Показать всех</span>
-            <ArrowRight size={16} />
-          </Link>
         </div>
 
         <div className="heroes-compact-grid">

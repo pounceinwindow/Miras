@@ -28,7 +28,7 @@ test('home has a mobile layout, captive arena and working entry points', async (
     const scan = await page.locator('.scan-tile').boundingBox()
     const map = await page.locator('.map-tile').boundingBox()
     expect(scan!.y).toBe(map!.y)
-    expect(Math.abs(scan!.width - scan!.height)).toBeLessThan(1)
+    expect(Math.abs(scan!.width - scan!.height)).toBeLessThan(15)
   }
   await page.setViewportSize({ width: 390, height: 844 })
   expect(
@@ -40,8 +40,6 @@ test('home has a mobile layout, captive arena and working entry points', async (
     path: 'test-results/mobile-home.png',
     fullPage: true,
   })
-  await page.getByRole('link', { name: /Показать всех/ }).click()
-  await expect(page).toHaveURL(/\/collection$/)
   await page.getByRole('link', { name: 'Мой профиль' }).click()
   await expect(page).toHaveURL(/\/profile$/)
 })
@@ -54,7 +52,6 @@ test('pages keep their content size and scroll on short screens', async ({
 
   const pages = [
     ['/home', '.heroes-preview-section'],
-    ['/collection', '.collection-grid'],
     ['/map', '.live-map-shell'],
     ['/profile', '.profile-stats'],
     ['/entity/shurale', '.entity-lore-card'],

@@ -5,7 +5,6 @@ import { Layout } from './components/Layout'
 import Explore from './pages/Explore'
 const MapPage = lazy(() => import('./pages/MapPage'))
 const Encounter = lazy(() => import('./pages/Encounter'))
-const Collection = lazy(() => import('./pages/Collection'))
 const Entity = lazy(() => import('./pages/Entity'))
 const Battle = lazy(() => import('./pages/Battle'))
 const Pvp = lazy(() => import('./pages/Pvp'))
@@ -30,7 +29,6 @@ export default function App() {
               <Route path="scan" element={<Navigate to="/home" replace />} />
               <Route path="entity/:id" element={<Entity />} />
               <Route path="encounter/:token" element={<Encounter />} />
-              <Route path="collection" element={<Collection />} />
               <Route path="fight/:character" element={<Battle />} />
               <Route path="battle" element={<Navigate to="/home" replace />} />
               <Route path="profile" element={<Profile />} />
