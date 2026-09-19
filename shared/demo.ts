@@ -15,6 +15,7 @@ export function executeDemo(
     if (!b || b.id !== command.battleId)
       throw new Error('Этот бой уже завершён или заменён. Обнови страницу.')
     b.reserves ??= []
+    b.enemyReserves ??= []
     if (b.status !== 'active') return { progress }
     const elapsed = Math.max(0, now - progress.pveUpdatedAt)
     // A hidden tab/disconnection freezes combat, rather than killing the player offline.

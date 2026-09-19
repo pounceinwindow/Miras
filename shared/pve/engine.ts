@@ -35,6 +35,7 @@ export interface PveBattle {
   player: Combatant
   reserves: Combatant[]
   enemy: Combatant
+  enemyReserves: Combatant[]
   tick: number
   status: 'active' | 'won' | 'lost'
   paused: boolean
@@ -78,16 +79,29 @@ export function createPve(
 ): PveBattle {
   const party = heroes.slice(0, 3)
   if (!party.length) throw new Error('Выбери хотя бы одного хранителя')
-  const enemy = fighter(target, mode === 'training' ? party[0].level : 1)
+  const enemyIds = [
+    target,
+    ...(Object.keys(rules.characters) as CharacterId[]).filter(
+      (id) => id !== target,
+    ),
+  ].slice(0, party.length)
+  const enemyParty = enemyIds.map((id) =>
+    fighter(id, mode === 'training' ? party[0].level : 1),
+  )
   const scale = party.length === 1 ? 0.78 : party.length === 2 ? 0.92 : 1.1
-  enemy.hp = enemy.maxHp = Math.round(enemy.hp * scale)
+  for (const enemy of enemyParty)
+    enemy.hp = enemy.maxHp = Math.max(
+      35,
+      Math.round((enemy.hp * scale) / enemyParty.length),
+    )
   return {
     id,
     mode,
     target,
     player: fighter(party[0].id, party[0].level),
     reserves: party.slice(1).map((hero) => fighter(hero.id, hero.level)),
-    enemy,
+    enemy: enemyParty[0],
+    enemyReserves: enemyParty.slice(1),
     tick: 0,
     status: 'active',
     paused: true,
@@ -234,8 +248,11 @@ export function stepPve(b: PveBattle, ticks = 1): PveBattle {
       b.reserves[next] = defeated
       note(b, `В бой выходит ${b.player.id}`)
     }
+    if (b.enemy.hp <= 0 && b.enemyReserves.some((item) => item.hp > 0))
+      switchEnemy(b)
     if (b.player.hp <= 0 || b.tick >= rules.maxTicks) b.status = 'lost'
-    else if (b.enemy.hp <= 0) b.status = 'won'
+    else if (b.enemy.hp <= 0 && !b.enemyReserves.some((item) => item.hp > 0))
+      b.status = 'won'
     if (b.status !== 'active') {
       b.threats = []
       note(
@@ -249,6 +266,11 @@ export function stepPve(b: PveBattle, ticks = 1): PveBattle {
       break
     }
     if (b.tick >= b.nextEnemyMove) {
+      if (
+        b.enemy.hp / b.enemy.maxHp <= 0.35 &&
+        b.enemyReserves.some((item) => item.hp > 0)
+      )
+        switchEnemy(b)
       // Different opponents use different deterministic movement patterns.
       const lane = ((b.enemy.lane + (b.enemy.id === 'shurale' ? 2 : 1)) %
         3) as Lane
@@ -282,6 +304,16 @@ export function stepPve(b: PveBattle, ticks = 1): PveBattle {
     }
   }
   return b
+}
+
+function switchEnemy(b: PveBattle) {
+  const next = b.enemyReserves.findIndex((item) => item.hp > 0)
+  if (next < 0) return
+  const previous = b.enemy
+  b.enemy = b.enemyReserves[next]
+  b.enemyReserves[next] = previous
+  b.enemy.lane = previous.lane
+  note(b, `Соперник выпускает ${b.enemy.id}`)
 }
 export function statuses(f: Combatant, tick: number): string[] {
   return [

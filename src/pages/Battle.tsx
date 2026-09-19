@@ -185,6 +185,7 @@ export default function Battle() {
   const playerStatuses = statuses(battle.player, battle.tick)
   const enemyStatuses = statuses(battle.enemy, battle.tick)
   const reserves = battle.reserves ?? []
+  const enemyReserves = battle.enemyReserves ?? []
   const castSkill = (slot: 0 | 1) =>
     void run({
       type: 'pve',
@@ -235,6 +236,17 @@ export default function Battle() {
               >
                 {getCharacter(fighter.id)?.name} · {fighter.hp}/{fighter.maxHp}
               </button>
+            ))}
+          </div>
+        )}
+        {enemyReserves.length > 0 && (
+          <div className="party-switcher enemy-party">
+            <span>Команда ИИ:</span>
+            <b>{getCharacter(battle.enemy.id)?.name} активен</b>
+            {enemyReserves.map((fighter, slot) => (
+              <span key={`${fighter.id}-${slot}`}>
+                {getCharacter(fighter.id)?.name} · {fighter.hp}/{fighter.maxHp}
+              </span>
             ))}
           </div>
         )}
