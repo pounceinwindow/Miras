@@ -50,6 +50,7 @@ describe('onboarding and encounter gate', () => {
         characterId: 'su-anasy',
         target: 'shurale',
         mode: 'encounter',
+        tagId: 'forest-01',
       }),
     ).toThrow('ответь на вопросы')
   })
@@ -129,6 +130,7 @@ describe('real-time lane combat', () => {
         characterId: 'su-anasy',
         target: 'shurale',
         mode: 'encounter',
+        tagId: 'forest-01',
       },
       now,
       'battle-id',
