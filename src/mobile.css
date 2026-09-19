@@ -7,7 +7,12 @@
   --ink: #242628;
   --muted: #797368;
   --border: #e3ddd1;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family:
+    'Rubik',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
 }
 .mobile-app {
   display: block;
@@ -166,10 +171,11 @@
 }
 .heroes-preview-header h1,
 .mobile-app .heroes-preview-header h1 {
+  font-family: 'Unbounded', sans-serif;
   margin: 0 0 4px;
-  font-size: clamp(22px, 6vw, 26px);
-  font-weight: 750;
-  letter-spacing: -0.6px;
+  font-size: clamp(17px, 5.2vw, 21px);
+  font-weight: 800;
+  letter-spacing: -0.5px;
   color: #fffdf7 !important;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
 }
@@ -186,9 +192,11 @@
   gap: 6px;
   background: linear-gradient(135deg, #f2cd6d 0%, #cf9f33 100%);
   color: #0b2a1f !important;
-  font-size: 11.5px;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 10px;
   font-weight: 750;
-  padding: 8px 14px;
+  letter-spacing: -0.2px;
+  padding: 8px 13px;
   border-radius: 12px;
   border: 1px solid #fae8a8;
   white-space: nowrap;
@@ -395,10 +403,13 @@
 }
 .captive-arena {
   margin-top: 16px;
-  background: #f7f3e8;
-  border: 1px solid #e7ded0;
+  background: linear-gradient(175deg, #18241e 0%, #101814 100%);
+  border: 1.5px solid #284437;
   border-radius: 20px;
   padding: 16px;
+  box-shadow:
+    0 8px 24px rgba(6, 17, 13, 0.3),
+    inset 0 1px 0 rgba(229, 190, 88, 0.25);
 }
 .captive-header {
   display: flex;
@@ -414,34 +425,42 @@
 .captive-icon {
   height: 38px;
   width: 38px;
-  background: #e2ede6;
+  background: #22382e;
+  border: 1.5px solid #365b4b;
   border-radius: 12px;
   display: grid;
   place-items: center;
-  color: #123e32;
+  color: #f2cd6d;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
-.captive-title-wrap h2 {
-  font-size: 15px;
-  font-weight: 700;
-  color: #2b251c;
+.captive-title-wrap h2,
+.mobile-app .captive-title-wrap h2 {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 14px;
+  font-weight: 750;
+  color: #fffdf5 !important;
   margin: 0;
   letter-spacing: -0.3px;
 }
-.captive-title-wrap small {
+.captive-title-wrap small,
+.mobile-app .captive-title-wrap small {
   display: block;
-  font-size: 9px;
-  color: #857b6d;
-  margin-top: 1px;
+  font-size: 10px;
+  color: #a0baa9 !important;
+  margin-top: 2px;
+  font-family: 'Rubik', sans-serif;
 }
 .captive-badge {
+  font-family: 'Unbounded', sans-serif;
   font-size: 8px;
   font-weight: 750;
-  letter-spacing: 0.8px;
-  color: #123e32;
-  background: #e2ede6;
-  border: 1px solid #c8ded1;
+  letter-spacing: 0.6px;
+  color: #f2cd6d;
+  background: #22382e;
+  border: 1px solid #365b4b;
   padding: 4px 8px;
   border-radius: 20px;
+  text-transform: uppercase;
 }
 .captive-grid {
   display: grid;
@@ -450,29 +469,21 @@
 }
 .captive-card {
   position: relative;
-  background: #ffffff;
-  border: 1px solid #e4d8c7;
+  background: linear-gradient(180deg, #24342d 0%, #16201b 100%);
+  border: 1.5px solid #395246;
   border-radius: 14px;
-  padding: 10px 6px;
+  padding: 10px 6px 11px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(35, 25, 15, 0.06);
-}
-.captive-cell-bars {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  justify-content: space-evenly;
-  pointer-events: none;
-  opacity: 0.14;
-}
-.captive-cell-bars span {
-  width: 2px;
-  height: 100%;
-  background: #383126;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition:
+    transform 0.15s,
+    border-color 0.15s;
 }
 .captive-cell-header {
   position: relative;
@@ -481,39 +492,118 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   padding: 0 2px;
 }
 .cell-num {
+  font-family: 'Unbounded', sans-serif;
   font-size: 8px;
   font-weight: 700;
-  color: #9c9080;
+  color: #78998a;
 }
 .cell-tag {
-  font-size: 7.5px;
-  font-weight: 600;
-  color: #123e32;
-  background: #e2ede6;
-  border: 1px solid #c8ded1;
-  padding: 1px 4px;
-  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 7px;
+  font-weight: 700;
+  color: #f5d16d;
+  background: rgba(229, 190, 88, 0.18);
+  border: 1px solid rgba(229, 190, 88, 0.45);
+  padding: 2px 5px;
+  border-radius: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
-.captive-art-wrap {
+.cell-tag svg {
+  flex-shrink: 0;
+  color: #f2cd6d;
+}
+.captive-dungeon-cell {
   position: relative;
-  z-index: 1;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: #f4eee2;
-  border: 1.5px solid #ded5c2;
+  width: 100%;
+  max-width: 80px;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  background: #0b120f;
+  border: 2px solid #3c5448;
+  box-shadow:
+    inset 0 4px 12px rgba(0, 0, 0, 0.9),
+    0 2px 6px rgba(0, 0, 0, 0.4);
   overflow: hidden;
+  margin: 2px auto 8px;
   display: grid;
   place-items: center;
-  margin: 2px 0 6px;
+}
+.captive-art-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  filter: brightness(0.82) contrast(1.1) saturate(0.85);
 }
 .captive-art-wrap svg {
   width: 100%;
   height: 100%;
+}
+.captive-iron-bars {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: stretch;
+  background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.4) 100%);
+}
+.iron-bar {
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #1c2722 0%,
+    #6e847b 45%,
+    #9cb3a9 55%,
+    #1c2722 100%
+  );
+  box-shadow:
+    0 0 3px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+}
+.iron-crossbar {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 5px;
+  transform: translateY(-50%);
+  background: linear-gradient(180deg, #6e847b 0%, #9cb3a9 40%, #1c2722 100%);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.75);
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+.iron-padlock {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 19px;
+  height: 19px;
+  background: linear-gradient(135deg, #d4a73b 0%, #8f6c1e 100%);
+  border: 1.2px solid #fae192;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  color: #1a1204;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+}
+.iron-padlock svg {
+  width: 11px;
+  height: 11px;
 }
 .captive-info {
   position: relative;
@@ -526,37 +616,53 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  font-family: 'Unbounded', sans-serif;
   font-size: 10.5px;
   font-weight: 700;
-  color: #2b251c;
+  color: #fffdf8;
   line-height: 1.25;
   min-height: 26px;
+}
+.captive-status-desc {
+  display: block;
+  font-size: 8px;
+  font-weight: 500;
+  color: #9bb0a6;
+  margin-top: 2px;
+  font-family: 'Rubik', sans-serif;
 }
 .captive-fight-btn {
   position: relative;
   z-index: 2;
   width: 100%;
-  border: 1px solid #23654c;
+  border: 1px solid #378b66;
   border-radius: 8px;
-  background: linear-gradient(135deg, #184e3a 0%, #0f3527 100%);
+  background: linear-gradient(135deg, #186045 0%, #0d3d2c 100%);
   color: #fffdf5;
-  font-size: 10px;
-  font-weight: 750;
-  padding: 6.5px 0;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  padding: 7px 2px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
   cursor: pointer;
-  box-shadow: 0 2px 7px rgba(18, 62, 50, 0.28);
-  transition: transform 0.15s, filter 0.15s;
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition:
+    transform 0.15s,
+    filter 0.15s;
 }
 .captive-fight-btn:active {
   transform: scale(0.96);
-  filter: brightness(0.9);
+  filter: brightness(1.15);
 }
 .captive-fight-btn svg {
-  color: #e5be58;
+  color: #f2cd6d;
+  flex-shrink: 0;
 }
 .fighters-link {
   display: flex;
@@ -1134,10 +1240,10 @@ body {
   z-index: 1;
   gap: 9px;
   color: #fff9e9;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: -1px;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
   text-shadow: 0 2px 8px #002c2166;
 }
 
@@ -1203,8 +1309,8 @@ body {
 .places-heading h2,
 .section-title h2,
 .mobile-page-heading h1 {
-  font-family: Georgia, 'Times New Roman', serif;
-  letter-spacing: -0.8px;
+  font-family: 'Unbounded', sans-serif;
+  letter-spacing: -0.5px;
 }
 
 .mobile-app .eyebrow {
@@ -1230,7 +1336,7 @@ body {
   position: absolute;
   z-index: 2;
   color: #c7a14a;
-  font-family: Georgia, serif;
+  font-family: 'Rubik', serif;
   font-size: 48px;
   line-height: 1;
   opacity: 0.3;
@@ -1255,10 +1361,10 @@ body {
 
 .kazan-hero h1 {
   color: #0a2f25;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(29px, 8vw, 38px);
-  font-weight: 700;
-  letter-spacing: -1px;
+  font-family: 'Unbounded', sans-serif;
+  font-size: clamp(23px, 6.5vw, 30px);
+  font-weight: 800;
+  letter-spacing: -0.6px;
 }
 
 .kazan-hero h1 > span {
@@ -1335,7 +1441,7 @@ body {
   position: absolute;
   right: 11px;
   bottom: 5px;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 34px;
   opacity: 0.16;
   transform: rotate(-25deg);
@@ -1358,8 +1464,11 @@ body {
 }
 
 .action-tile strong {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 15px;
   font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: -0.4px;
 }
 
 .fighters-link {

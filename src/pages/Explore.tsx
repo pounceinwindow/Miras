@@ -8,6 +8,7 @@ import {
   Map,
   Swords,
   Sparkles,
+  Lock,
 } from 'lucide-react'
 import { useGame } from '../store/game'
 import { CharacterArt } from '../components/CharacterArt'
@@ -153,27 +154,36 @@ export default function Explore() {
         <div className="captive-grid">
           {captiveEnemies.map((enemy, idx) => (
             <div key={enemy.id} className="captive-card">
-              <div className="captive-cell-bars" aria-hidden="true">
-                <span />
-                <span />
-                <span />
-              </div>
               <div className="captive-cell-header">
                 <span className="cell-num">0{idx + 1}</span>
-                <span className="cell-tag">В плену</span>
+                <span className="cell-tag">
+                  <Lock size={9} /> В плену
+                </span>
               </div>
-              <div className={`captive-art-wrap art-${enemy.id}`}>
-                <CharacterArt id={enemy.id} />
+              <div className="captive-dungeon-cell">
+                <div className={`captive-art-wrap art-${enemy.id}`}>
+                  <CharacterArt id={enemy.id} />
+                </div>
+                <div className="captive-iron-bars" aria-hidden="true">
+                  <span className="iron-bar" />
+                  <span className="iron-bar" />
+                  <span className="iron-bar" />
+                  <span className="iron-crossbar" />
+                  <div className="iron-padlock">
+                    <Lock size={11} strokeWidth={2.4} />
+                  </div>
+                </div>
               </div>
               <div className="captive-info">
                 <strong>{enemy.name}</strong>
+                <small className="captive-status-desc">Заточен в клетке</small>
               </div>
               <button
                 type="button"
                 className="captive-fight-btn"
                 onClick={() => handleFight(enemy.id)}
               >
-                <Swords size={14} /> Сразиться
+                <Swords size={13} /> Сразиться
               </button>
             </div>
           ))}
