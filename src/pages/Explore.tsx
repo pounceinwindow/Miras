@@ -8,7 +8,6 @@ import {
   Map,
   Swords,
   Sparkles,
-  MapPin,
 } from 'lucide-react'
 import { useGame } from '../store/game'
 import { CharacterArt } from '../components/CharacterArt'
@@ -61,12 +60,9 @@ export default function Explore() {
       <section className="heroes-preview-section" aria-labelledby="heroes-title">
         <div className="heroes-preview-header">
           <div>
-            <div className="hero-location">
-              <MapPin size={12} /> КАЗАНЬ, ТАТАРСТАН<span>ЛЕГЕНДЫ РЯДОМ</span>
-            </div>
-            <h1 id="heroes-title">Хранители Казани</h1>
+            <h1 id="heroes-title">Мои хранители</h1>
             <p className="hero-intro">
-              Герои древних сказаний на улицах города.
+              Герои древних сказаний рядом с тобой.
             </p>
           </div>
           <Link className="button-show-all" to="/collection">
@@ -86,9 +82,7 @@ export default function Explore() {
                 <CharacterArt id={hero.id} />
               </div>
               <div className="hero-compact-details">
-                <span className="hero-compact-element">{hero.element}</span>
                 <strong>{hero.name}</strong>
-                <small>{hero.kind}</small>
               </div>
             </Link>
           ))}
@@ -163,7 +157,6 @@ export default function Explore() {
               </div>
               <div className="captive-info">
                 <strong>{enemy.name}</strong>
-                <small>{enemy.element}</small>
               </div>
               <button
                 type="button"

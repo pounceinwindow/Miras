@@ -5,7 +5,7 @@ test('home has a mobile layout, captive arena and working entry points', async (
 }) => {
   await page.goto('/home')
   await expect(
-    page.getByRole('heading', { name: 'Хранители Казани' }),
+    page.getByRole('heading', { name: 'Мои хранители' }),
   ).toBeVisible()
   await expect(page.locator('.captive-arena')).toBeVisible()
   for (const width of [320, 390, 480, 1280]) {
