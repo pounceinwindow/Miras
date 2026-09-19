@@ -212,7 +212,12 @@ export default function Explore() {
                   </div>
                   <div className="captive-dungeon-cell">
                     <div className={`captive-art-wrap art-${enemy.id}`}>
-                      <CharacterArt id={enemy.id} />
+                      <img
+                        className="captive-pixel-art"
+                        src={`/pixel/${enemy.id}.png`}
+                        alt=""
+                        aria-hidden="true"
+                      />
                     </div>
                     <div className="captive-iron-bars" aria-hidden="true">
                       <span className="iron-bar" />

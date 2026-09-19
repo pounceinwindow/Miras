@@ -8,7 +8,6 @@ const Encounter = lazy(() => import('./pages/Encounter'))
 const Entity = lazy(() => import('./pages/Entity'))
 const Battle = lazy(() => import('./pages/Battle'))
 const Pvp = lazy(() => import('./pages/Pvp'))
-const Profile = lazy(() => import('./pages/Profile'))
 export default function App() {
   return (
     <MotionConfig reducedMotion="user">
@@ -31,7 +30,6 @@ export default function App() {
               <Route path="encounter/:token" element={<Encounter />} />
               <Route path="fight/:character" element={<Battle />} />
               <Route path="battle" element={<Navigate to="/home" replace />} />
-              <Route path="profile" element={<Profile />} />
               <Route
                 path="*"
                 element={

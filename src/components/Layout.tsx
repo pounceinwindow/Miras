@@ -30,9 +30,9 @@ export function Layout() {
             {busy && (
               <LoaderCircle className="spin" size={16} aria-label="Загрузка" />
             )}
-            <NavLink to="/profile" className="avatar" aria-label="Мой профиль">
+            <span className="avatar" aria-hidden="true">
               <UserRound size={20} />
-            </NavLink>
+            </span>
           </div>
         </header>
         {error && (
