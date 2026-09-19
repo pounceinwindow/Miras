@@ -219,45 +219,137 @@
   gap: 10px;
 }
 .hero-compact-card {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: #fffffffa;
-  border: 1px solid #dfd6c3;
-  border-radius: 12px;
-  min-height: 70px;
-  padding: 9px 10px;
+  gap: 9px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(247, 239, 219, 0.98)),
+    #fffaf0;
+  border: 1px solid #d8bd74;
+  border-radius: 14px 14px 11px 11px;
+  min-height: 78px;
+  padding: 8px 10px 8px 8px;
   text-decoration: none;
   color: inherit;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 3px 9px rgba(0, 0, 0, 0.12),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.62);
+  overflow: hidden;
   transition: transform 0.15s, background 0.15s, border-color 0.15s;
+}
+.hero-compact-card::before {
+  content: '';
+  position: absolute;
+  right: -15px;
+  bottom: -17px;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(174, 121, 32, 0.2);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 7px rgba(174, 121, 32, 0.07),
+    0 0 0 13px rgba(174, 121, 32, 0.04);
+  pointer-events: none;
+}
+.hero-compact-card::after {
+  content: '◆';
+  position: absolute;
+  right: 6px;
+  top: 5px;
+  color: rgba(148, 99, 22, 0.32);
+  font-size: 7px;
+  line-height: 1;
+  transform: rotate(45deg);
+  pointer-events: none;
 }
 .hero-compact-card:active {
   transform: scale(0.97);
-  background: #ffffff;
-  border-color: #cf9f33;
+  border-color: #f0c958;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
 }
 .hero-compact-art {
-  width: 50px;
-  height: 50px;
-  border-radius: 11px;
-  background: #f5efe3;
-  border: 1px solid #e2d7c3;
+  position: relative;
+  width: 57px;
+  height: 61px;
+  border-radius: 28px 28px 12px 12px;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(255, 244, 183, 0.7), transparent 48%),
+    #dfe9d8;
+  border: 1px solid #b98b2e;
   overflow: hidden;
   flex-shrink: 0;
   display: grid;
   place-items: center;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 249, 220, 0.85),
+    inset 0 -12px 18px rgba(22, 55, 39, 0.11),
+    0 2px 5px rgba(59, 43, 14, 0.18);
+}
+.hero-compact-art::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  z-index: 2;
+  border: 1px solid rgba(255, 236, 164, 0.72);
+  border-radius: 24px 24px 9px 9px;
+  pointer-events: none;
+}
+.hero-compact-art::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 4px;
+  height: 3px;
+  z-index: 2;
+  background: linear-gradient(90deg, transparent, #d9ad49, transparent);
+  opacity: 0.75;
+  pointer-events: none;
+}
+.hero-compact-art.art-shurale {
+  background-color: #b9c99c;
+  background-image: radial-gradient(circle at 50% 30%, #f3df9b 0%, transparent 48%);
+}
+.hero-compact-art.art-syuyumbike {
+  background-color: #c99778;
+  background-image: radial-gradient(circle at 50% 30%, #ffe5a7 0%, transparent 50%);
+}
+.hero-compact-art.art-su-anasy {
+  background-color: #8ec5c2;
+  background-image: radial-gradient(circle at 50% 30%, #ddf7de 0%, transparent 50%);
+}
+.hero-compact-art.art-kereml {
+  background-color: #a9c7c0;
+  background-image: radial-gradient(circle at 50% 30%, #fff0b5 0%, transparent 50%);
 }
 .hero-compact-pixel {
-  width: 100%;
-  height: 100%;
+  position: relative;
+  z-index: 1;
+  width: 108%;
+  height: 108%;
   object-fit: contain;
   image-rendering: pixelated;
-  transform: scale(1.14);
+  transform: translateY(2px) scale(1.19);
+  transform-origin: center bottom;
+  filter: drop-shadow(0 2px 1px rgba(20, 35, 27, 0.34));
 }
 .hero-compact-details {
+  position: relative;
+  z-index: 1;
   min-width: 0;
   flex: 1;
+}
+.hero-compact-details::before {
+  content: 'ХРАНИТЕЛЬ';
+  display: block;
+  margin-bottom: 3px;
+  color: #9a6c20;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 6.5px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  line-height: 1;
 }
 .hero-compact-details strong {
   display: -webkit-box;
@@ -265,7 +357,7 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   font-family: 'Unbounded', sans-serif;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: #1a2520;
   line-height: 1.2;
@@ -273,7 +365,7 @@
 }
 .hero-compact-details small {
   display: block;
-  font-size: 10px;
+  font-size: 9.5px;
   letter-spacing: -0.2px;
   font-weight: 600;
   color: #797163;
@@ -2321,18 +2413,18 @@ body {
 
   .hero-compact-card {
     gap: 7px;
-    min-height: 62px;
+    min-height: 72px;
     padding: 7px;
   }
 
   .hero-compact-art {
-    width: 44px;
-    height: 44px;
+    width: 50px;
+    height: 55px;
   }
 
   .hero-compact-details strong {
-    font-size: 10.5px;
-    min-height: 25px;
+    font-size: 11px;
+    min-height: 27px;
   }
 
   .hero-compact-details small {
