@@ -29,7 +29,12 @@ export default function Profile() {
             value: `${progress.collection.length}/4`,
             label: 'Хранителей найдено',
           },
-          { icon: Trophy, value: progress.wins, label: 'Побед в поединках' },
+          { icon: Trophy, value: progress.wins, label: 'Побед над боссами' },
+          {
+            icon: Trophy,
+            value: progress.pvpWins,
+            label: 'Побед над друзьями',
+          },
         ].map(({ icon: Icon, value, label }) => (
           <div className="stat-card" key={label}>
             <Icon size={24} />

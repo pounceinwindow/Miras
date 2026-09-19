@@ -4,6 +4,7 @@ using Miras.Api.Endpoints;
 using Miras.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
 
 // --- Database ---
 var connectionString = builder.Configuration.GetConnectionString("PostgreSql");
@@ -17,6 +18,9 @@ builder.Services.AddScoped<EncounterService>();
 builder.Services.AddScoped<QuizService>();
 builder.Services.AddScoped<CollectionService>();
 builder.Services.AddScoped<GameService>();
+builder.Services.AddScoped<GameAuthService>();
+builder.Services.AddScoped<PvpService>();
+builder.Services.AddHttpClient();
 
 // --- Swagger / OpenAPI ---
 builder.Services.AddEndpointsApiExplorer();
@@ -59,6 +63,7 @@ app.MapEntityEndpoints();
 app.MapUserEndpoints();
 app.MapEncounterEndpoints();
 app.MapGameEndpoints();
+app.MapPvpEndpoints();
 
 app.Run();
 

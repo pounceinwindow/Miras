@@ -58,6 +58,7 @@ docker compose up --build
 - Восемь лорных умений: удержание без потери управления, отражение снарядов, морок, щиты, ослабление атаки и закрытие позиции. Полное описание — в `docs/BATTLE_DESIGN.md`.
 - Победа над боссом добавляет его в коллекцию. Внутриигровой валюты и прокачки в текущем прототипе нет.
 - Активный бой сохраняется. При скрытии вкладки или разрыве связи дольше 1,5 секунды бой ставится на паузу; награда и поимка применяются ровно один раз.
+- Дружеский PvP по коду комнаты: два игрока одновременно выбирают атаку, защиту или умение. Первый с двумя выигранными раундами получает победу в общем лидерборде.
 - Мобильная навигация, обратная связь ошибок, поддержка reduced motion.
 - Схематичная карта и авторские SVG-персонажи. PixiJS рисует арену и эффекты; интерфейс и персонажи остаются доступными DOM/SVG-элементами. При недоступном WebGL бой работает с упрощённой сценой.
 
@@ -95,7 +96,7 @@ docker compose up --build
 
 ## Облако: Vercel + C# hosting + Supabase
 
-1. Создать Supabase-проект, включить Anonymous Sign-ins в Auth.
+1. Создать Supabase-проект, включить **Allow anonymous sign-ins** в `Authentication → Providers → Anonymous`.
 2. Применить `backend/schema.sql` в PostgreSQL через SQL Editor или psql. Таблица имеет RLS и не доступна клиентским `anon`/`authenticated`; браузер работает через API.
 3. Разместить C# API на хостинге, поддерживающем .NET или Docker. Dockerfile: `backend/Dockerfile`, контекст — корень репозитория, порт 8080. **Vercel здесь обслуживает только frontend.**
 4. В окружении API настроить:
@@ -104,6 +105,8 @@ docker compose up --build
 ASPNETCORE_ENVIRONMENT=Production
 ConnectionStrings__PostgreSql=YOUR_POSTGRES_CONNECTION_STRING
 Cors__Origins__0=https://YOUR_FRONTEND_DOMAIN
+Supabase__Url=https://YOUR_PROJECT.supabase.co
+Supabase__PublishableKey=sb_publishable_YOUR_KEY
 ```
 
 Для сетевого подключения к Supabase PostgreSQL использовать строку подключения с SSL-параметрами из панели проекта. Текущая ветка использует собственную гостевую сессию C# API. Проверка Supabase Auth JWT остаётся отдельной задачей перед production.
@@ -112,11 +115,21 @@ Cors__Origins__0=https://YOUR_FRONTEND_DOMAIN
 
 ```dotenv
 VITE_API_URL=https://YOUR_CSHARP_API_DOMAIN
+VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_YOUR_KEY
 ```
 
 `VITE_*` доступны всем посетителям. Строка подключения PostgreSQL и service_role key **никогда** не должны там находиться. Service role key приложению не нужен. SPA rewrite для прямых NFC-ссылок уже в `vercel.json`.
 
-Привязка email/OAuth и восстановление доступа ещё не реализованы. Supabase Storage не нужен для текущих SVG; можно подключить позже для иллюстраций и аудио.
+Publishable key можно передавать браузеру; secret/service-role key в `VITE_*` добавлять нельзя. Если anonymous-вход временно выключен, клиент откатывается к гостевой сессии C# API. Привязка email/OAuth и восстановление доступа ещё не реализованы. Supabase Storage не нужен для текущих SVG; можно подключить позже для иллюстраций и аудио.
+
+## Дружеский PvP
+
+PvP вынесен на страницу `/pvp` и не влияет на захват боссов. Хозяин комнаты выбирает собранного хранителя, получает шестизначный код и отправляет его другу. Друг входит по коду со своей сессии и своим хранителем.
+
+Каждый раунд оба игрока тайно выбирают один приём: `атака` побеждает `умение`, `умение` побеждает `защиту`, `защита` побеждает `атаку`. При одинаковом выборе очко не получает никто. Матч заканчивается, когда один игрок набирает два очка; сервер один раз увеличивает его `PvpWins`. Лидерборд показывает 20 игроков с наибольшим числом PvP-побед.
+
+Для ручной проверки открой приложение в двух разных браузерах или во втором окне инкогнито. В первом создай комнату, во втором введи показанный код.
 
 ## API и данные
 
@@ -131,6 +144,8 @@ VITE_API_URL=https://YOUR_CSHARP_API_DOMAIN
 {"type":"pve","battleId":"ID_FROM_SERVER","action":"poll","input":{"kind":"move","lane":0}}
 {"type":"pve","battleId":"ID_FROM_SERVER","action":"poll","input":{"kind":"skill","slot":1}}
 ```
+
+PvP использует отдельные endpoints: `GET /api/pvp/me`, `GET /api/pvp/leaderboard`, `POST /api/pvp/matches`, `POST /api/pvp/matches/join` и `POST /api/pvp/matches/{id}/move`. Все команды матча проверяют Bearer-токен на C# API; текущий выбор соперника не раскрывается до завершения раунда.
 
 Указанные JSON-объекты — отдельные примеры запросов. Ответ: `{ "progress": { ... }, "outcome": "ready" | "failed" | null }`. Ошибки: `{ "error": "..." }`, HTTP 400/401/409. После конфликта 409 обновить состояние.
 
@@ -180,4 +195,4 @@ npm run format
 - [Татарская энциклопедия: Су анасы](https://tatarica.org/ru/razdely/narody/tatary/verovaniya-i-mifologiya/mifologicheskie-personazhi/su-anasy).
 - [Материалы о Су анасы на портале Габдуллы Тукая](https://gabdullatukay.ru/news/heritage/ahmetova-dina-kazan-raznoobrazie-stilistiki-obraza-su-anasy-v-sovremennom-izobrazitelnom-iskusstve).
 
-Не входят в основу: PvP (флаг режима всегда `false`), реальные географические координаты, подтверждение присутствия у метки, аудиоистории, восстановление аккаунта, удалённое редактирование контента и полноценная защита экономики от ботов.
+Не входят в основу: рейтинговый матчмейкинг, реальные географические координаты, подтверждение присутствия у метки, аудиоистории, восстановление аккаунта, удалённое редактирование контента и полноценная защита от ботов.

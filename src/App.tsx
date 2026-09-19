@@ -7,6 +7,7 @@ const Encounter = lazy(() => import('./pages/Encounter'))
 const Collection = lazy(() => import('./pages/Collection'))
 const Battle = lazy(() => import('./pages/Battle'))
 const Profile = lazy(() => import('./pages/Profile'))
+const Pvp = lazy(() => import('./pages/Pvp'))
 export default function App() {
   return (
     <MotionConfig reducedMotion="user">
@@ -24,6 +25,7 @@ export default function App() {
               <Route path="encounter/:tagId" element={<Encounter />} />
               <Route path="collection" element={<Collection />} />
               <Route path="battle" element={<Battle />} />
+              <Route path="pvp" element={<Pvp />} />
               <Route path="profile" element={<Profile />} />
               <Route
                 path="*"

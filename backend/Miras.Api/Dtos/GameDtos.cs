@@ -8,6 +8,7 @@ public sealed record GameProgressDto(
     List<OwnedCharacterDto> Collection,
     Dictionary<string, DateTimeOffset> Cooldowns,
     int Wins,
+    int PvpWins,
     object? Battle,
     PveState? Pve,
     long PveUpdatedAt,

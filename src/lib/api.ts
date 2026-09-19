@@ -5,7 +5,9 @@ const apiUrl = (import.meta.env.VITE_API_URL as string | undefined)?.replace(
   '',
 )
 const url = import.meta.env.VITE_SUPABASE_URL
-const key = import.meta.env.VITE_SUPABASE_ANON_KEY
+const key =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+  import.meta.env.VITE_SUPABASE_ANON_KEY
 if (Boolean(url) !== Boolean(key))
   throw new Error(
     'Укажите обе переменные Supabase Auth или оставьте обе пустыми.',
@@ -24,12 +26,12 @@ async function getToken(): Promise<string> {
     if (sessionError) throw sessionError
     if (session) return session.access_token
     const { data, error } = await supabase.auth.signInAnonymously()
-    if (error || !data.session)
-      throw new Error(
-        'Не удалось войти. Включите Anonymous Sign-ins в Supabase Auth.',
-      )
-    return data.session.access_token
+    if (!error && data.session) return data.session.access_token
   }
+  return getGuestToken()
+}
+
+async function getGuestToken(): Promise<string> {
   const storageKey = `miras-guest:${apiUrl}`
   const existing = localStorage.getItem(storageKey)
   if (existing) return existing
@@ -51,16 +53,26 @@ async function getToken(): Promise<string> {
   return guestPromise
 }
 export async function cloudCommand(command: Command): Promise<GameResult> {
+  return authorizedRequest('/api/game', {
+    method: 'POST',
+    body: JSON.stringify(command),
+  })
+}
+
+export async function authorizedRequest<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<T> {
   const token = await getToken()
   let response: Response
   try {
-    response = await fetch(`${apiUrl}/api/game`, {
-      method: 'POST',
+    response = await fetch(`${apiUrl}${path}`, {
+      ...init,
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
+        ...init.headers,
       },
-      body: JSON.stringify(command),
     })
   } catch {
     throw new Error(
@@ -72,5 +84,5 @@ export async function cloudCommand(command: Command): Promise<GameResult> {
     throw new Error(
       data?.error || `Ошибка сервера (${response.status}). Повтори запрос.`,
     )
-  return data as GameResult
+  return data as T
 }

@@ -25,11 +25,12 @@ export interface Progress {
   collection: OwnedCharacter[]
   cooldowns: Partial<Record<CharacterId, string>>
   wins: number
+  pvpWins: number
   battle: Battle | null
   pve: PveBattle | null
   pveUpdatedAt: number
   challenges: CharacterId[]
-  modes: { pve: boolean; encounters: boolean; pvp: false }
+  modes: { pve: boolean; encounters: boolean; pvp: boolean }
 }
 export type Command =
   | { type: 'sync' }
@@ -65,6 +66,7 @@ export const initialProgress = (): Progress => ({
   ],
   cooldowns: {},
   wins: 0,
+  pvpWins: 0,
   battle: null,
   pve: null,
   pveUpdatedAt: 0,

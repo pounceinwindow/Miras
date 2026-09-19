@@ -208,11 +208,12 @@ public sealed class GameService(AppDbContext db)
             collection,
             cooldowns,
             wins,
+            user.PvpWins,
             null,
             latest is null ? null : Deserialize(latest),
             latest?.UpdatedAt.ToUnixTimeMilliseconds() ?? 0,
             challenges,
-            new GameModesDto(true, true, false));
+            new GameModesDto(true, true, true));
     }
 
     private static PveState Deserialize(PveBattle row) =>

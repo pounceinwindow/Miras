@@ -9,6 +9,7 @@ import {
   MapPin,
   X,
   LoaderCircle,
+  UsersRound,
 } from 'lucide-react'
 import { useGame } from '../store/game'
 import { isCloud } from '../lib/api'
@@ -16,6 +17,7 @@ const nav = [
   { to: '/', label: 'Исследовать', icon: Compass },
   { to: '/collection', label: 'Коллекция', icon: BookOpen },
   { to: '/battle', label: 'Поединки', icon: Swords },
+  { to: '/pvp', label: 'С друзьями', icon: UsersRound },
   { to: '/profile', label: 'Мой путь', icon: UserRound },
 ]
 export function Layout() {

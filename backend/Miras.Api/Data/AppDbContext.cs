@@ -13,6 +13,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Encounter> Encounters => Set<Encounter>();
     public DbSet<Battle> Battles => Set<Battle>();
     public DbSet<PveBattle> PveBattles => Set<PveBattle>();
+    public DbSet<PvpMatch> PvpMatches => Set<PvpMatch>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -24,6 +25,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasIndex(u => u.Username).IsUnique();
             e.Property(u => u.GameTokenHash).HasMaxLength(64);
             e.HasIndex(u => u.GameTokenHash).IsUnique();
+            e.Property(u => u.SupabaseUserId).HasMaxLength(36);
+            e.HasIndex(u => u.SupabaseUserId).IsUnique();
+            e.Property(u => u.DisplayName).HasMaxLength(24);
+            e.Property(u => u.PublicCode).HasMaxLength(8);
+            e.HasIndex(u => u.PublicCode).IsUnique();
         });
 
         // --- Entity ---
@@ -89,6 +95,26 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasOne(x => x.User).WithMany(x => x.PveBattles).HasForeignKey(x => x.UserId);
             e.HasOne(x => x.Encounter).WithMany().HasForeignKey(x => x.EncounterId);
             e.HasIndex(x => new { x.UserId, x.UpdatedAt });
+        });
+
+        modelBuilder.Entity<PvpMatch>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.InviteCode).HasMaxLength(8).IsRequired();
+            e.HasIndex(x => x.InviteCode).IsUnique();
+            e.Property(x => x.HostCharacterId).HasMaxLength(50).IsRequired();
+            e.Property(x => x.GuestCharacterId).HasMaxLength(50);
+            e.Property(x => x.HostMove).HasMaxLength(10);
+            e.Property(x => x.GuestMove).HasMaxLength(10);
+            e.Property(x => x.LastHostMove).HasMaxLength(10);
+            e.Property(x => x.LastGuestMove).HasMaxLength(10);
+            e.Property(x => x.Status).HasMaxLength(16).IsRequired();
+            e.Property(x => x.Version).IsConcurrencyToken();
+            e.HasOne(x => x.HostUser).WithMany().HasForeignKey(x => x.HostUserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.GuestUser).WithMany().HasForeignKey(x => x.GuestUserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.WinnerUser).WithMany().HasForeignKey(x => x.WinnerUserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasIndex(x => new { x.HostUserId, x.Status });
+            e.HasIndex(x => new { x.GuestUserId, x.Status });
         });
 
         // ========== SEED DATA ==========
