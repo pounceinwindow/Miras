@@ -15,7 +15,11 @@ export default function Pvp() {
   const source = useMemo(() => {
     const owned = collection[0]?.id ?? 'su-anasy'
     const player = heroAliases[owned] ?? 'su_anasy'
-    return `/fighting/index.html?${new URLSearchParams({ mode: 'pvp', player })}`
+    return `/fighting/index.html?${new URLSearchParams({
+      mode: 'pvp',
+      player,
+      build: 'pvp-2',
+    })}`
   }, [collection])
 
   return (
