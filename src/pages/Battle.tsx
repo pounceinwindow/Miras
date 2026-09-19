@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 
 const heroAliases: Record<string, string> = {
   'su-anasy': 'su_anasy',
@@ -22,12 +23,17 @@ export default function Battle() {
   }, [character, searchParams])
 
   return (
-    <section className="fighting-embed" aria-label="Бой хранителей">
-      <iframe
-        src={source}
-        title="Три русла — бой хранителей"
-        allow="autoplay; fullscreen"
-      />
-    </section>
+    <>
+      <Link className="back-link battle-back-link" to="/home">
+        <ArrowLeft size={17} /> К темнице и хранителям
+      </Link>
+      <section className="fighting-embed" aria-label="Бой хранителей">
+        <iframe
+          src={source}
+          title="Три русла — бой хранителей"
+          allow="autoplay; fullscreen"
+        />
+      </section>
+    </>
   )
 }

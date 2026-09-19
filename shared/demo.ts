@@ -28,6 +28,10 @@ export function executeDemo(
   if (!getCharacter(command.characterId)) throw new Error('Персонаж не найден')
   const owned = progress.collection.find((c) => c.id === command.characterId)
   if (command.type === 'capture') {
+    if (!progress.captives) progress.captives = []
+    if (!progress.captives.includes(command.characterId)) {
+      progress.captives.push(command.characterId)
+    }
     if (!owned) {
       progress.collection.push({
         id: command.characterId,

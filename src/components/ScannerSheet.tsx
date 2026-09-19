@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { X } from 'lucide-react'
+import { X, Lock, Check } from 'lucide-react'
 import { useGame } from '../store/game'
 import { getActiveArTarget } from '../api/arTargets'
 import type { CharacterId } from '../api/types'
@@ -19,7 +18,6 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
   const handled = useRef(false)
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const [isClosing, setIsClosing] = useState(false)
-  const navigate = useNavigate()
   const run = useGame((state) => state.run)
 
   const close = useCallback(() => {
@@ -55,6 +53,9 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
     }
   }, [])
 
+  const [capturedSpirit, setCapturedSpirit] = useState<CharacterId | null>(null)
+  const entities = useGame((state) => state.entities)
+
   useEffect(() => {
     async function onMessage(event: MessageEvent) {
       if (
@@ -75,45 +76,25 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
           targetId === 'su-anasy' ? 'shurale' : 'su-anasy'
         let state = useGame.getState()
         if (!state.progress.collection.some((item) => item.id === starterId)) {
-          const outcome = await run({
+          await run({
             type: 'capture',
             characterId: starterId,
           })
-          if (outcome !== 'captured') {
-            handled.current = false
-            return
-          }
           state = useGame.getState()
         }
-        if (!state.progress.collection.some((item) => item.id === targetId)) {
-          const outcome = await run({
-            type: 'capture',
-            characterId: targetId,
-          })
-          if (outcome !== 'captured') {
-            handled.current = false
-            return
-          }
-        }
-        const currentBattle = useGame.getState().progress.battle
-        if (currentBattle?.status !== 'active') {
-          await run({
-            type: 'startBattle',
-            characterId: starterId,
-            enemyId: targetId,
-          })
-        }
-        if (useGame.getState().progress.battle?.status !== 'active') {
-          handled.current = false
-          return
-        }
-        close()
-        navigate(`/fight/${starterId}?enemy=${targetId}`)
+        await run({
+          type: 'capture',
+          characterId: targetId,
+        })
+        setCapturedSpirit(targetId)
+        setTimeout(() => {
+          close()
+        }, 1800)
       }
     }
     window.addEventListener('message', onMessage)
     return () => window.removeEventListener('message', onMessage)
-  }, [close, navigate, run])
+  }, [close, run])
 
   return (
     <dialog
@@ -141,6 +122,32 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
             })
           }}
         />
+        {capturedSpirit && (
+          <div
+            className="scanner-captured-banner"
+            role="status"
+            aria-live="polite"
+          >
+            <div className="scanner-captured-badge">
+              <Lock size={12} /> В плену!
+            </div>
+            <h2>
+              {entities.find((e) => e.id === capturedSpirit)?.name ?? 'Дух'}{' '}
+              заточён!
+            </h2>
+            <p>
+              Хранитель добавлен в темницу на главной странице. Выбери его,
+              чтобы сразиться.
+            </p>
+            <button
+              type="button"
+              className="scanner-captured-btn"
+              onClick={close}
+            >
+              <Check size={14} /> Перейти к пленникам
+            </button>
+          </div>
+        )}
         <button
           type="button"
           className="scanner-sheet-close"

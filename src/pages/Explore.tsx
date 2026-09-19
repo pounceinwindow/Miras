@@ -8,6 +8,7 @@ import {
   Map,
   Swords,
   Lock,
+  X,
 } from 'lucide-react'
 import { useGame } from '../store/game'
 import { CharacterArt } from '../components/CharacterArt'
@@ -15,21 +16,56 @@ import type { CharacterId } from '../api/types'
 
 export default function Explore() {
   const [scannerOpen, setScannerOpen] = useState(false)
+  const [selectedEnemy, setSelectedEnemy] = useState<CharacterId | null>(null)
   const navigate = useNavigate()
   const { progress, entities, run } = useGame()
 
-  const captiveIds: CharacterId[] = ['kereml', 'shurale', 'su-anasy']
-  const captiveEnemies = captiveIds.map((id) => {
-    const found = entities.find((e) => e.id === id)
+  const captiveIds: CharacterId[] = progress.captives ?? []
+  const CELL_COUNT = 3
+  const slots: (CharacterId | null)[] = Array.from(
+    { length: Math.max(CELL_COUNT, captiveIds.length) },
+    (_, i) => captiveIds[i] ?? null,
+  )
+
+  const handleFightClick = (enemyId: CharacterId) => {
+    const ownedHeroes = progress.collection
+    if (ownedHeroes.length > 1) {
+      setSelectedEnemy(enemyId)
+    } else {
+      void startDuel(ownedHeroes[0]?.id, enemyId)
+    }
+  }
+
+  const startDuel = async (
+    playerHeroId?: CharacterId,
+    enemyId?: CharacterId,
+  ) => {
+    if (!enemyId) return
+    let fighterId = playerHeroId
+    if (!fighterId) {
+      const starter = enemyId === 'shurale' ? 'su-anasy' : 'shurale'
+      await run({ type: 'capture', characterId: starter })
+      fighterId = starter
+    }
+    const currentBattle = progress.battle
+    if (currentBattle?.status !== 'active') {
+      await run({ type: 'startBattle', characterId: fighterId, enemyId })
+    }
+    navigate(`/fight/${fighterId}?enemy=${enemyId}`)
+  }
+
+  const getEnemyEntity = (id: CharacterId) => {
     return (
-      found || {
+      entities.find((e) => e.id === id) || {
         id,
         name:
           id === 'kereml'
             ? 'Керемль'
             : id === 'shurale'
               ? 'Шурале'
-              : 'Су анасы',
+              : id === 'syuyumbike'
+                ? 'Сююмбике'
+                : 'Су анасы',
         element:
           id === 'kereml' ? 'Камень' : id === 'shurale' ? 'Лес' : 'Вода',
         kind: 'Хранитель',
@@ -37,20 +73,6 @@ export default function Explore() {
         attack: 16,
       }
     )
-  })
-
-  const handleFight = async (enemyId: CharacterId) => {
-    let playerHero = progress.collection[0]?.id
-    if (!playerHero) {
-      const starter = enemyId === 'shurale' ? 'su-anasy' : 'shurale'
-      await run({ type: 'capture', characterId: starter })
-      playerHero = starter
-    }
-    const currentBattle = progress.battle
-    if (currentBattle?.status !== 'active') {
-      await run({ type: 'startBattle', characterId: playerHero, enemyId })
-    }
-    navigate(`/fight/${playerHero}`)
   }
 
   const heroDescriptions: Record<string, string> = {
@@ -173,47 +195,154 @@ export default function Explore() {
               <small>Выбери соперника для поединка</small>
             </div>
           </div>
-          <span className="captive-badge">3 ЯЧЕЙКИ</span>
+          <span className="captive-badge">
+            {captiveIds.length > 0
+              ? `${captiveIds.length} В ПЛЕНУ`
+              : '3 ЯЧЕЙКИ'}
+          </span>
         </div>
 
         <div className="captive-grid">
-          {captiveEnemies.map((enemy, idx) => (
-            <div key={enemy.id} className="captive-card">
-              <div className="captive-cell-header">
-                <span className="cell-num">0{idx + 1}</span>
-                <span className="cell-tag">
-                  <Lock size={9} /> В плену
-                </span>
-              </div>
-              <div className="captive-dungeon-cell">
-                <div className={`captive-art-wrap art-${enemy.id}`}>
-                  <CharacterArt id={enemy.id} />
+          {slots.map((enemyId, idx) => {
+            if (enemyId) {
+              const enemy = getEnemyEntity(enemyId)
+              return (
+                <div key={enemy.id} className="captive-card">
+                  <div className="captive-cell-header">
+                    <span className="cell-num">0{idx + 1}</span>
+                    <span className="cell-tag">
+                      <Lock size={9} /> В плену
+                    </span>
+                  </div>
+                  <div className="captive-dungeon-cell">
+                    <div className={`captive-art-wrap art-${enemy.id}`}>
+                      <CharacterArt id={enemy.id} />
+                    </div>
+                    <div className="captive-iron-bars" aria-hidden="true">
+                      <span className="iron-bar" />
+                      <span className="iron-bar" />
+                      <span className="iron-bar" />
+                      <span className="iron-crossbar" />
+                      <div className="iron-padlock">
+                        <Lock size={11} strokeWidth={2.4} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="captive-info">
+                    <strong>{enemy.name}</strong>
+                    <small className="captive-status-desc">
+                      Заточен в клетке
+                    </small>
+                  </div>
+                  <button
+                    type="button"
+                    className="captive-fight-btn"
+                    onClick={() => handleFightClick(enemy.id)}
+                  >
+                    <Swords size={13} /> Сразиться
+                  </button>
                 </div>
-                <div className="captive-iron-bars" aria-hidden="true">
-                  <span className="iron-bar" />
-                  <span className="iron-bar" />
-                  <span className="iron-bar" />
-                  <span className="iron-crossbar" />
-                  <div className="iron-padlock">
-                    <Lock size={11} strokeWidth={2.4} />
+              )
+            }
+
+            return (
+              <div key={`empty-${idx}`} className="captive-card is-empty">
+                <div className="captive-cell-header">
+                  <span className="cell-num">0{idx + 1}</span>
+                  <span className="cell-tag empty-tag">Свободно</span>
+                </div>
+                <div className="captive-dungeon-cell is-empty">
+                  <div className="captive-empty-placeholder">
+                    <Lock size={18} strokeWidth={1.4} />
+                  </div>
+                  <div className="captive-iron-bars" aria-hidden="true">
+                    <span className="iron-bar" />
+                    <span className="iron-bar" />
+                    <span className="iron-bar" />
+                    <span className="iron-crossbar" />
                   </div>
                 </div>
+                <div className="captive-info">
+                  <strong>Пустая клетка</strong>
+                  <small className="captive-status-desc">
+                    Найди духа по метке
+                  </small>
+                </div>
+                <button
+                  type="button"
+                  className="captive-fight-btn captive-empty-btn"
+                  onClick={() => setScannerOpen(true)}
+                >
+                  <ScanLine size={13} /> Пленить духа
+                </button>
               </div>
-              <div className="captive-info">
-                <strong>{enemy.name}</strong>
-                <small className="captive-status-desc">Заточен в клетке</small>
+            )
+          })}
+        </div>
+      </section>
+
+      {selectedEnemy && (
+        <div
+          className="modal-backdrop"
+          onClick={() => setSelectedEnemy(null)}
+          role="presentation"
+        >
+          <div
+            className="fighter-select-modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-label="Выбор бойца"
+          >
+            <div className="fighter-modal-header">
+              <div>
+                <h2>Выбери своего бойца</h2>
+                <p>
+                  Кто сразится против{' '}
+                  {getEnemyEntity(selectedEnemy).name}?
+                </p>
               </div>
               <button
                 type="button"
-                className="captive-fight-btn"
-                onClick={() => handleFight(enemy.id)}
+                className="fighter-modal-close"
+                onClick={() => setSelectedEnemy(null)}
+                aria-label="Закрыть"
               >
-                <Swords size={13} /> Сразиться
+                <X size={18} />
               </button>
             </div>
-          ))}
+            <div className="fighter-select-grid">
+              {progress.collection.map((hero) => {
+                const entity = entities.find((e) => e.id === hero.id)
+                return (
+                  <button
+                    key={hero.id}
+                    type="button"
+                    className="fighter-select-card"
+                    onClick={() => {
+                      const enemy = selectedEnemy
+                      setSelectedEnemy(null)
+                      void startDuel(hero.id, enemy)
+                    }}
+                  >
+                    <div className={`fighter-card-art art-${hero.id}`}>
+                      <CharacterArt id={hero.id} />
+                    </div>
+                    <div className="fighter-card-info">
+                      <strong>{entity?.name ?? hero.id}</strong>
+                      <small>
+                        Уровень {hero.level} · {entity?.element ?? 'Магия'}
+                      </small>
+                    </div>
+                    <span className="fighter-pick-action">
+                      <Swords size={13} /> Выбрать
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
         </div>
-      </section>
+      )}
     </div>
   )
 }

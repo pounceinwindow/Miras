@@ -26,6 +26,7 @@ export interface Progress {
   cooldowns: Partial<Record<CharacterId, string>>
   wins: number
   battle: Battle | null
+  captives?: CharacterId[]
 }
 export type Command =
   | { type: 'sync' }
@@ -43,4 +44,5 @@ export const initialProgress = (): Progress => ({
   cooldowns: {},
   wins: 0,
   battle: null,
+  captives: [],
 })
