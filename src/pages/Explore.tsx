@@ -108,7 +108,12 @@ export default function Explore() {
               className="hero-compact-card"
             >
               <div className={`hero-compact-art art-${hero.id}`}>
-                <CharacterArt id={hero.id} />
+                <img
+                  className="hero-compact-pixel"
+                  src={`/pixel/${hero.id}.png`}
+                  alt=""
+                  aria-hidden="true"
+                />
               </div>
               <div className="hero-compact-details">
                 <strong>{hero.name}</strong>
