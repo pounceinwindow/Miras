@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import { getEntities, getEntity, upgradeEntity } from '../../src/api/entities'
-import { captureEncounter, startEncounter } from '../../src/api/encounters'
-import { startBattle, attack } from '../../src/api/battles'
+import {
+  captureEncounter,
+  imprisonEncounter,
+  startEncounter,
+} from '../../src/api/encounters'
+import {
+  startBattle,
+  attack,
+  recruitDefeatedEnemy,
+} from '../../src/api/battles'
 import { getInitialProgress } from '../../src/api/user'
 import { getBattleFeedback } from '../../src/game/battle/feedback'
 
@@ -29,7 +37,9 @@ describe('frontend API contract', () => {
       const entity = await startEncounter(token)
       const captured = await captureEncounter(entity.id, getInitialProgress())
       expect(captured.outcome).toBe('captured')
-      expect(captured.progress.collection).toHaveLength(1)
+      expect(
+        captured.progress.collection.some((item) => item.id === entity.id),
+      ).toBe(true)
       const started = await startBattle(entity.id, captured.progress)
       const before = started.progress.battle!
       const attacked = await attack(
@@ -48,7 +58,9 @@ describe('frontend API contract', () => {
         attack(before.id, before.turn, 'attack', attacked.progress),
       ).rejects.toThrow()
       const repeated = await captureEncounter(entity.id, captured.progress)
-      expect(repeated.progress.collection).toHaveLength(1)
+      expect(repeated.progress.collection).toHaveLength(
+        entity.id === 'su-anasy' ? 1 : 2,
+      )
     })
   }
   it('captures directly and reflects upgrades', async () => {
@@ -60,5 +72,18 @@ describe('frontend API contract', () => {
       hp: 112,
       attack: 19,
     })
+  })
+  it('moves a defeated captive into the collection', async () => {
+    const imprisoned = await imprisonEncounter('kereml', getInitialProgress())
+    expect(imprisoned.progress.captives).toEqual(['kereml'])
+    expect(
+      imprisoned.progress.collection.some((item) => item.id === 'kereml'),
+    ).toBe(false)
+
+    const recruited = await recruitDefeatedEnemy('kereml', imprisoned.progress)
+    expect(recruited.progress.captives).toEqual([])
+    expect(
+      recruited.progress.collection.some((item) => item.id === 'kereml'),
+    ).toBe(true)
   })
 })

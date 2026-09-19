@@ -74,8 +74,7 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
       ) {
         handled.current = true
         const targetId = event.data.entityId as CharacterId
-        const starterId: CharacterId =
-          targetId === 'su-anasy' ? 'shurale' : 'su-anasy'
+        const starterId: CharacterId = 'su-anasy'
         const state = useGame.getState()
         if (!state.progress.collection.some((item) => item.id === starterId)) {
           await run({
@@ -84,7 +83,7 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
           })
         }
         await run({
-          type: 'capture',
+          type: 'imprison',
           characterId: targetId,
         })
         setCapturedSpirit(targetId)

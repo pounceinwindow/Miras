@@ -52,8 +52,8 @@ export default function EntityPage({ character, isEncounter }: { character?: Ent
       playerId = starter
     }
     if (!owned) {
-      const outcome = await run({ type: 'capture', characterId: entity!.id })
-      if (outcome !== 'captured') return
+      const outcome = await run({ type: 'imprison', characterId: entity!.id })
+      if (outcome !== 'imprisoned') return
     }
     if (useGame.getState().progress.battle?.status !== 'active') {
       await run({ type: 'startBattle', characterId: playerId, enemyId: entity!.id })

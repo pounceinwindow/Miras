@@ -9,3 +9,7 @@ export async function startEncounter(token: string) {
 export function captureEncounter(id: CharacterId, progress: Progress) {
   return request({ type: 'capture', characterId: id }, progress)
 }
+
+export function imprisonEncounter(id: CharacterId, progress: Progress) {
+  return request({ type: 'imprison', characterId: id }, progress)
+}

@@ -20,7 +20,10 @@ export default function Explore() {
   const navigate = useNavigate()
   const { progress, entities, run } = useGame()
 
-  const captiveIds: CharacterId[] = progress.captives ?? []
+  const ownedIds = new Set(progress.collection.map((item) => item.id))
+  const captiveIds: CharacterId[] = (progress.captives ?? []).filter(
+    (id) => !ownedIds.has(id),
+  )
   const CELL_COUNT = 3
   const slots: (CharacterId | null)[] = Array.from(
     { length: Math.max(CELL_COUNT, captiveIds.length) },
@@ -43,7 +46,7 @@ export default function Explore() {
     if (!enemyId) return
     let fighterId = playerHeroId
     if (!fighterId) {
-      const starter = enemyId === 'shurale' ? 'su-anasy' : 'shurale'
+      const starter: CharacterId = 'su-anasy'
       await run({ type: 'capture', characterId: starter })
       fighterId = starter
     }
@@ -66,8 +69,7 @@ export default function Explore() {
               : id === 'syuyumbike'
                 ? 'Сююмбике'
                 : 'Су анасы',
-        element:
-          id === 'kereml' ? 'Камень' : id === 'shurale' ? 'Лес' : 'Вода',
+        element: id === 'kereml' ? 'Камень' : id === 'shurale' ? 'Лес' : 'Вода',
         kind: 'Хранитель',
         hp: 100,
         attack: 16,
@@ -86,7 +88,10 @@ export default function Explore() {
     <div className="home-page">
       {scannerOpen && <ScannerSheet onClosed={() => setScannerOpen(false)} />}
 
-      <section className="heroes-preview-section" aria-labelledby="heroes-title">
+      <section
+        className="heroes-preview-section"
+        aria-labelledby="heroes-title"
+      >
         <div className="heroes-preview-header">
           <div>
             <h1 id="heroes-title">Мои хранители</h1>
@@ -98,28 +103,30 @@ export default function Explore() {
         </div>
 
         <div className="heroes-compact-grid">
-          {entities.map((hero) => (
-            <Link
-              key={hero.id}
-              to={`/entity/${hero.id}`}
-              className="hero-compact-card"
-            >
-              <div className={`hero-compact-art art-${hero.id}`}>
-                <img
-                  className="hero-compact-pixel"
-                  src={`/pixel/${hero.id}.png`}
-                  alt=""
-                  aria-hidden="true"
-                />
-              </div>
-              <div className="hero-compact-details">
-                <strong>{hero.name}</strong>
-                <small>
-                  {heroDescriptions[hero.id] ?? hero.kind ?? 'Герой легенд'}
-                </small>
-              </div>
-            </Link>
-          ))}
+          {entities
+            .filter((hero) => ownedIds.has(hero.id))
+            .map((hero) => (
+              <Link
+                key={hero.id}
+                to={`/entity/${hero.id}`}
+                className="hero-compact-card"
+              >
+                <div className={`hero-compact-art art-${hero.id}`}>
+                  <img
+                    className="hero-compact-pixel"
+                    src={`/pixel/${hero.id}.png`}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                </div>
+                <div className="hero-compact-details">
+                  <strong>{hero.name}</strong>
+                  <small>
+                    {heroDescriptions[hero.id] ?? hero.kind ?? 'Герой легенд'}
+                  </small>
+                </div>
+              </Link>
+            ))}
         </div>
       </section>
 
@@ -298,10 +305,7 @@ export default function Explore() {
             <div className="fighter-modal-header">
               <div>
                 <h2>Выбери своего бойца</h2>
-                <p>
-                  Кто сразится против{' '}
-                  {getEnemyEntity(selectedEnemy).name}?
-                </p>
+                <p>Кто сразится против {getEnemyEntity(selectedEnemy).name}?</p>
               </div>
               <button
                 type="button"

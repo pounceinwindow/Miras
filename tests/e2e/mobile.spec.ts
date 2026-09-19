@@ -123,6 +123,7 @@ test('scanner opens on home with one tap, handles denial and retries', async ({
         throw new DOMException('Permission denied', 'NotAllowedError')
       }
   })
+
   await page.goto('/home')
   await expect(page.locator('iframe')).toHaveCount(0)
   await page.getByRole('button', { name: /Начать сканировать/ }).click()
@@ -144,6 +145,26 @@ test('scanner opens on home with one tap, handles denial and retries', async ({
   await expect(scanner.locator('a-scene')).toHaveCount(0)
   await page.getByRole('button', { name: 'Закрыть камеру' }).click()
   await expect(page.locator('iframe')).toHaveCount(0)
+})
+
+test('battle opens as an immersive page with compact header controls', async ({
+  page,
+}) => {
+  await page.goto('/fight/su-anasy?enemy=kereml')
+  await expect(page.locator('.battle-page')).toHaveCSS('position', 'fixed')
+  await expect(page.locator('.topbar')).toBeHidden()
+  await expect(page.getByRole('link', { name: 'Назад' })).toHaveCount(0)
+  const fight = page.frameLocator('iframe')
+  await expect(fight.locator('.masthead h1')).toHaveCount(0)
+  await expect(
+    fight.getByRole('button', { name: 'Включить звук' }),
+  ).toBeVisible()
+  await expect(
+    fight.getByRole('button', { name: 'Пауза и меню' }),
+  ).toBeVisible()
+  await expect(
+    fight.getByRole('button', { name: 'На весь экран' }),
+  ).toBeVisible()
 })
 
 test('outside tap closes the sheet, inside tap keeps it open, Escape works and focus returns', async ({
@@ -206,15 +227,17 @@ test('scanner ignores unrelated messages and routes MindAR targetFound once', as
       location.origin,
     )
   })
-  await expect(page.locator('.scanner-captured-banner')).toBeVisible({ timeout: 30000 })
+  await expect(page.locator('.scanner-captured-banner')).toBeVisible({
+    timeout: 30000,
+  })
   await page.locator('.scanner-captured-btn').click()
   await expect(page).toHaveURL(/\/encounter\/stone-01/i)
   await expect(page.locator('iframe')).toHaveCount(0)
   await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden')
-  
+
   // They are now on the Encounter page
   await expect(page.getByRole('heading', { name: 'Сила хранителя' })).toBeVisible()
-  
+
   // Answer the random quiz to enable the start button
   while (!(await page.getByText('Верно!').isVisible())) {
     await page.locator('.quiz-section button').first().click()
@@ -224,10 +247,31 @@ test('scanner ignores unrelated messages and routes MindAR targetFound once', as
 
   await page.getByRole('button', { name: /Начать испытание/ }).click()
   await expect(page).toHaveURL(/\/fight\/.*kereml/i)
-  await page.goBack()
-  await expect(page).toHaveURL(/\/encounter\/stone-01/i)
-  await page.goBack()
+  const fight = page.frameLocator('iframe')
+  await fight.locator('body').evaluate(() => {
+    window.parent.postMessage(
+      {
+        type: 'miras:battle-finished',
+        result: 'win',
+        player: 'su_anasy',
+        enemy: 'kremlin',
+      },
+      location.origin,
+    )
+    window.parent.postMessage(
+      { type: 'miras:open-collection' },
+      location.origin,
+    )
+  })
+  await expect(page).toHaveURL(/\/collection$/)
+  await expect(
+    page.locator('.collection-card', { hasText: 'Казанский Кремль' }),
+  ).toContainText('В коллекции')
+  await page.goto('/home')
   await expect(page).toHaveURL(/\/home$/)
+  await expect(
+    page.locator('.captive-card', { hasText: 'Казанский Кремль' }),
+  ).toHaveCount(0)
   await expect(page.locator('iframe')).toHaveCount(0)
 })
 

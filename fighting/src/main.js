@@ -8,7 +8,7 @@ const battleParams=new URLSearchParams(window.location.search),isPvp=battleParam
 const app=$('#app');
 app.innerHTML=`
 <main class="game-shell">
-  <header class="masthead"><div class="brand-mark" aria-hidden="true">Ⅲ</div><div><h1>ТРИ РУСЛА</h1><p>ХРАНИТЕЛИ · PvE</p></div><div class="header-actions"><button class="icon-button" id="sound" aria-label="Включить звук" title="Звук выключен">♪</button><button class="icon-button" id="menu" aria-label="Пауза и меню">Ⅱ</button></div></header>
+  <header class="masthead"><div class="header-actions"><button class="icon-button" id="sound" aria-label="Включить звук" title="Звук выключен">♪</button><button class="icon-button" id="menu" aria-label="Пауза и меню">Ⅱ</button></div><button class="icon-button fullscreen-button" id="fullscreen" aria-label="На весь экран" title="На весь экран">⛶</button></header>
   <section class="combatant enemy-panel" aria-label="Противник"><img id="enemy-portrait" alt=""><div class="combatant-info"><div class="name-row"><span id="enemy-name">Керемль</span><small>СОПЕРНИК</small></div><div class="hp-track"><div id="enemy-bar" class="hp-fill enemy-fill"></div><div id="enemy-shield" class="shield-fill"></div></div><div class="health-meta"><span id="enemy-hp"></span><span id="enemy-status"></span></div></div><div class="timer"><strong id="timer">90</strong><small>СЕК</small></div></section>
   <section class="arena" id="arena"><div class="arena-caption"><span>Ⅰ</span><span>Ⅱ</span><span>Ⅲ</span></div><div class="load-panel" id="loading"><span class="loading-emblem">Ⅲ</span><p id="loading-message">Пробуждаем хранителей…</p><progress id="load-progress" max="1" value="0"></progress></div><div class="toast" id="toast" role="status"></div></section>
   <div class="lane-controls" role="group" aria-label="Выберите русло"><button data-lane="0"><span>Ⅰ</span><small>ЛЕВОЕ</small></button><button data-lane="1"><span>Ⅱ</span><small>СРЕДНЕЕ</small></button><button data-lane="2"><span>Ⅲ</span><small>ПРАВОЕ</small></button></div>
@@ -22,14 +22,12 @@ app.innerHTML=`
 <dialog id="rules-dialog" class="panel-dialog"><div class="dialog-eyebrow">ТРИ РУСЛА</div><h2>Два решения.<br>Много возможностей.</h2><div class="rules-list"><p><b>Двигайтесь.</b> Нажмите на русло или кнопку Ⅰ / Ⅱ / Ⅲ. Обычные снаряды летят автоматически, когда хранители стоят напротив друг друга.</p><p><b>Следите за предупреждениями.</b> Красное русло и таймер — вражеское умение. Золотое — ваше. Уйдите до попадания.</p><p><b>Удержание ≠ запрет умений.</b> Даже если движение запрещено, можно применить способность. Волна Су анасы и Воля ханбике снимают удержание.</p><p><b>Закрытые ворота.</b> Выйти из закрытого русла можно, войти обратно — нельзя до окончания таймера.</p><p><b>90 секунд.</b> Побеждает тот, кто первым обнулит здоровье врага. По времени сравнивается доля оставшегося здоровья.</p><p><b>Смена стороны.</b> В меню выберите «Поменять героев»: начнётся новая дуэль за другого хранителя.</p></div><button class="primary-button" id="close-rules">Понятно</button></dialog>
 <dialog id="atlas-dialog" class="atlas-dialog"><div class="atlas-header"><div><div class="dialog-eyebrow">40 ИСХОДНЫХ СПРАЙТОВ</div><h2>Все грани хранителей</h2></div><button class="icon-button" id="close-atlas" aria-label="Закрыть атлас">×</button></div><div id="atlas-content"></div><p class="small-note">В бою: снизу — вид со спины, сверху — вид спереди. Оба умения используют cast.</p></dialog>`;
 
-
-let playerHero=Object.hasOwn(HEROES,requestedHero)?requestedHero:'su_anasy',enemyHero=Object.hasOwn(HEROES,requestedEnemy)&&requestedEnemy!==playerHero?requestedEnemy:playerHero==='kremlin'?'shurale':'kremlin',battle=new Battle(),renderer,loaded=false,returnDialog=null,soundOn=false,audio=null,resultTimer=null,toastTimer=null;
+let playerHero=Object.hasOwn(HEROES,requestedHero)?requestedHero:'su_anasy',enemyHero=Object.hasOwn(HEROES,requestedEnemy)&&requestedEnemy!==playerHero?requestedEnemy:playerHero==='kremlin'?'shurale':'kremlin',battle=new Battle(),renderer,loaded=false,returnDialog=null,soundOn=false,audio=null,resultTimer=null,toastTimer=null,lastResult=null;
 let pvpConnection=null,pvpRole=null,pvpMatched=false,lastNetworkState=0,networkEvents=[];
 const stateNames={idle:'Ожидание',attack:'Атака',cast:'Умение',hit:'Попадание',defeat:'Поражение'};
 const portraits=(hero,face='front',pose='idle')=>ASSET_URLS[`/${hero}/${face}/${pose}.png`];
 const abilityHints={su_anasy:['Отражение + очищение','Урон + удержание'],kremlin:['Щит · 32 урона','Урон + закрытие'],shurale:['Удержание · 2 с','Защита от автоатак'],syuyumbike:['Очищение + щит 22','Два русла + ослабление']};
 if(isPvp){
-  $('.masthead p').textContent='ХРАНИТЕЛИ · PvP';
   $('.desktop-note .small-note').textContent='Сетевая дуэль · Supabase Realtime';
   app.insertAdjacentHTML('beforeend',`
     <dialog id="pvp-dialog" class="panel-dialog">
@@ -129,7 +127,7 @@ function updateSelection(){
 function updatePvpSelection(){if(isPvp&&$('#hero-description'))$('#hero-description').innerHTML=HEROES[playerHero].abilities.map(ability=>`<p><b>${ability.name}</b><span>${ability.description}</span></p>`).join('');}
 function configure(){clearTimeout(resultTimer);closeDialogs();battle=new Battle({player:playerHero,enemy:enemyHero,ai:!isPvp,bonus});renderer?.reset();updateSelection();updateHUD();if(isPvp)$('#pvp-dialog').showModal();}
 function swap(){[playerHero,enemyHero]=[enemyHero,playerHero];battle=new Battle({player:playerHero,enemy:enemyHero,bonus});renderer?.reset();updateSelection();updateHUD();}
-function start(){if(!loaded||isPvp)return;clearTimeout(resultTimer);closeDialogs();battle=new Battle({player:playerHero,enemy:enemyHero,bonus});renderer.reset();battle.start();updateHUD();audio?.resume();}
+function start(){if(!loaded||isPvp)return;clearTimeout(resultTimer);closeDialogs();lastResult=null;battle=new Battle({player:playerHero,enemy:enemyHero,bonus});renderer.reset();battle.start();updateHUD();audio?.resume();}
 function pause(reason='Можно перевести дух.'){
   if(isPvp){toast('В сетевой дуэли паузы нет.');return;}
   if(battle.status!=='playing')return;battle.pause();$('#pause-reason').textContent=reason;if(!document.querySelector('dialog[open]'))$('#pause-dialog').showModal();
@@ -148,13 +146,22 @@ function updateHUD(){
 }
 function showResult(event){
   if(battle.status!=='finished')return;closeDialogs();
+  lastResult=event.result;
   $('#result-title').textContent={win:'Ваша победа',lose:'Ещё одна попытка?',draw:'Равные силы'}[event.result];$('#result-mark').textContent=event.result==='win'?'✦':event.result==='draw'?'◇':'↻';
-  $('#result-description').textContent=event.timeout?'Время вышло. Итог — по доле оставшегося здоровья.':event.result==='win'?(isPvp?'Вы переиграли друга на трёх руслах.':'Русла на вашей стороне. Попробуете другого хранителя?'):(isPvp?'Друг оказался сильнее в этой дуэли.':'Изучите предупреждения и используйте защиту вовремя.');
+  $('#result-description').textContent=event.timeout?'Время вышло. Итог — по доле оставшегося здоровья.':event.result==='win'?(isPvp?'Вы переиграли друга на трёх руслах.':'Противник усмирён и присоединяется к твоей коллекции.'):(isPvp?'Друг оказался сильнее в этой дуэли.':'Изучите предупреждения и используйте защиту вовремя.');
+  $('#rematch').textContent=isPvp?'Новая комната':event.result==='win'?'В коллекцию':'Ещё бой';
   $('#stat-damage').textContent=battle.stats.damage;$('#stat-dodges').textContent=battle.stats.dodges;$('#stat-reflect').textContent=battle.stats.reflections;$('#result-dialog').showModal();
+  window.parent.postMessage({type:'miras:battle-finished',result:event.result,player:playerHero,enemy:enemyHero},window.location.origin);
 }
-$('#rematch').onclick=()=>isPvp?void leavePvp('Создайте новую комнату для реванша.'):start();
+$('#rematch').onclick=()=>{if(isPvp){void leavePvp('Создайте новую комнату для реванша.');return;}if(lastResult==='win'){window.parent.postMessage({type:'miras:open-collection'},window.location.origin);if(window.parent===window)window.location.assign('/collection');return;}start();};
 $('#resume').onclick=()=>{if(document.hidden||!navigator.onLine){$('#pause-reason').textContent='Вернитесь в игру и восстановите соединение.';return;}$('#pause-dialog').close();battle.resume();};
 $('#menu').onclick=()=>{if(battle.status==='playing')pause();else if(battle.status==='paused')$('#pause-dialog').showModal();};
+const hostDocument=window.parent===window?document:window.parent.document,fullscreenTarget=window.frameElement||document.documentElement,fullscreenButton=$('#fullscreen');
+const currentFullscreenElement=()=>hostDocument.fullscreenElement||hostDocument.webkitFullscreenElement;
+fullscreenButton.onclick=async()=>{try{if(currentFullscreenElement()){if(hostDocument.exitFullscreen)await hostDocument.exitFullscreen();else if(hostDocument.webkitExitFullscreen)await hostDocument.webkitExitFullscreen();else toast('Сверните игру жестом браузера.');}else if(fullscreenTarget.requestFullscreen)await fullscreenTarget.requestFullscreen({navigationUI:'hide'});else if(fullscreenTarget.webkitRequestFullscreen)await fullscreenTarget.webkitRequestFullscreen();else toast('Добавьте игру на главный экран телефона.');}catch{toast('Браузер не разрешил изменить полноэкранный режим.');}};
+const syncFullscreenButton=()=>{const isFullscreen=Boolean(currentFullscreenElement());fullscreenButton.textContent=isFullscreen?'⤢':'⛶';fullscreenButton.setAttribute('aria-label',isFullscreen?'Свернуть':'На весь экран');fullscreenButton.title=isFullscreen?'Свернуть':'На весь экран';};
+hostDocument.addEventListener('fullscreenchange',syncFullscreenButton);
+hostDocument.addEventListener('webkitfullscreenchange',syncFullscreenButton);
 $('#rules-button').onclick=()=>openSub('#rules-dialog');$('#pause-rules').onclick=()=>openSub('#rules-dialog');$('#close-rules').onclick=()=>closeSub('#rules-dialog');
 for(const id of ['atlas-button','pause-atlas','pvp-atlas']){const el=$('#'+id);if(el)el.onclick=()=>openSub('#atlas-dialog');}
 $('#close-atlas').onclick=()=>closeSub('#atlas-dialog');

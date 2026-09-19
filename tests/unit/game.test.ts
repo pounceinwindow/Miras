@@ -31,8 +31,10 @@ describe('capture and economy', () => {
       now,
     )
     expect(outcome).toBe('captured')
-    expect(progress.collection[0].level).toBe(1)
-    expect(input.collection).toEqual([])
+    expect(
+      progress.collection.find((item) => item.id === 'shurale')?.level,
+    ).toBe(1)
+    expect(input.collection.map((item) => item.id)).toEqual(['su-anasy'])
   })
   it('treats a repeated scan as an idempotent capture', () => {
     const first = capture()
@@ -41,7 +43,7 @@ describe('capture and economy', () => {
       characterId: 'shurale',
     })
     expect(second.outcome).toBe('captured')
-    expect(second.progress.collection).toHaveLength(1)
+    expect(second.progress.collection).toHaveLength(2)
   })
   it('charges upgrades and enforces limits', () => {
     const p = capture()
@@ -49,8 +51,10 @@ describe('capture and economy', () => {
       type: 'upgrade',
       characterId: 'shurale',
     }).progress
-    expect(result.collection[0].level).toBe(2)
-    p.collection[0].level = 10
+    expect(result.collection.find((item) => item.id === 'shurale')?.level).toBe(
+      2,
+    )
+    p.collection.find((item) => item.id === 'shurale')!.level = 10
     expect(() =>
       executeDemo(p, { type: 'upgrade', characterId: 'shurale' }),
     ).toThrow()
@@ -62,6 +66,49 @@ describe('capture and economy', () => {
         characterId: 'shurale',
       }),
     ).toThrow()
+  })
+  it('keeps a scanned enemy captive until victory recruits it', () => {
+    const scanned = executeDemo(
+      initialProgress(),
+      { type: 'imprison', characterId: 'kereml' },
+      now,
+    ).progress
+    expect(scanned.collection.map((item) => item.id)).toEqual(['su-anasy'])
+    expect(scanned.captives).toEqual(['kereml'])
+
+    const won = executeDemo(
+      scanned,
+      { type: 'recruit', characterId: 'kereml' },
+      now,
+    ).progress
+    expect(won.collection.map((item) => item.id)).toEqual([
+      'su-anasy',
+      'kereml',
+    ])
+    expect(won.captives).toEqual([])
+    expect(won.wins).toBe(1)
+
+    const repeated = executeDemo(won, {
+      type: 'recruit',
+      characterId: 'kereml',
+    }).progress
+    expect(repeated.collection).toHaveLength(2)
+    expect(repeated.wins).toBe(1)
+  })
+  it('repairs progress created by the old scan flow', () => {
+    const repaired = executeDemo(
+      {
+        ...initialProgress(),
+        collection: [
+          ...initialProgress().collection,
+          { id: 'kereml', level: 1, capturedAt: new Date(now).toISOString() },
+        ],
+        captives: ['su-anasy', 'kereml'],
+      },
+      { type: 'sync' },
+    ).progress
+    expect(repaired.collection.map((item) => item.id)).toEqual(['su-anasy'])
+    expect(repaired.captives).toEqual(['kereml'])
   })
 })
 describe('battle', () => {

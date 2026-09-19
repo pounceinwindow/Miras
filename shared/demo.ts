@@ -1,9 +1,12 @@
-import {
-  getCharacter,
-  MAX_LEVEL,
-} from './characters.ts'
+import { getCharacter, MAX_LEVEL } from './characters.ts'
 import { createBattle, takeTurn } from './battle.ts'
-import type { Command, GameResult, Progress } from './types.ts'
+import type {
+  CharacterId,
+  Command,
+  GameResult,
+  OwnedCharacter,
+  Progress,
+} from './types.ts'
 
 function createBattleId() {
   const webCrypto = globalThis.crypto
@@ -25,13 +28,43 @@ function createBattleId() {
   return `${hex.slice(0, 4).join('')}-${hex.slice(4, 6).join('')}-${hex.slice(6, 8).join('')}-${hex.slice(8, 10).join('')}-${hex.slice(10).join('')}`
 }
 
+const starterCharacter = (): OwnedCharacter => ({
+  id: 'su-anasy',
+  level: 1,
+  capturedAt: new Date(0).toISOString(),
+})
+
+export function normalizeProgress(input: Progress): Progress {
+  const progress = structuredClone(input)
+  progress.collection = Array.isArray(progress.collection)
+    ? progress.collection
+    : []
+  progress.captives = Array.isArray(progress.captives) ? progress.captives : []
+
+  if (!progress.collection.some((item) => item.id === 'su-anasy')) {
+    progress.collection.unshift(starterCharacter())
+  }
+
+  const captiveIds = new Set<CharacterId>(
+    progress.captives.filter((id) => id !== 'su-anasy'),
+  )
+  const seenOwned = new Set<CharacterId>()
+  progress.collection = progress.collection.filter((item) => {
+    if (seenOwned.has(item.id)) return false
+    seenOwned.add(item.id)
+    return item.id === 'su-anasy' || !captiveIds.has(item.id)
+  })
+  progress.captives = [...captiveIds]
+  return progress
+}
+
 export function executeDemo(
   input: Progress,
   command: Command,
   now = Date.now(),
   battleId?: string,
 ): GameResult {
-  const progress = structuredClone(input)
+  const progress = normalizeProgress(input)
   if (command.type === 'sync') return { progress }
   if (command.type === 'battleTurn') {
     if (
@@ -48,11 +81,28 @@ export function executeDemo(
   }
   if (!getCharacter(command.characterId)) throw new Error('Персонаж не найден')
   const owned = progress.collection.find((c) => c.id === command.characterId)
-  if (command.type === 'capture') {
-    if (!progress.captives) progress.captives = []
-    if (!progress.captives.includes(command.characterId)) {
-      progress.captives.push(command.characterId)
+  if (command.type === 'imprison') {
+    if (!owned && !progress.captives!.includes(command.characterId)) {
+      progress.captives!.push(command.characterId)
     }
+    return { progress, outcome: 'imprisoned' }
+  }
+  if (command.type === 'recruit') {
+    progress.battle = null
+    progress.captives = progress.captives!.filter(
+      (id) => id !== command.characterId,
+    )
+    if (!owned) {
+      progress.collection.push({
+        id: command.characterId,
+        level: 1,
+        capturedAt: new Date(now).toISOString(),
+      })
+      progress.wins += 1
+    }
+    return { progress, outcome: 'recruited' }
+  }
+  if (command.type === 'capture') {
     if (!owned) {
       progress.collection.push({
         id: command.characterId,
@@ -60,6 +110,9 @@ export function executeDemo(
         capturedAt: new Date(now).toISOString(),
       })
     }
+    progress.captives = progress.captives!.filter(
+      (id) => id !== command.characterId,
+    )
     delete progress.cooldowns[command.characterId]
     return { progress, outcome: 'captured' }
   }

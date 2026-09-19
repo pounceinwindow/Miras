@@ -31,16 +31,24 @@ export interface Progress {
 export type Command =
   | { type: 'sync' }
   | { type: 'capture'; characterId: CharacterId }
+  | { type: 'imprison'; characterId: CharacterId }
+  | { type: 'recruit'; characterId: CharacterId }
   | { type: 'upgrade'; characterId: CharacterId }
   | { type: 'startBattle'; characterId: CharacterId; enemyId?: CharacterId }
   | { type: 'battleTurn'; battleId: string; turn: number; action: Action }
 export interface GameResult {
   progress: Progress
-  outcome?: 'captured'
+  outcome?: 'captured' | 'imprisoned' | 'recruited'
 }
 export const initialProgress = (): Progress => ({
   balance: 0,
-  collection: [],
+  collection: [
+    {
+      id: 'su-anasy',
+      level: 1,
+      capturedAt: new Date(0).toISOString(),
+    },
+  ],
   cooldowns: {},
   wins: 0,
   battle: null,

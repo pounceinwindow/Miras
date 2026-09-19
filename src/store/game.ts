@@ -2,8 +2,8 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { getInitialProgress as initialProgress, getUser } from '../api/user'
 import { getEntities, upgradeEntity } from '../api/entities'
-import { captureEncounter } from '../api/encounters'
-import { startBattle, attack } from '../api/battles'
+import { captureEncounter, imprisonEncounter } from '../api/encounters'
+import { startBattle, attack, recruitDefeatedEnemy } from '../api/battles'
 import type { Entity } from '../api/types'
 import type { Command, Progress } from '../api/types'
 import { isCloud } from '../api/client'
@@ -13,7 +13,9 @@ interface GameStore {
   busy: boolean
   error: string | null
   ready: boolean
-  run: (command: Command) => Promise<'captured' | undefined>
+  run: (
+    command: Command,
+  ) => Promise<'captured' | 'imprisoned' | 'recruited' | undefined>
   clearError: () => void
   resetDemo: () => void
 }
@@ -41,16 +43,24 @@ export const useGame = create<GameStore>()(
             ? getUser(progress)
             : command.type === 'capture'
               ? captureEncounter(command.characterId, progress)
-              : command.type === 'upgrade'
-                ? upgradeEntity(command.characterId, progress)
-                : command.type === 'startBattle'
-                  ? startBattle(command.characterId, progress, command.enemyId)
-                  : attack(
-                      command.battleId,
-                      command.turn,
-                      command.action,
-                      progress,
-                    ))
+              : command.type === 'imprison'
+                ? imprisonEncounter(command.characterId, progress)
+                : command.type === 'recruit'
+                  ? recruitDefeatedEnemy(command.characterId, progress)
+                  : command.type === 'upgrade'
+                    ? upgradeEntity(command.characterId, progress)
+                    : command.type === 'startBattle'
+                      ? startBattle(
+                          command.characterId,
+                          progress,
+                          command.enemyId,
+                        )
+                      : attack(
+                          command.battleId,
+                          command.turn,
+                          command.action,
+                          progress,
+                        ))
           const entities = await getEntities(result.progress)
           set({ progress: result.progress, entities, ready: true })
           return result.outcome

@@ -1768,6 +1768,59 @@
   background: #0c171c;
 }
 
+body:has(.battle-page) {
+  overflow: hidden;
+  background: #0c171c;
+}
+
+.mobile-app:has(.battle-page) {
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  background: #0c171c;
+}
+
+.mobile-app:has(.battle-page) .topbar,
+.mobile-app:has(.battle-page) .error-banner {
+  display: none;
+}
+
+.mobile-app:has(.battle-page) .main-shell,
+.mobile-app:has(.battle-page) main {
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.battle-page {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: #0c171c;
+}
+
+.battle-page:fullscreen,
+.battle-page:-webkit-full-screen {
+  width: 100vw;
+  height: 100dvh;
+}
+
+.battle-page .fighting-embed {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+}
+
 /* Heritage theme: keeps the interaction model and layout, while bringing the
    deep green, warm ivory, gold and ornamental atmosphere from the reference. */
 :root {

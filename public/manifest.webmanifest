@@ -1,0 +1,19 @@
+{
+  "name": "Мирас — легенды рядом",
+  "short_name": "Мирас",
+  "description": "Мобильная игра о хранителях татарских легенд",
+  "start_url": "/home",
+  "scope": "/",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#0c171c",
+  "theme_color": "#07543e",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
