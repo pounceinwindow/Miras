@@ -68,6 +68,10 @@ export default function Explore() {
       <section className="heroes-preview-section" aria-labelledby="heroes-title">
         <div className="heroes-preview-header">
           <div>
+            <div className="heroes-step-pill">
+              <Sparkles size={10} />
+              <span>Шаг 03 · Коллекция</span>
+            </div>
             <h1 id="heroes-title">Мои хранители</h1>
             <p className="hero-intro">
               Герои древних сказаний рядом с тобой.
@@ -99,6 +103,19 @@ export default function Explore() {
           ))}
         </div>
       </section>
+
+      <div className="home-step-bridge" aria-label="Шаг 01: Сканирование">
+        <div className="step-bridge-chip">01</div>
+        <div className="step-bridge-body">
+          <strong className="step-bridge-title">Отсканируй место</strong>
+          <span className="step-bridge-desc">
+            Наведи камеру на метку или найди на карте
+          </span>
+        </div>
+        <div className="step-bridge-icon">
+          <ScanLine size={15} />
+        </div>
+      </div>
 
       <section className="home-actions" aria-label="Начать приключение">
         <button
@@ -136,6 +153,19 @@ export default function Explore() {
           </span>
         </Link>
       </section>
+
+      <div className="home-step-bridge" aria-label="Шаг 02: Поединок">
+        <div className="step-bridge-chip">02</div>
+        <div className="step-bridge-body">
+          <strong className="step-bridge-title">Пройди испытание</strong>
+          <span className="step-bridge-desc">
+            Сразись с заточенным духом и открой его силу
+          </span>
+        </div>
+        <div className="step-bridge-icon">
+          <Swords size={15} />
+        </div>
+      </div>
 
       <section className="captive-arena" aria-labelledby="captive-title">
         <div className="captive-header">
@@ -188,48 +218,6 @@ export default function Explore() {
             </div>
           ))}
         </div>
-      </section>
-
-      <section className="home-guide" aria-labelledby="guide-title">
-        <div className="guide-heading">
-          <h2 id="guide-title">Как это работает</h2>
-          <span>3 ПРОСТЫХ ШАГА</span>
-        </div>
-        <ol>
-          <li>
-            <span className="guide-number">01</span>
-            <div>
-              <h3>Отсканируй место</h3>
-              <p>
-                Найди метку и наведи камеру —<br />
-                за ней скрывается целая история.
-              </p>
-            </div>
-            <ScanLine size={22} />
-          </li>
-          <li>
-            <span className="guide-number">02</span>
-            <div>
-              <h3>Пройди испытание</h3>
-              <p>
-                После сканирования сразу начнётся
-                <br />испытание найденного хранителя.
-              </p>
-            </div>
-            <Swords size={22} />
-          </li>
-          <li>
-            <span className="guide-number">03</span>
-            <div>
-              <h3>Познакомься с героем</h3>
-              <p>
-                После боя откроется его история,
-                <br />способности и место в коллекции.
-              </p>
-            </div>
-            <Sparkles size={22} />
-          </li>
-        </ol>
       </section>
     </div>
   )

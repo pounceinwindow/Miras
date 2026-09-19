@@ -26,6 +26,11 @@ test('home has a mobile layout, captive arena and working entry points', async (
     expect(Math.abs(scan!.width - scan!.height)).toBeLessThan(1)
   }
   await page.setViewportSize({ width: 390, height: 844 })
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollHeight <= innerHeight,
+    ),
+  ).toBe(true)
   await page.screenshot({
     path: 'test-results/mobile-home.png',
     fullPage: true,
