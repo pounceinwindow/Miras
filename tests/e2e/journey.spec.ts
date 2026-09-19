@@ -1,12 +1,12 @@
 import { expect, test } from '@playwright/test'
 
-test('encounter goes directly to the battle flow without a quiz', async ({
+test('encounter shows lore, a quiz, and a battle flow', async ({
   page,
 }) => {
   await page.goto('/encounter/forest-01')
-  await expect(page.getByRole('heading', { name: 'Давай познакомимся.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Сила хранителя' })).toBeVisible()
   await expect(page.getByRole('button', { name: /Начать испытание/ })).toBeVisible()
-  await expect(page.getByText(/викторины нет/i)).toBeVisible()
+  await expect(page.getByText(/ответь на вопрос/i)).toBeVisible()
 })
 
 test('unknown encounter is handled', async ({ page }) => {

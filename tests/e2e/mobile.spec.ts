@@ -58,7 +58,7 @@ test('pages keep their content size and scroll on short screens', async ({
     ['/map', '.live-map-shell'],
     ['/profile', '.profile-stats'],
     ['/entity/shurale', '.entity-lore-card'],
-    ['/encounter/forest-01', '.encounter-grid'],
+    ['/encounter/forest-01', '.entity-lore-card'],
     ['/fight/shurale', '.fighting-embed'],
   ] as const
 
@@ -208,14 +208,24 @@ test('scanner ignores unrelated messages and routes MindAR targetFound once', as
   })
   await expect(page.locator('.scanner-captured-banner')).toBeVisible({ timeout: 30000 })
   await page.locator('.scanner-captured-btn').click()
-  await expect(page).toHaveURL(/\/home$/)
+  await expect(page).toHaveURL(/\/encounter\/stone-01/i)
   await expect(page.locator('iframe')).toHaveCount(0)
   await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden')
-  const fightBtn = page.locator('.captive-card', { hasText: 'Казанский Кремль' }).getByRole('button', { name: /Сразиться/ })
-  await expect(fightBtn).toBeVisible()
-  await fightBtn.click()
-  await page.locator('.fighter-select-card').first().click({ timeout: 1000 }).catch(() => {})
+  
+  // They are now on the Encounter page
+  await expect(page.getByRole('heading', { name: 'Сила хранителя' })).toBeVisible()
+  
+  // Answer the random quiz to enable the start button
+  while (!(await page.getByText('Верно!').isVisible())) {
+    await page.locator('.quiz-section button').first().click()
+    // Wait briefly for state update
+    await page.waitForTimeout(100)
+  }
+
+  await page.getByRole('button', { name: /Начать испытание/ }).click()
   await expect(page).toHaveURL(/\/fight\/.*kereml/i)
+  await page.goBack()
+  await expect(page).toHaveURL(/\/encounter\/stone-01/i)
   await page.goBack()
   await expect(page).toHaveURL(/\/home$/)
   await expect(page.locator('iframe')).toHaveCount(0)

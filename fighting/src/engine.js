@@ -12,8 +12,10 @@ const other=id=>id==='player'?'enemy':'player';
 const affects=(attack,lane)=>(attack.lanes??[attack.lane]).includes(lane);
 function entity(id,hero){return {id,hero,hp:HEROES[hero].hp,maxHp:HEROES[hero].hp,lane:1,fromLane:1,moveStart:0,movingUntil:0,nextMove:0,rootUntil:0,reflectUntil:0,mistUntil:0,weakenUntil:0,shield:0,shieldUntil:0,cooldowns:[0,0],nextAuto:0.9,pose:'idle',poseUntil:0};}
 export class Battle {
-  constructor({player='su_anasy',enemy='kremlin',random=Math.random,ai=true}={}){
-    this.entities={player:entity('player',player),enemy:entity('enemy',enemy)};this.time=0;this.limit=90;this.status='ready';this.result=null;this.events=[];this.pending=[];this.projectiles=[];this.closed={player:[0,0,0],enemy:[0,0,0]};this.serial=0;this.random=random;this.ai=ai;this.nextThink=.6;this.stats={damage:0,reflections:0,dodges:0};
+  constructor({player='su_anasy',enemy='kremlin',bonus=false,random=Math.random,ai=true}={}){
+    this.entities={player:entity('player',player),enemy:entity('enemy',enemy)};
+    if(bonus){this.entities.enemy.hp=Math.floor(this.entities.enemy.hp*0.9);this.entities.enemy.maxHp=this.entities.enemy.hp;}
+    this.time=0;this.limit=90;this.status='ready';this.result=null;this.events=[];this.pending=[];this.projectiles=[];this.closed={player:[0,0,0],enemy:[0,0,0]};this.serial=0;this.random=random;this.ai=ai;this.nextThink=.6;this.stats={damage:0,reflections:0,dodges:0};
   }
   emit(type,detail={}){const event={type,time:this.time,...detail};this.events.push(event);return event;}
   drain(){return this.events.splice(0);}

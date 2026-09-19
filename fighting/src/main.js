@@ -4,7 +4,7 @@ import { BattleRenderer, ASSET_URLS } from './renderer.js';
 import { PvpConnection, createRoomCode, isPvpConfigured } from './pvp.js';
 
 const $=selector=>document.querySelector(selector);
-const battleParams=new URLSearchParams(window.location.search),isPvp=battleParams.get('mode')==='pvp',requestedHero=battleParams.get('player'),requestedEnemy=battleParams.get('enemy');
+const battleParams=new URLSearchParams(window.location.search),isPvp=battleParams.get('mode')==='pvp',requestedHero=battleParams.get('player'),requestedEnemy=battleParams.get('enemy'),bonus=battleParams.get('bonus')==='true';
 const app=$('#app');
 app.innerHTML=`
 <main class="game-shell">
@@ -21,6 +21,7 @@ app.innerHTML=`
 <dialog id="result-dialog" class="panel-dialog"><div class="result-mark" id="result-mark">✦</div><div class="dialog-eyebrow">ДУЭЛЬ ЗАВЕРШЕНА</div><h2 id="result-title"></h2><p id="result-description" class="dialog-description"></p><div class="result-stats"><div><strong id="stat-damage"></strong><small>УРОНА</small></div><div><strong id="stat-dodges"></strong><small>УКЛОНЕНИЙ</small></div><div><strong id="stat-reflect"></strong><small>ОТРАЖЕНИЙ</small></div></div><button class="primary-button" id="rematch">Ещё бой</button></dialog>
 <dialog id="rules-dialog" class="panel-dialog"><div class="dialog-eyebrow">ТРИ РУСЛА</div><h2>Два решения.<br>Много возможностей.</h2><div class="rules-list"><p><b>Двигайтесь.</b> Нажмите на русло или кнопку Ⅰ / Ⅱ / Ⅲ. Обычные снаряды летят автоматически, когда хранители стоят напротив друг друга.</p><p><b>Следите за предупреждениями.</b> Красное русло и таймер — вражеское умение. Золотое — ваше. Уйдите до попадания.</p><p><b>Удержание ≠ запрет умений.</b> Даже если движение запрещено, можно применить способность. Волна Су анасы и Воля ханбике снимают удержание.</p><p><b>Закрытые ворота.</b> Выйти из закрытого русла можно, войти обратно — нельзя до окончания таймера.</p><p><b>90 секунд.</b> Побеждает тот, кто первым обнулит здоровье врага. По времени сравнивается доля оставшегося здоровья.</p><p><b>Смена стороны.</b> В меню выберите «Поменять героев»: начнётся новая дуэль за другого хранителя.</p></div><button class="primary-button" id="close-rules">Понятно</button></dialog>
 <dialog id="atlas-dialog" class="atlas-dialog"><div class="atlas-header"><div><div class="dialog-eyebrow">40 ИСХОДНЫХ СПРАЙТОВ</div><h2>Все грани хранителей</h2></div><button class="icon-button" id="close-atlas" aria-label="Закрыть атлас">×</button></div><div id="atlas-content"></div><p class="small-note">В бою: снизу — вид со спины, сверху — вид спереди. Оба умения используют cast.</p></dialog>`;
+
 
 let playerHero=Object.hasOwn(HEROES,requestedHero)?requestedHero:'su_anasy',enemyHero=Object.hasOwn(HEROES,requestedEnemy)&&requestedEnemy!==playerHero?requestedEnemy:playerHero==='kremlin'?'shurale':'kremlin',battle=new Battle(),renderer,loaded=false,returnDialog=null,soundOn=false,audio=null,resultTimer=null,toastTimer=null;
 let pvpConnection=null,pvpRole=null,pvpMatched=false,lastNetworkState=0,networkEvents=[];
@@ -126,9 +127,9 @@ function updateSelection(){
   updatePvpSelection();
 }
 function updatePvpSelection(){if(isPvp&&$('#hero-description'))$('#hero-description').innerHTML=HEROES[playerHero].abilities.map(ability=>`<p><b>${ability.name}</b><span>${ability.description}</span></p>`).join('');}
-function configure(){clearTimeout(resultTimer);closeDialogs();battle=new Battle({player:playerHero,enemy:enemyHero,ai:!isPvp});renderer?.reset();updateSelection();updateHUD();if(isPvp)$('#pvp-dialog').showModal();}
-function swap(){[playerHero,enemyHero]=[enemyHero,playerHero];battle=new Battle({player:playerHero,enemy:enemyHero});renderer?.reset();updateSelection();updateHUD();}
-function start(){if(!loaded||isPvp)return;clearTimeout(resultTimer);closeDialogs();battle=new Battle({player:playerHero,enemy:enemyHero});renderer.reset();battle.start();updateHUD();audio?.resume();}
+function configure(){clearTimeout(resultTimer);closeDialogs();battle=new Battle({player:playerHero,enemy:enemyHero,ai:!isPvp,bonus});renderer?.reset();updateSelection();updateHUD();if(isPvp)$('#pvp-dialog').showModal();}
+function swap(){[playerHero,enemyHero]=[enemyHero,playerHero];battle=new Battle({player:playerHero,enemy:enemyHero,bonus});renderer?.reset();updateSelection();updateHUD();}
+function start(){if(!loaded||isPvp)return;clearTimeout(resultTimer);closeDialogs();battle=new Battle({player:playerHero,enemy:enemyHero,bonus});renderer.reset();battle.start();updateHUD();audio?.resume();}
 function pause(reason='Можно перевести дух.'){
   if(isPvp){toast('В сетевой дуэли паузы нет.');return;}
   if(battle.status!=='playing')return;battle.pause();$('#pause-reason').textContent=reason;if(!document.querySelector('dialog[open]'))$('#pause-dialog').showModal();

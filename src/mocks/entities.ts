@@ -38,4 +38,5 @@ export const entities: Entity[] = characters.map((character) => ({
       'Наносит двойной урон. Требует 3 энергии. Обычная атака и защита восстанавливают 1 энергию.',
   },
   nextUpgradeCost: 30,
+  quiz: character.quiz,
 }))

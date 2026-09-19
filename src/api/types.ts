@@ -28,4 +28,9 @@ export interface Entity {
   defense: number
   ability: { name: string; description: string }
   nextUpgradeCost: number | null
+  quiz: {
+    question: string
+    options: string[]
+    correctIndex: number
+  }[]
 }

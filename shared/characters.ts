@@ -15,6 +15,11 @@ export interface Character {
   skill: string
   attack: number
   health: number
+  quiz: {
+    question: string
+    options: string[]
+    correctIndex: number
+  }[]
 }
 export const characters: Character[] = [
   {
@@ -40,6 +45,11 @@ export const characters: Character[] = [
     skill: 'Корни леса',
     attack: 16,
     health: 100,
+    quiz: [
+      { question: 'Кем по происхождению является Шурале?', options: ['Духом леса', 'Домашним духом', 'Водным духом'], correctIndex: 0 },
+      { question: 'Кто написал знаменитую поэму о Шурале?', options: ['Муса Джалиль', 'Габдулла Тукай', 'Хасан Туфан'], correctIndex: 1 },
+      { question: 'Как звали парня, который обхитрил Шурале?', options: ['Былтыр', 'Алпамыш', 'Керемль'], correctIndex: 0 },
+    ],
   },
   {
     id: 'syuyumbike',
@@ -64,6 +74,11 @@ export const characters: Character[] = [
     skill: 'Свет памяти',
     attack: 15,
     health: 110,
+    quiz: [
+      { question: 'В каком веке Сююмбике правила Казанским ханством?', options: ['XVI век', 'XV век', 'XVII век'], correctIndex: 0 },
+      { question: 'От имени кого Сююмбике управляла ханством?', options: ['От имени мужа', 'От имени своего малолетнего сына', 'От имени отца'], correctIndex: 1 },
+      { question: 'Какой архитектурный памятник в Казани носит её имя?', options: ['Мечеть Кул-Шариф', 'Башня Сююмбике', 'Благовещенский собор'], correctIndex: 1 },
+    ],
   },
   {
     id: 'su-anasy',
@@ -88,6 +103,11 @@ export const characters: Character[] = [
     skill: 'Лунный прилив',
     attack: 17,
     health: 95,
+    quiz: [
+      { question: 'Что расчёсывает Су анасы своим гребнем?', options: ['Волосы', 'Траву', 'Волны'], correctIndex: 0 },
+      { question: 'Из какого материала сделан гребень Су анасы?', options: ['Дерево', 'Золото', 'Кость'], correctIndex: 1 },
+      { question: 'В какой среде обычно появляется Су анасы?', options: ['В лесной чаще', 'У водоемов', 'В горах'], correctIndex: 1 },
+    ],
   },
   {
     id: 'kereml',
@@ -113,6 +133,11 @@ export const characters: Character[] = [
     skill: 'Каменная печать',
     attack: 14,
     health: 120,
+    quiz: [
+      { question: 'В каком году Казанский кремль был включён в Список всемирного наследия ЮНЕСКО?', options: ['2000', '1995', '2005'], correctIndex: 0 },
+      { question: 'На берегу какой реки расположен Казанский кремль?', options: ['Волга', 'Казанка', 'Кама'], correctIndex: 1 },
+      { question: 'В каком веке кремль стал политическим центром Казанского ханства?', options: ['XV–XVI века', 'XII–XIII века', 'XVII–XVIII века'], correctIndex: 0 },
+    ],
   },
 ]
 export const getCharacter = (id: string) => characters.find((c) => c.id === id)

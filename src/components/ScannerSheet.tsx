@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { X, Lock, Check } from 'lucide-react'
 import { useGame } from '../store/game'
+import { useNavigate } from 'react-router-dom'
 import { getActiveArTarget } from '../api/arTargets'
 import type { CharacterId } from '../api/types'
 
@@ -19,6 +20,7 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const [isClosing, setIsClosing] = useState(false)
   const run = useGame((state) => state.run)
+  const navigate = useNavigate()
 
   const close = useCallback(() => {
     if (closing.current) return
@@ -87,13 +89,15 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
         })
         setCapturedSpirit(targetId)
         setTimeout(() => {
+          const tag = useGame.getState().entities.find((e) => e.id === targetId)?.tag
           close()
+          if (tag) setTimeout(() => navigate(`/encounter/${tag}`), 240)
         }, 1800)
       }
     }
     window.addEventListener('message', onMessage)
     return () => window.removeEventListener('message', onMessage)
-  }, [close, run])
+  }, [close, run, navigate])
 
   return (
     <dialog
@@ -144,9 +148,13 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
             <button
               type="button"
               className="scanner-captured-btn"
-              onClick={close}
+              onClick={() => {
+                const tag = entities.find((e) => e.id === capturedSpirit)?.tag
+                close()
+                if (tag) setTimeout(() => navigate(`/encounter/${tag}`), 240)
+              }}
             >
-              <Check size={14} /> Перейти к пленникам
+              <Check size={14} /> Читать историю и сразиться
             </button>
           </div>
         )}
