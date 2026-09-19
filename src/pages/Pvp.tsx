@@ -169,7 +169,10 @@ export default function Pvp() {
                   <h2>{profile?.name ?? 'Загрузка…'}</h2>
                   <p>
                     Код игрока: <b>{profile?.code ?? '—'}</b> · побед:{' '}
-                    <b>{profile?.wins ?? progress.pvpWins}</b>
+                    <b>
+                      {profile?.wins ?? progress.pvpWins}
+                      {profile?.name === 'prince' ? ' (100 %)' : ''}
+                    </b>
                   </p>
                 </div>
                 <form
@@ -301,7 +304,10 @@ export default function Pvp() {
                 <li key={`${entry.rank}-${entry.name}`}>
                   <span>{entry.rank}</span>
                   <b>{entry.name}</b>
-                  <strong>{entry.wins}</strong>
+                  <strong>
+                    {entry.wins}
+                    {entry.name === 'prince' ? ' (100 %)' : ''}
+                  </strong>
                 </li>
               ))}
             </ol>
