@@ -29,17 +29,13 @@ public static class GameEndpoints
         app.MapPost("/api/game", async (
             HttpRequest request,
             JsonElement command,
-            AppDbContext db,
+            GameAuthService auth,
             GameService game,
             CancellationToken ct) =>
         {
             try
             {
-                var header = request.Headers.Authorization.ToString();
-                if (!header.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-                    return Results.Unauthorized();
-                var hash = Hash(header[7..].Trim());
-                var user = await db.Users.SingleOrDefaultAsync(item => item.GameTokenHash == hash, ct);
+                var user = await auth.ResolveAsync(request, ct);
                 if (user is null) return Results.Unauthorized();
                 return Results.Ok(await game.ExecuteAsync(user, command, ct));
             }

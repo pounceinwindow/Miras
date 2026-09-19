@@ -7,6 +7,10 @@ public class User
     public int ChakChak { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public string? GameTokenHash { get; set; }
+    public string? SupabaseUserId { get; set; }
+    public string? DisplayName { get; set; }
+    public string? PublicCode { get; set; }
+    public int PvpWins { get; set; }
 
     public ICollection<UserEntity> UserEntities { get; set; } = [];
     public ICollection<Encounter> Encounters { get; set; } = [];

@@ -90,6 +90,8 @@ export function executeDemo(
       const target = getCharacter(command.target)
       if (!progress.modes.encounters || target?.tag !== command.tagId)
         throw new Error('Открой босса с его локации')
+      if (!progress.challenges.includes(command.target))
+        throw new Error('Сначала ответь на вопросы хранителя')
       if (progress.collection.some((c) => c.id === command.target))
         throw new Error('Хранитель уже в коллекции')
     }

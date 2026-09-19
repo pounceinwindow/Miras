@@ -55,7 +55,7 @@ public class PveTests
         Assert.DoesNotContain(quiz.Progress.Collection, item => item.Id == "shurale");
 
         var started = await service.ExecuteAsync(user, Command("""
-            {"type":"pveStart","characterId":"su-anasy","target":"shurale","mode":"encounter"}
+            {"type":"pveStart","characterId":"su-anasy","target":"shurale","mode":"encounter","tagId":"forest-01"}
             """), default);
         var battle = started.Progress.Pve!;
         var row = await db.PveBattles.SingleAsync(item => item.Id == Guid.Parse(battle.Id));

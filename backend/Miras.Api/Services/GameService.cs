@@ -121,9 +121,11 @@ public sealed class GameService(AppDbContext db)
             var tag = RequiredString(command, "tagId");
             if (!Tags.TryGetValue(tag, out var tagSlug) || tagSlug != targetSlug)
                 throw new InvalidOperationException("Открой босса с его локации.");
-            var location = await db.Locations.FirstAsync(item => item.EntityId == target.Id, ct);
-            encounter = new Encounter { UserId = user.Id, EntityId = target.Id, LocationId = location.Id, Status = EncounterStatus.ReadyForBattle };
-            db.Encounters.Add(encounter);
+            encounter = await db.Encounters
+                .Where(item => item.UserId == user.Id && item.EntityId == target.Id && item.Status == EncounterStatus.ReadyForBattle)
+                .OrderByDescending(item => item.StartedAt)
+                .FirstOrDefaultAsync(ct)
+                ?? throw new InvalidOperationException("Сначала ответь на вопросы хранителя.");
         }
         var active = await db.PveBattles.Where(item => item.UserId == user.Id)
             .OrderByDescending(item => item.UpdatedAt).FirstOrDefaultAsync(ct);
@@ -208,11 +210,12 @@ public sealed class GameService(AppDbContext db)
             collection,
             cooldowns,
             wins,
+            user.PvpWins,
             null,
             latest is null ? null : Deserialize(latest),
             latest?.UpdatedAt.ToUnixTimeMilliseconds() ?? 0,
             challenges,
-            new GameModesDto(true, true, false));
+            new GameModesDto(true, true, true));
     }
 
     private static PveState Deserialize(PveBattle row) =>
