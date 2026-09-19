@@ -53,6 +53,13 @@ export default function Explore() {
     navigate(`/fight/${playerHero}`)
   }
 
+  const heroDescriptions: Record<string, string> = {
+    shurale: 'Герой сказок',
+    syuyumbike: 'Святыня Кремля',
+    'su-anasy': 'Героиня легенд',
+    kereml: 'Крепость Казани',
+  }
+
   return (
     <div className="home-page">
       {scannerOpen && <ScannerSheet onClosed={() => setScannerOpen(false)} />}
@@ -83,6 +90,9 @@ export default function Explore() {
               </div>
               <div className="hero-compact-details">
                 <strong>{hero.name}</strong>
+                <small>
+                  {heroDescriptions[hero.id] ?? hero.kind ?? 'Герой легенд'}
+                </small>
               </div>
             </Link>
           ))}
