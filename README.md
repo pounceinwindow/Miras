@@ -51,6 +51,7 @@ VITE_SUPABASE_ANON_KEY=YOUR_PUBLISHABLE_OR_ANON_KEY
 | Коллекция | `/collection` |
 | Хранитель | `/entity/:id` |
 | Бой | `/fight/:character?enemy=:enemy` |
+| PvP с другом | `/pvp` |
 | Профиль | `/profile` |
 
 ## Проверки
