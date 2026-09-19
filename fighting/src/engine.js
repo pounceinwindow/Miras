@@ -2,7 +2,7 @@ export const HEROES = {
   su_anasy: {name:'Су анасы', title:'Хранительница воды', hp:120, damage:8, interval:1.35, color:0x57d9dc,
     abilities:[{name:'Обратная волна', short:'Волна', icon:'≈', cooldown:8, description:'Снимает удержание. Отражает снаряды 1,6 с и наносит 14 урона по своему руслу.'}, {name:'Золотой гребень', short:'Гребень', icon:'⋔',cooldown:7,description:'Через 0,8 с наносит 18 урона в отмеченном русле и удерживает цель 2 с.'}]},
   kremlin: {name:'Керемль',title:'Белокаменный хранитель',hp:144,damage:9,interval:1.55,color:0xe9c879,
-    abilities:[{name:'Белокаменная стена',short:'Стена',icon:'▥',cooldown:9,description:'Щит на 32 урона на 4 с. Запрещает себе движение на 2 с. Умения доступны.'},{name:'Печать ворот',short:'Печать',icon:'◇',cooldown:7.5,description:'Через 1,6 с наносит 24 наземного урона и закрывает вход в русло на 4 с. Выйти можно.'}]},
+    abilities:[{name:'Белокаменная стена',short:'Стена',icon:'▥',cooldown:9,description:'Щит на 32 урона на 4 с. Запрещает себе движение на 2 с. Умения доступны.'},{name:'Печать ворот',short:'Печать',icon:'◇',cooldown:7.5,description:'Через 1,6 с наносит 24 наземного урона и закрывает вход в русло на 4 с. Если ворота захлопнутся на цели, она не сможет двигаться до их исчезновения.'}]},
   shurale: {name:'Шурале',title:'Лесной хитрец',hp:124,damage:9,interval:1.4,color:0x9ab967,
     abilities:[{name:'Щекотка',short:'Щекотка',icon:'⌁',cooldown:7,description:'Через 1,4 с удерживает цель в отмеченном русле на 2 с. Не наносит урон.'},{name:'Лесной морок',short:'Морок',icon:'♧',cooldown:9,description:'На 3 с защищает от обычных снарядов. Умения проходят сквозь морок.'}]},
   syuyumbike: {name:'Сююмбике',title:'Воля ханбике',hp:128,damage:8,interval:1.4,color:0xe5a8c1,
@@ -10,7 +10,7 @@ export const HEROES = {
 };
 const other=id=>id==='player'?'enemy':'player';
 const affects=(attack,lane)=>(attack.lanes??[attack.lane]).includes(lane);
-function entity(id,hero){return {id,hero,hp:HEROES[hero].hp,maxHp:HEROES[hero].hp,lane:1,fromLane:1,moveStart:0,movingUntil:0,nextMove:0,rootUntil:0,reflectUntil:0,mistUntil:0,weakenUntil:0,shield:0,shieldUntil:0,cooldowns:[0,0],nextAuto:0.9,pose:'idle',poseUntil:0};}
+function entity(id,hero){return {id,hero,hp:HEROES[hero].hp,maxHp:HEROES[hero].hp,lane:1,fromLane:1,moveStart:0,movingUntil:0,nextMove:0,rootUntil:0,gateTrapUntil:0,reflectUntil:0,mistUntil:0,weakenUntil:0,shield:0,shieldUntil:0,cooldowns:[0,0],nextAuto:0.9,pose:'idle',poseUntil:0};}
 export class Battle {
   constructor({player='su_anasy',enemy='kremlin',random=Math.random,ai=true}={}){
     this.entities={player:entity('player',player),enemy:entity('enemy',enemy)};this.time=0;this.limit=90;this.status='ready';this.result=null;this.events=[];this.pending=[];this.projectiles=[];this.closed={player:[0,0,0],enemy:[0,0,0]};this.serial=0;this.random=random;this.ai=ai;this.nextThink=.6;this.stats={damage:0,reflections:0,dodges:0};
@@ -23,6 +23,7 @@ export class Battle {
   setPose(e,pose,duration){e.pose=pose;e.poseUntil=this.time+duration;}
   move(id,lane){
     const e=this.entities[id];if(this.status!=='playing'||!Number.isInteger(lane)||lane<0||lane>2||e.hp<=0||lane===e.lane)return false;
+    if(e.gateTrapUntil>this.time){if(id==='player')this.emit('BLOCKED',{reason:'Ворота удерживают: умения доступны'});return false;}
     if(e.rootUntil>this.time){if(id==='player')this.emit('BLOCKED',{reason:'Удержание: умения доступны'});return false;}
     if(e.nextMove>this.time)return false;
     if(this.closed[id][lane]>this.time){if(id==='player')this.emit('BLOCKED',{reason:'Вход закрыт. Выберите другое русло'});return false;}
@@ -59,7 +60,12 @@ export class Battle {
     this.emit('HIT',{id,source,damage:actual,absorbed,kind,lane:lane??e.lane,root,weaken});
   }
   resolve(a){
-    if(a.kind==='seal'){this.closed[a.target][a.lane]=this.time+4;this.emit('CLOSE',{id:a.target,lane:a.lane});}
+    if(a.kind==='seal'){
+      this.closed[a.target][a.lane]=this.time+4;
+      const trapped=this.entities[a.target].lane===a.lane&&this.entities[a.target].movingUntil<=this.time;
+      if(trapped)this.entities[a.target].gateTrapUntil=this.closed[a.target][a.lane];
+      this.emit('CLOSE',{id:a.target,lane:a.lane,trapped});
+    }
     const target=this.entities[a.target];
     for(const lane of a.lanes??[a.lane])this.emit('IMPACT',{...a,lane,id:a.target});
     if(!affects(a,target.lane)||target.movingUntil>this.time){if(a.target==='player')this.stats.dodges++;this.emit('MISS',{id:a.target,lane:target.lane});return;}
