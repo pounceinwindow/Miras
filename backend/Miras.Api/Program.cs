@@ -6,13 +6,19 @@ using Miras.Api.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // --- Database ---
-var connectionString = builder.Configuration.GetConnectionString("PostgreSql");
-if (string.IsNullOrWhiteSpace(connectionString))
-    throw new InvalidOperationException("ConnectionStrings:PostgreSql is required. Check appsettings.");
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    var connectionString = builder.Configuration.GetConnectionString("PostgreSql");
+    if (string.IsNullOrWhiteSpace(connectionString))
+        throw new InvalidOperationException("ConnectionStrings:PostgreSql is required. Check appsettings.");
 
-builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(connectionString, o => o.UseNetTopologySuite()));
+}
 
 // --- Services ---
+builder.Services.AddSingleton<IMindStorage, LocalMindStorage>();
+builder.Services.AddScoped<IArService, ArService>();
 builder.Services.AddScoped<EncounterService>();
 builder.Services.AddScoped<QuizService>();
 builder.Services.AddScoped<CollectionService>();
@@ -45,8 +51,9 @@ if (app.Environment.IsDevelopment())
 }
 
 // --- Apply migrations & seed on startup ---
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsEnvironment("Testing"))
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
 }
@@ -59,6 +66,7 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "miras-api
 app.MapEntityEndpoints();
 app.MapUserEndpoints();
 app.MapLocationEndpoints();
+app.MapArEndpoints();
 app.MapEncounterEndpoints();
 app.MapUpgradeEndpoints();
 app.MapBattleEndpoints();

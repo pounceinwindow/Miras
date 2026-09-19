@@ -35,9 +35,20 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         // --- Location ---
         modelBuilder.Entity<Location>(e =>
         {
+            e.ToTable("locations");
             e.HasKey(x => x.Id);
-            e.Property(x => x.NfcToken).HasMaxLength(100).IsRequired();
+            e.Property(x => x.Id).HasColumnName("id");
+            e.Property(x => x.Name).HasColumnName("name");
+            e.Property(x => x.EntityId).HasColumnName("entity_id");
+            e.Property(x => x.NfcToken).HasColumnName("nfc_token").HasMaxLength(100).IsRequired();
+            e.Property(x => x.Latitude).HasColumnName("latitude");
+            e.Property(x => x.Longitude).HasColumnName("longitude");
+            e.Property(x => x.Position).HasColumnName("position").HasColumnType("geography(Point, 4326)");
+            e.Property(x => x.MindFilePath).HasColumnName("mind_file_path");
+            e.Property(x => x.MindFileHash).HasColumnName("mind_file_hash");
+            e.Property(x => x.IsActive).HasColumnName("is_active").HasDefaultValue(true);
             e.HasIndex(x => x.NfcToken).IsUnique();
+            e.HasIndex(x => x.Position).HasDatabaseName("idx_locations_position").HasMethod("GIST");
             e.HasOne(x => x.Entity).WithMany(x => x.Locations).HasForeignKey(x => x.EntityId);
         });
 
@@ -162,10 +173,54 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         // --- Seed Locations ---
         modelBuilder.Entity<Location>().HasData(
-            new Location { Id = 1, Name = "Лесопарк Лебяжье", EntityId = 1, NfcToken = "SHURALE_NFC", Latitude = 55.7972, Longitude = 49.1495 },
-            new Location { Id = 2, Name = "Озеро Кабан", EntityId = 2, NfcToken = "SUANASY_NFC", Latitude = 55.7797, Longitude = 49.1235 },
-            new Location { Id = 3, Name = "Башня Сююмбике", EntityId = 3, NfcToken = "SYUYUMBIKE_NFC", Latitude = 55.8005, Longitude = 49.1051 },
-            new Location { Id = 4, Name = "Казанский Кремль", EntityId = 4, NfcToken = "ABC123", Latitude = 55.7984, Longitude = 49.1052 }
+            new Location
+            {
+                Id = 1,
+                Name = "Лесопарк Лебяжье",
+                EntityId = 1,
+                NfcToken = "SHURALE_NFC",
+                Latitude = 55.7972,
+                Longitude = 49.1495,
+                Position = new NetTopologySuite.Geometries.Point(49.1495, 55.7972) { SRID = 4326 },
+                MindFilePath = "mind/shurale.mind",
+                IsActive = true
+            },
+            new Location
+            {
+                Id = 2,
+                Name = "Озеро Кабан",
+                EntityId = 2,
+                NfcToken = "SUANASY_NFC",
+                Latitude = 55.7797,
+                Longitude = 49.1235,
+                Position = new NetTopologySuite.Geometries.Point(49.1235, 55.7797) { SRID = 4326 },
+                MindFilePath = "mind/su-anasy.mind",
+                IsActive = true
+            },
+            new Location
+            {
+                Id = 3,
+                Name = "Башня Сююмбике",
+                EntityId = 3,
+                NfcToken = "SYUYUMBIKE_NFC",
+                Latitude = 55.8005,
+                Longitude = 49.1051,
+                Position = new NetTopologySuite.Geometries.Point(49.1051, 55.8005) { SRID = 4326 },
+                MindFilePath = "mind/syuyumbike.mind",
+                IsActive = true
+            },
+            new Location
+            {
+                Id = 4,
+                Name = "Казанский Кремль",
+                EntityId = 4,
+                NfcToken = "ABC123",
+                Latitude = 55.7984,
+                Longitude = 49.1052,
+                Position = new NetTopologySuite.Geometries.Point(49.1052, 55.7984) { SRID = 4326 },
+                MindFilePath = "mind/kereml.mind",
+                IsActive = true
+            }
         );
 
         // --- Seed Questions: Шурале ---
