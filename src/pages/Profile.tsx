@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BookOpen, Trophy, Hexagon, Nfc, Copy, Check } from 'lucide-react'
+import { BookOpen, Trophy, ArrowLeft, Nfc, Copy, Check } from 'lucide-react'
 import { useGame } from '../store/game'
 import { isCloud } from '../api/client'
 export default function Profile() {
@@ -11,6 +11,9 @@ export default function Profile() {
   const [copyError, setCopyError] = useState(false)
   return (
     <>
+      <Link className="back-link" to="/home">
+        <ArrowLeft size={17} /> На главную
+      </Link>
       <div className="page-heading">
         <span className="eyebrow">ТВОЯ СОБСТВЕННАЯ ИСТОРИЯ</span>
         <h1>
@@ -30,11 +33,6 @@ export default function Profile() {
             label: 'Хранителей найдено',
           },
           { icon: Trophy, value: progress.wins, label: 'Побед в поединках' },
-          {
-            icon: Hexagon,
-            value: progress.balance,
-            label: 'Чак-чака в запасе',
-          },
         ].map(({ icon: Icon, value, label }) => (
           <div className="stat-card" key={label}>
             <Icon size={24} />
@@ -105,7 +103,7 @@ export default function Profile() {
         <section className="panel">
           <h2>Начать демо заново</h2>
           <p>
-            Удалит локальную коллекцию, чак-чак и ожидание повторной попытки.
+            Удалит локальную коллекцию и историю поединков.
           </p>
           {confirm ? (
             <div className="button-row">

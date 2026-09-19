@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test'
 
-test('home has a mobile layout, a live balance and working entry points', async ({
+test('home has a mobile layout, captive arena and working entry points', async ({
   page,
 }) => {
   await page.goto('/home')
   await expect(
-    page.getByRole('heading', { name: 'Город знакомый. Мир — волшебный.' }),
+    page.getByRole('heading', { name: 'Хранители Казани' }),
   ).toBeVisible()
-  await expect(page.locator('.balance b')).toHaveText('0')
+  await expect(page.locator('.captive-arena')).toBeVisible()
   for (const width of [320, 390, 480, 1280]) {
     await page.setViewportSize({ width, height: 844 })
     expect(
@@ -30,7 +30,7 @@ test('home has a mobile layout, a live balance and working entry points', async 
     path: 'test-results/mobile-home.png',
     fullPage: true,
   })
-  await page.getByRole('link', { name: /Мои бойцы/ }).click()
+  await page.getByRole('link', { name: /Показать всех/ }).click()
   await expect(page).toHaveURL(/\/collection$/)
   await page.getByRole('link', { name: 'Мой профиль' }).click()
   await expect(page).toHaveURL(/\/profile$/)

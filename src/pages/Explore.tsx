@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ScannerSheet } from '../components/ScannerSheet'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   ArrowUpRight,
   ArrowRight,
@@ -11,51 +11,90 @@ import {
   MapPin,
 } from 'lucide-react'
 import { useGame } from '../store/game'
+import { CharacterArt } from '../components/CharacterArt'
+import type { CharacterId } from '../api/types'
 
 export default function Explore() {
   const [scannerOpen, setScannerOpen] = useState(false)
-  const count = useGame((s) => s.progress.collection.length)
+  const navigate = useNavigate()
+  const { progress, entities, run } = useGame()
+
+  const captiveIds: CharacterId[] = ['kereml', 'shurale', 'su-anasy']
+  const captiveEnemies = captiveIds.map((id) => {
+    const found = entities.find((e) => e.id === id)
+    return (
+      found || {
+        id,
+        name:
+          id === 'kereml'
+            ? 'Керемль'
+            : id === 'shurale'
+              ? 'Шурале'
+              : 'Су анасы',
+        element:
+          id === 'kereml' ? 'Камень' : id === 'shurale' ? 'Лес' : 'Вода',
+        kind: 'Хранитель',
+        hp: 100,
+        attack: 16,
+      }
+    )
+  })
+
+  const handleFight = async (enemyId: CharacterId) => {
+    let playerHero = progress.collection[0]?.id
+    if (!playerHero) {
+      const starter = enemyId === 'shurale' ? 'su-anasy' : 'shurale'
+      await run({ type: 'capture', characterId: starter, answers: [0, 1, 2] })
+      playerHero = starter
+    }
+    const currentBattle = progress.battle
+    if (currentBattle?.status !== 'active') {
+      await run({ type: 'startBattle', characterId: playerHero, enemyId })
+    }
+    navigate(`/fight/${playerHero}`)
+  }
+
   return (
     <div className="home-page">
       {scannerOpen && <ScannerSheet onClosed={() => setScannerOpen(false)} />}
-      <section className="kazan-hero" aria-labelledby="home-title">
-        <div className="hero-location">
-          <MapPin size={12} /> КАЗАНЬ, ТАТАРСТАН<span>ГЛАВА 01</span>
+
+      <section className="heroes-preview-section" aria-labelledby="heroes-title">
+        <div className="heroes-preview-header">
+          <div>
+            <div className="hero-location">
+              <MapPin size={12} /> КАЗАНЬ, ТАТАРСТАН<span>ЛЕГЕНДЫ РЯДОМ</span>
+            </div>
+            <h1 id="heroes-title">Хранители Казани</h1>
+            <p className="hero-intro">
+              Герои древних сказаний на улицах города.
+            </p>
+          </div>
+          <Link className="button-show-all" to="/collection">
+            <span>Показать всех</span>
+            <ArrowRight size={16} />
+          </Link>
         </div>
-        <h1 id="home-title">
-          Город знакомый.
-          <br />
-          <span>Мир — волшебный.</span>
-        </h1>
-        <p className="hero-intro">
-          Открой легенды Казани.
-          <br />
-          Собери свою команду хранителей.
-        </p>
-        <div className="city-art">
-          <img
-            src="/kazan.svg"
-            alt="Иллюстрация Казани: мечеть Кул-Шариф, башня Сююмбике и стены Кремля"
-            width="420"
-            height="260"
-          />
-          <span className="art-note note-left">
-            Истории
-            <br />
-            оживают здесь
-            <svg viewBox="0 0 45 28" aria-hidden="true">
-              <path d="M3 3Q8 25 39 19m-7-6 8 6-8 6" />
-            </svg>
-          </span>
-          <span className="art-note note-right">
-            <Sparkles size={18} />
-            Твоя легенда
-            <br />
-            начинается
-          </span>
-          <span className="city-label">КАЗАНЬ — ЭТО ТОЛЬКО НАЧАЛО</span>
+
+        <div className="heroes-compact-grid">
+          {entities.map((hero) => (
+            <Link
+              key={hero.id}
+              to={`/entity/${hero.id}`}
+              className="hero-compact-card"
+            >
+              <div className={`hero-compact-art art-${hero.id}`}>
+                <CharacterArt id={hero.id} />
+              </div>
+              <div className="hero-compact-details">
+                <span className="hero-compact-element">{hero.element}</span>
+                <strong>{hero.name}</strong>
+                <small>{hero.kind}</small>
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
+
       <section className="home-actions" aria-label="Начать приключение">
         <button
           className="action-tile scan-tile"
@@ -92,20 +131,52 @@ export default function Explore() {
           </span>
         </Link>
       </section>
-      <Link className="fighters-link" to="/collection">
-        <span className="fighters-icon">
-          <Swords size={23} />
-        </span>
-        <span>
-          <strong>Мои бойцы</strong>
-          <small>
-            {count
-              ? `${count} из 4 хранителей уже с тобой`
-              : 'Собери команду для больших историй'}
-          </small>
-        </span>
-        <ArrowRight size={20} />
-      </Link>
+
+      <section className="captive-arena" aria-labelledby="captive-title">
+        <div className="captive-header">
+          <div className="captive-title-wrap">
+            <span className="captive-icon">
+              <Swords size={20} />
+            </span>
+            <div>
+              <h2 id="captive-title">Враги в плену</h2>
+              <small>Выбери соперника для поединка</small>
+            </div>
+          </div>
+          <span className="captive-badge">3 ЯЧЕЙКИ</span>
+        </div>
+
+        <div className="captive-grid">
+          {captiveEnemies.map((enemy, idx) => (
+            <div key={enemy.id} className="captive-card">
+              <div className="captive-cell-bars" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </div>
+              <div className="captive-cell-header">
+                <span className="cell-num">0{idx + 1}</span>
+                <span className="cell-tag">В плену</span>
+              </div>
+              <div className={`captive-art-wrap art-${enemy.id}`}>
+                <CharacterArt id={enemy.id} />
+              </div>
+              <div className="captive-info">
+                <strong>{enemy.name}</strong>
+                <small>{enemy.element}</small>
+              </div>
+              <button
+                type="button"
+                className="captive-fight-btn"
+                onClick={() => handleFight(enemy.id)}
+              >
+                <Swords size={14} /> Сразиться
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="home-guide" aria-labelledby="guide-title">
         <div className="guide-heading">
           <h2 id="guide-title">Как это работает</h2>

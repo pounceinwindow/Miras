@@ -44,7 +44,7 @@ export const useGame = create<GameStore>()(
               : command.type === 'upgrade'
                 ? upgradeEntity(command.characterId, progress)
                 : command.type === 'startBattle'
-                  ? startBattle(command.characterId, progress)
+                  ? startBattle(command.characterId, progress, command.enemyId)
                   : attack(
                       command.battleId,
                       command.turn,

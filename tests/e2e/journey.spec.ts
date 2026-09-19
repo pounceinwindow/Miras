@@ -49,7 +49,7 @@ test('capture persists, scanning starts battle, result opens hero', async ({
   await expect(page.getByText('Уровень 1', { exact: true })).toBeVisible()
   await page.getByRole('link', { name: 'Шурале', exact: true }).click()
   await expect(page).toHaveURL(/\/entity\/shurale$/)
-  await expect(page.getByText('Следующее улучшение: 30 чак-чака')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Улучшить' })).toBeVisible()
   await expect(page.locator('.entity-stats')).toContainText('70%')
   await expect(page.getByRole('link', { name: 'Перейти в бой' })).toHaveCount(0)
   await startScannedBattle(page)
@@ -88,11 +88,10 @@ test('capture persists, scanning starts battle, result opens hero', async ({
     await expect(page.getByTestId('battle-feedback')).toBeVisible()
   }
   await expect(
-    page.getByRole('heading', { name: 'Победа! +25 чак-чака' }),
+    page.getByRole('heading', { name: 'Победа!' }),
   ).toBeVisible()
   await page.getByRole('link', { name: 'О герое' }).click()
   await expect(page).toHaveURL(/\/entity\/shurale$/)
-  await expect(page.locator('.balance b')).toHaveText('25')
 })
 test('failed quiz stays locked after reload, unknown NFC is handled, mobile fits', async ({
   page,

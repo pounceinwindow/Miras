@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, LockKeyhole, TrendingUp, Hexagon } from 'lucide-react'
+import { ArrowRight, ArrowLeft, LockKeyhole, TrendingUp } from 'lucide-react'
 import { useGame } from '../store/game'
 import { CharacterArt } from '../components/CharacterArt'
 export default function Collection() {
@@ -7,6 +7,9 @@ export default function Collection() {
   const { progress, run, busy, ready } = useGame()
   return (
     <>
+      <Link className="back-link" to="/home">
+        <ArrowLeft size={17} /> На главную
+      </Link>
       <div className="page-heading">
         <span className="eyebrow">ИСТОРИИ, КОТОРЫЕ ТЕПЕРЬ С ТОБОЙ</span>
         <h1>
@@ -32,7 +35,6 @@ export default function Collection() {
       <div className="collection-grid">
         {characters.map((c) => {
           const owned = progress.collection.find((o) => o.id === c.id)
-          const cost = c.nextUpgradeCost ?? 0
           return (
             <article
               key={c.id}
@@ -73,8 +75,7 @@ export default function Collection() {
                       disabled={
                         busy ||
                         !ready ||
-                        c.nextUpgradeCost === null ||
-                        progress.balance < cost
+                        c.nextUpgradeCost === null
                       }
                       onClick={() =>
                         void run({ type: 'upgrade', characterId: c.id })
@@ -83,15 +84,8 @@ export default function Collection() {
                       <TrendingUp size={17} />
                       {c.nextUpgradeCost === null
                         ? 'Максимальный уровень'
-                        : `Улучшить · ${cost}`}{' '}
-                      {c.nextUpgradeCost !== null && <Hexagon size={15} />}
+                        : 'Улучшить'}
                     </button>
-                    {c.nextUpgradeCost !== null && progress.balance < cost && (
-                      <small className="muted">
-                        Не хватает {cost - progress.balance} чак-чака. Новые
-                        награды можно получить после сканирования.
-                      </small>
-                    )}
                   </>
                 ) : (
                   <Link to={`/encounter/${c.tag}`} className="button secondary">

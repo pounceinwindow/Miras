@@ -31,7 +31,7 @@ export type Command =
   | { type: 'sync' }
   | { type: 'capture'; characterId: CharacterId; answers: number[] }
   | { type: 'upgrade'; characterId: CharacterId }
-  | { type: 'startBattle'; characterId: CharacterId }
+  | { type: 'startBattle'; characterId: CharacterId; enemyId?: CharacterId }
   | { type: 'battleTurn'; battleId: string; turn: number; action: Action }
 export interface GameResult {
   progress: Progress

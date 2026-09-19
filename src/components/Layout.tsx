@@ -1,22 +1,14 @@
 import { useEffect } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
-  House,
-  Map,
   UserRound,
   Flower2,
   X,
   LoaderCircle,
-  BookOpen,
 } from 'lucide-react'
 import { useGame } from '../store/game'
-const nav = [
-  { to: '/home', label: 'Главная', icon: House },
-  { to: '/map', label: 'Карта', icon: Map },
-  { to: '/collection', label: 'Бойцы', icon: BookOpen },
-]
 export function Layout() {
-  const { progress, error, busy, ready, run, clearError } = useGame()
+  const { error, busy, ready, run, clearError } = useGame()
   const location = useLocation()
   useEffect(() => {
     void run({ type: 'sync' })
@@ -43,17 +35,6 @@ export function Layout() {
             {busy && (
               <LoaderCircle className="spin" size={16} aria-label="Загрузка" />
             )}
-            <span
-              className="balance"
-              aria-label={`${progress.balance} чак-чаков`}
-              title="Чак-чаки — игровая валюта"
-            >
-              <span className="chakchak" aria-hidden="true">
-                ✦
-              </span>
-              <b>{progress.balance}</b>
-              <span>чак-чак</span>
-            </span>
             <NavLink to="/profile" className="avatar" aria-label="Мой профиль">
               <UserRound size={20} />
             </NavLink>
@@ -80,14 +61,6 @@ export function Layout() {
           )}
         </main>
       </div>
-      <nav className="bottom-nav" aria-label="Главная навигация">
-        {nav.map(({ to, label, icon: Icon }) => (
-          <NavLink key={to} to={to}>
-            <Icon size={21} strokeWidth={1.7} />
-            <span>{label}</span>
-          </NavLink>
-        ))}
-      </nav>
     </div>
   )
 }

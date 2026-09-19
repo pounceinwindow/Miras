@@ -1,8 +1,8 @@
 import { request } from './client'
 import type { Action, CharacterId, Progress } from './types'
 export { enemyIntent } from '../../shared/battle'
-export function startBattle(id: CharacterId, progress: Progress) {
-  return request({ type: 'startBattle', characterId: id }, progress)
+export function startBattle(id: CharacterId, progress: Progress, enemyId?: CharacterId) {
+  return request({ type: 'startBattle', characterId: id, enemyId }, progress)
 }
 export function attack(
   battleId: string,

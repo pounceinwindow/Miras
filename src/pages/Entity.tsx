@@ -6,7 +6,6 @@ import {
   Swords,
   Shield,
   Sparkles,
-  Hexagon,
   TrendingUp,
 } from 'lucide-react'
 import { useGame } from '../store/game'
@@ -70,33 +69,18 @@ export default function EntityPage() {
               <p>{entity.ability.description}</p>
             </div>
           </div>
-          <div className="entity-wallet">
-            <Hexagon size={18} /> Твой баланс:{' '}
-            <strong>{progress.balance} чак-чака</strong>
-          </div>
-          <p>
-            {cost === null
-              ? 'Достигнут максимальный уровень.'
-              : `Следующее улучшение: ${cost} чак-чака`}
-          </p>
           {owned ? (
             <div className="entity-actions">
               <button
                 className="button secondary"
-                disabled={busy || cost === null || progress.balance < cost}
+                disabled={busy || cost === null}
                 onClick={() =>
                   void run({ type: 'upgrade', characterId: entity.id })
                 }
               >
                 <TrendingUp size={18} />
-                {cost === null ? 'Максимальный уровень' : `Улучшить · ${cost}`}
+                {cost === null ? 'Максимальный уровень' : 'Улучшить'}
               </button>
-              {cost !== null && progress.balance < cost && (
-                <p className="muted">
-                  Не хватает {cost - progress.balance} чак-чака. Продолжай
-                  исследовать места, чтобы получить награды.
-                </p>
-              )}
             </div>
           ) : (
             <Link className="button" to={`/encounter/${entity.tag}`}>

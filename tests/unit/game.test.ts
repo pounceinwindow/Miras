@@ -62,15 +62,10 @@ describe('capture and economy', () => {
   })
   it('charges upgrades and enforces limits', () => {
     const p = capture()
-    expect(() =>
-      executeDemo(p, { type: 'upgrade', characterId: 'shurale' }),
-    ).toThrow()
-    p.balance = 60
     const result = executeDemo(p, {
       type: 'upgrade',
       characterId: 'shurale',
     }).progress
-    expect(result.balance).toBe(30)
     expect(result.collection[0].level).toBe(2)
     p.collection[0].level = 10
     expect(() =>
@@ -137,7 +132,6 @@ describe('battle', () => {
               : 'attack',
       }).progress
     }
-    expect(p.balance).toBe(25)
     expect(p.wins).toBe(1)
     expect(() =>
       executeDemo(p, {

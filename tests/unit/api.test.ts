@@ -68,17 +68,12 @@ describe('frontend API contract', () => {
       [0, 1, 2],
       getInitialProgress(),
     )
-    const upgraded = await upgradeEntity('shurale', {
-      ...captured.progress,
-      balance: 30,
-    })
+    const upgraded = await upgradeEntity('shurale', captured.progress)
     const entity = await getEntity('shurale', upgraded.progress)
     expect(entity).toMatchObject({
       level: 2,
       hp: 112,
       attack: 19,
-      nextUpgradeCost: 60,
     })
-    expect(upgraded.progress.balance).toBe(0)
   })
 })

@@ -2,9 +2,8 @@ import {
   COOLDOWN_MS,
   getCharacter,
   MAX_LEVEL,
-  upgradeCost,
 } from './characters.ts'
-import { createBattle, takeTurn, WIN_REWARD } from './battle.ts'
+import { createBattle, takeTurn } from './battle.ts'
 import { gradeQuiz } from './quiz.ts'
 import type { Command, GameResult, Progress } from './types.ts'
 export function executeDemo(
@@ -24,7 +23,6 @@ export function executeDemo(
       throw new Error('Ход уже обработан. Обнови состояние боя.')
     progress.battle = takeTurn(progress.battle, command.action)
     if (progress.battle.status === 'won') {
-      progress.balance += WIN_REWARD
       progress.wins += 1
     }
     return { progress }
@@ -58,15 +56,16 @@ export function executeDemo(
   if (command.type === 'upgrade') {
     if (owned.level >= MAX_LEVEL)
       throw new Error('Достигнут максимальный уровень')
-    const cost = upgradeCost(owned.level)
-    if (progress.balance < cost)
-      throw new Error('Недостаточно чак-чака. Победи в поединке!')
-    progress.balance -= cost
     owned.level += 1
   } else {
     if (progress.battle?.status === 'active')
       throw new Error('Сначала заверши текущий бой')
-    progress.battle = createBattle(battleId, owned.id, owned.level)
+    progress.battle = createBattle(
+      battleId,
+      owned.id,
+      owned.level,
+      command.enemyId,
+    )
   }
   return { progress }
 }
