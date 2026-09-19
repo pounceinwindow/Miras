@@ -18,7 +18,7 @@ export default function Pvp() {
     return `/fighting/index.html?${new URLSearchParams({
       mode: 'pvp',
       player,
-      build: 'pvp-2',
+      build: 'pvp-3',
     })}`
   }, [collection])
 

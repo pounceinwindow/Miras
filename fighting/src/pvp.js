@@ -51,7 +51,7 @@ export class PvpConnection {
   async connect() {
     if (!client) throw new Error('Supabase не настроен для сетевой игры.');
     this.channel = client.channel(`miras-pvp-${this.room}`, {
-      config: { broadcast: { self: false, ack: true } },
+      config: { broadcast: { self: false, ack: false } },
     });
     this.channel.on('broadcast', { event: 'message' }, ({ payload }) => {
       this.receive(payload);

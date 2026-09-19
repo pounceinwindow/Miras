@@ -77,6 +77,7 @@ function guestState(state){
 function applyGuestState(payload){
   if(!payload?.state||pvpRole!=='guest')return;
   const state=guestState(payload.state),wasFinished=battle.status==='finished';
+  if(state.status==='playing')state.time=Math.max(state.time,battle.time);
   Object.assign(battle,state);
   for(const event of payload.events??[])renderer?.event(flipEvent(event),battle);
   updateHUD();
@@ -160,8 +161,8 @@ $('#rules-button').onclick=()=>openSub('#rules-dialog');$('#pause-rules').onclic
 for(const id of ['atlas-button','setup-atlas','pause-atlas'])$('#'+id).onclick=()=>openSub('#atlas-dialog');
 $('#close-atlas').onclick=()=>closeSub('#atlas-dialog');
 $('#atlas-content').innerHTML=Object.entries(HEROES).map(([hero,config])=>`<section class="atlas-section"><h3>${config.name}</h3>${['front','back'].map(face=>`<p class="atlas-facing">${face==='front'?'СПЕРЕДИ · СОПЕРНИК':'СЗАДИ · ВАШ ГЕРОЙ'}</p><div class="sprite-grid">${Object.entries(stateNames).map(([state,label])=>`<figure><img loading="lazy" src="${portraits(hero,face,state)}" alt="${config.name}: ${label}, ${face==='front'?'спереди':'сзади'}"><figcaption>${label}<small>${state}</small></figcaption></figure>`).join('')}</div>`).join('')}</section>`).join('');
-function playerMove(lane){if(isPvp&&pvpRole==='guest')void pvpConnection?.sendInput('move',lane);else battle.move('player',lane);}
-function playerCast(slot){if(isPvp&&pvpRole==='guest')void pvpConnection?.sendInput('cast',slot);else battle.cast('player',slot);}
+function playerMove(lane){if(isPvp&&pvpRole==='guest'){battle.move('player',lane);void pvpConnection?.sendInput('move',lane);}else battle.move('player',lane);}
+function playerCast(slot){if(isPvp&&pvpRole==='guest'){battle.cast('player',slot);void pvpConnection?.sendInput('cast',slot);}else battle.cast('player',slot);}
 document.querySelectorAll('[data-lane]').forEach(button=>button.onclick=()=>playerMove(Number(button.dataset.lane)));
 document.querySelectorAll('[data-ability]').forEach(button=>button.onclick=()=>playerCast(Number(button.dataset.ability)));
 if(isPvp){
@@ -188,9 +189,9 @@ try{
   renderer=new BattleRenderer($('#arena'),playerMove);
   await renderer.init(progress=>{$('#load-progress').value=progress;});loaded=true;$('#loading').hidden=true;$('#start').disabled=false;$('#start').textContent='Войти в бой';
   let lastTime=performance.now(),lastHUD=0;
-  const loop=now=>{const delta=(now-lastTime)/1000;lastTime=now;if(delta>1.5&&battle.status==='playing'&&!isPvp)pause('Бой приостановлен после перерыва.');if(!isPvp||pvpRole==='host')battle.step(delta);
+  const loop=now=>{const delta=(now-lastTime)/1000;lastTime=now;if(delta>1.5&&battle.status==='playing'&&!isPvp)pause('Бой приостановлен после перерыва.');if(!isPvp||pvpRole==='host')battle.step(delta);else if(pvpRole==='guest'&&battle.status==='playing')battle.time=Math.min(battle.limit,battle.time+Math.min(delta,.1));
     const events=battle.drain();for(const event of events){renderer.event(event,battle);playSound(event.type);if(event.type==='BLOCKED')toast(event.reason);if(event.type==='FINISH'){clearTimeout(resultTimer);resultTimer=setTimeout(()=>showResult(event),1200);}}
-    if(isPvp&&pvpRole==='host'&&pvpMatched){networkEvents.push(...events.map(clone));if(now-lastNetworkState>=80){void pvpConnection?.sendState(battleSnapshot(),networkEvents.splice(0));lastNetworkState=now;}}
+    if(isPvp&&pvpRole==='host'&&pvpMatched){networkEvents.push(...events.map(clone));if(now-lastNetworkState>=50){void pvpConnection?.sendState(battleSnapshot(),networkEvents.splice(0));lastNetworkState=now;}}
     renderer.draw(battle,battle.status==='paused'?0:Math.min(delta,.05));if(now-lastHUD>50){updateHUD();lastHUD=now;}requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);$('#setup-dialog').showModal();
