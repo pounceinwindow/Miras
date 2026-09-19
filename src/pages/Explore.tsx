@@ -3,7 +3,6 @@ import { ScannerSheet } from '../components/ScannerSheet'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   ArrowUpRight,
-  ArrowRight,
   ScanLine,
   Map,
   Swords,
@@ -96,6 +95,9 @@ export default function Explore() {
           <div>
             <h1 id="heroes-title">Мои хранители</h1>
           </div>
+          <span className="heroes-owned-count">
+            {ownedIds.size} из {entities.length}
+          </span>
         </div>
 
         <div className="heroes-compact-grid">
@@ -105,7 +107,7 @@ export default function Explore() {
               <Link
                 key={hero.id}
                 to={`/entity/${hero.id}`}
-                className="hero-compact-card"
+                className={`hero-compact-card card-${hero.id}`}
               >
                 <div className={`hero-compact-art art-${hero.id}`}>
                   <img
@@ -200,11 +202,6 @@ export default function Explore() {
               <small>Выбери соперника для поединка</small>
             </div>
           </div>
-          <span className="captive-badge">
-            {captiveIds.length > 0
-              ? `${captiveIds.length} В ПЛЕНУ`
-              : '3 ЯЧЕЙКИ'}
-          </span>
         </div>
 
         <div className="captive-grid">
@@ -214,9 +211,8 @@ export default function Explore() {
               return (
                 <div key={enemy.id} className="captive-card">
                   <div className="captive-cell-header">
-                    <span className="cell-num">0{idx + 1}</span>
                     <span className="cell-tag">
-                      <Lock size={9} /> В плену
+                      <Lock size={9} /> <span>В плену</span>
                     </span>
                   </div>
                   <div className="captive-dungeon-cell">
@@ -253,8 +249,9 @@ export default function Explore() {
             return (
               <div key={`empty-${idx}`} className="captive-card is-empty">
                 <div className="captive-cell-header">
-                  <span className="cell-num">0{idx + 1}</span>
-                  <span className="cell-tag empty-tag">Свободно</span>
+                  <span className="cell-tag empty-tag">
+                    <span>Свободно</span>
+                  </span>
                 </div>
                 <div className="captive-dungeon-cell is-empty">
                   <div className="captive-empty-placeholder">
@@ -278,7 +275,7 @@ export default function Explore() {
                   className="captive-fight-btn captive-empty-btn"
                   onClick={() => setScannerOpen(true)}
                 >
-                  <ScanLine size={13} /> Пленить духа
+                  Пленить духа
                 </button>
               </div>
             )
