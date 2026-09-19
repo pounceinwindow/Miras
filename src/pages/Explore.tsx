@@ -90,9 +90,6 @@ export default function Explore() {
         <div className="heroes-preview-header">
           <div>
             <h1 id="heroes-title">Мои хранители</h1>
-            <p className="hero-intro">
-              Герои древних сказаний рядом с тобой.
-            </p>
           </div>
           <Link className="button-show-all" to="/collection">
             <span>Показать всех</span>

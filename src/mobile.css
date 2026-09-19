@@ -254,17 +254,6 @@
     0 0 0 13px rgba(174, 121, 32, 0.04);
   pointer-events: none;
 }
-.hero-compact-card::after {
-  content: '◆';
-  position: absolute;
-  right: 6px;
-  top: 5px;
-  color: rgba(148, 99, 22, 0.32);
-  font-size: 7px;
-  line-height: 1;
-  transform: rotate(45deg);
-  pointer-events: none;
-}
 .hero-compact-card:active {
   transform: scale(0.97);
   border-color: #f0c958;
@@ -343,17 +332,6 @@
   width: 100%;
   flex: 1;
   text-align: center;
-}
-.hero-compact-details::before {
-  content: 'ХРАНИТЕЛЬ';
-  display: block;
-  margin-bottom: 2px;
-  color: #9a6c20;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 6px;
-  font-weight: 800;
-  letter-spacing: 0.7px;
-  line-height: 1;
 }
 .hero-compact-details strong {
   display: -webkit-box;
