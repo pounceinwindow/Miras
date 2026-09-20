@@ -1,0 +1,152 @@
+[
+  {
+    "source": "background.png (корень проекта)",
+    "target": "assets/battle/background.png",
+    "sha256": "31c7a978b7fb4a021885402158c0b6ec75923181e310df2f6f456990cf6e2c3d"
+  },
+  {
+    "source": "abilities/kremlin/gate_seal.png",
+    "target": "assets/battle/abilities/kremlin/gate_seal.png",
+    "sha256": "7cf941e5b977cf58d340078dc2fd35099b6425ec27adfe81a737b7fd322cf225"
+  },
+  {
+    "source": "abilities/kremlin/white_wall.png",
+    "target": "assets/battle/abilities/kremlin/white_wall.png",
+    "sha256": "069dd26e0c156660ae62900206cd6b0e4990c230fc046ff37294cebcdd5ea5c7"
+  },
+  {
+    "source": "abilities/shurale/forest_haze.png",
+    "target": "assets/battle/abilities/shurale/forest_haze.png",
+    "sha256": "242f08d5793fbcaac7938ca8419af36238c7077f9dbe2420669abb374214265b"
+  },
+  {
+    "source": "abilities/shurale/tickle.png",
+    "target": "assets/battle/abilities/shurale/tickle.png",
+    "sha256": "0aebdd2f810d323baeb4168db64814f799b78cdbcd62bdbb1da3597d9f9ff960"
+  },
+  {
+    "source": "abilities/su_anasy/golden_comb.png",
+    "target": "assets/battle/abilities/su_anasy/golden_comb.png",
+    "sha256": "2d2eda4b18928ef1fa5c39141466323a6965d2e573420606fd165841d160a7a1"
+  },
+  {
+    "source": "abilities/su_anasy/reverse_wave.png",
+    "target": "assets/battle/abilities/su_anasy/reverse_wave.png",
+    "sha256": "74f7e1c7d1b56fcabedc77b3b06b357c3b37b60ec9494b099d003bc20d527d9f"
+  },
+  {
+    "source": "abilities/syuyumbike/kazan_voice.png",
+    "target": "assets/battle/abilities/syuyumbike/kazan_voice.png",
+    "sha256": "0d455d195cd3dff5c90a13bd60fe0138e38d1cd9b54a6d03cedaf8c0002d229e"
+  },
+  {
+    "source": "abilities/syuyumbike/khanbike_will.png",
+    "target": "assets/battle/abilities/syuyumbike/khanbike_will.png",
+    "sha256": "5d97b2b0ce01e0ea50020271983dfd8d751d22e51af9c962c025b4fe9e324913"
+  },
+  {
+    "source": "binds/shurale.png",
+    "target": "assets/battle/binds/shurale.png",
+    "sha256": "bbc57e1f35a7a2c8e22a34035646b734e824464be50b42ee3666b4f8476ff725"
+  },
+  {
+    "source": "су анасы связка.png (корень проекта)",
+    "target": "assets/battle/binds/su_anasy.png",
+    "sha256": "141d3fd24a3a1a99d23e728bca13a711629795f7e4d2d77d0ffceb95f0d05e57"
+  },
+  {
+    "source": "cast back.png (корень проекта)",
+    "target": "kremlin/back/cast.png",
+    "sha256": "7d12a28c5636a513dc884475d29e92f201ea3d9d679f4457ffd384c5cddae102"
+  },
+  {
+    "source": "cast front.png (корень проекта)",
+    "target": "kremlin/front/cast.png",
+    "sha256": "7622bc45b49c738106af94274d9bb57cbac25b98ef416def8cd1d90e532ede9d"
+  },
+  {
+    "source": "cast_patch/shurale_back.png",
+    "target": "shurale/back/cast.png",
+    "sha256": "e93e8e8dc09502396a9dff4abbe0c900b65def6c3c16c587f2fbc602a2e9b1be"
+  },
+  {
+    "source": "cast_patch/shurale_front.png",
+    "target": "shurale/front/cast.png",
+    "sha256": "6e6b60ffb5f69b1d80aad104ef20ea486a164e568c55edb4c298a14a38f3d9d0"
+  },
+  {
+    "source": "cast_patch/su_anasy_back.png",
+    "target": "su_anasy/back/cast.png",
+    "sha256": "c39d4e35116fbd9f06257c276b247d629f4546ed0d8579ab246fc25e152c0c0b"
+  },
+  {
+    "source": "cast_patch/su_anasy_front.png",
+    "target": "su_anasy/front/cast.png",
+    "sha256": "28a6fd439a53ab9e637aade78e377cdf9a26cd31348724a48dcf847fe17b2014"
+  },
+  {
+    "source": "cast_patch/syuyumbike_back.png",
+    "target": "syuyumbike/back/cast.png",
+    "sha256": "e1277fda8789ef9a33e06af414f924737bc998fd3ea506166141e09ef8ba2489"
+  },
+  {
+    "source": "cast_patch/syuyumbike_front.png",
+    "target": "syuyumbike/front/cast.png",
+    "sha256": "22f06e6214fda808fb1949008ba2e658c07955aed25d51b2d3d26bef707df44e"
+  },
+  {
+    "source": "gates/kremlin.png",
+    "target": "assets/battle/gates/kremlin.png",
+    "sha256": "3fc7531ba4f798cf399d925714a068c08110d85dba3664544950d104249c7f76"
+  },
+  {
+    "source": "impacts/1.png",
+    "target": "assets/battle/impacts/1.png",
+    "sha256": "de9b272fc9dd2dbee51b8c7c760f3acaf48e631e5e39390f25347ec939abc674"
+  },
+  {
+    "source": "impacts/2.png",
+    "target": "assets/battle/impacts/2.png",
+    "sha256": "55ade12197c73d36933229431bdae6014fcd4acdf2b2051a5f6fa86002da0f95"
+  },
+  {
+    "source": "impacts/3.png",
+    "target": "assets/battle/impacts/3.png",
+    "sha256": "f42e9eed66679c00a2a5760c1d880151e4e6cd19707936f73a2b4005733648fe"
+  },
+  {
+    "source": "impacts/4.png",
+    "target": "assets/battle/impacts/4.png",
+    "sha256": "2781b60afb2b7f4383150d2d2c58dca53224e302d19b91b3f9df45e34ef44174"
+  },
+  {
+    "source": "projectiles/kremlin.png",
+    "target": "assets/battle/projectiles/kremlin.png",
+    "sha256": "b1225358f1be0d5ccdcab2542c34e11dab2ded66a101ced1f7f8b045b030fe32"
+  },
+  {
+    "source": "projectiles/shurale.png",
+    "target": "assets/battle/projectiles/shurale.png",
+    "sha256": "e9610c6ec827449555eb2cbd7f14950bd7b36094f5c9d01c7e9b9c6fa22509e9"
+  },
+  {
+    "source": "projectiles/su_anasy.png",
+    "target": "assets/battle/projectiles/su_anasy.png",
+    "sha256": "4e62d3a6cb2ae67ad73ee9ab003e1658bca4af37615e21f49a62c3f01061a418"
+  },
+  {
+    "source": "projectiles/syuyumbike.png",
+    "target": "assets/battle/projectiles/syuyumbike.png",
+    "sha256": "687b5cb4abf2fab21e98d18879286771a48f084a206b8d9895fe34eaacf0a440"
+  },
+  {
+    "source": "shields/kremlin.png",
+    "target": "assets/battle/shields/kremlin.png",
+    "sha256": "6506a258d5ffee8f5268b7e61241c6fd0ed2ae7a5491ab5ed88a61609e991d3b"
+  },
+  {
+    "source": "shields/syuyumbike.png",
+    "target": "assets/battle/shields/syuyumbike.png",
+    "sha256": "d5343e3a24e320e3dbfa20ab9c43385bbcafa8686aab30d29ae8a5685d2ab43c"
+  }
+]
