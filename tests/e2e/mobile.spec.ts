@@ -266,6 +266,13 @@ test('scanner ignores unrelated messages and routes MindAR targetFound once', as
       location.origin,
     )
   })
+  await expect(page).toHaveURL(/\/fight\/.*kereml/i)
+  await fight.locator('body').evaluate(() => {
+    window.parent.postMessage(
+      { type: 'miras:open-collection' },
+      location.origin,
+    )
+  })
   await expect(page).toHaveURL(/\/home$/)
   await expect(
     page.locator('.captive-card', { hasText: 'Казанский Кремль' }),

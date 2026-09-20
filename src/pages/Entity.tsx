@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/purity */
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowRight,
@@ -10,9 +10,11 @@ import {
   Shield,
   Sparkles,
   Check,
+  MessageCircle,
 } from 'lucide-react'
 import { useGame } from '../store/game'
 import { QueryState } from '../components/QueryState'
+import { CharacterSpeech } from '../components/CharacterSpeech'
 import type { Entity, CharacterId } from '../api/types'
 
 export default function EntityPage({ character, isEncounter }: { character?: Entity; isEncounter?: boolean }) {
@@ -21,12 +23,30 @@ export default function EntityPage({ character, isEncounter }: { character?: Ent
   const navigate = useNavigate()
   const entity = character || entities.find((candidate) => candidate.id === id)
   const [collapsed, setCollapsed] = useState(false)
+  const [cardSpeechState, setCardSpeechState] = useState<'open' | 'closing' | 'closed'>('open')
   const dragStart = useRef<number | null>(null)
 
   // Quiz state
   const [quizSuccess, setQuizSuccess] = useState(false)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(() => Math.floor(Math.random() * (entity?.quiz?.length || 1)))
   const [wrongAnswer, setWrongAnswer] = useState(false)
+  const entityId = entity?.id
+  const heroSpeechLine = isEncounter
+    ? entity?.voice?.challenge
+    : entity?.voice?.card
+  const hasHeroSpeech = Boolean(heroSpeechLine)
+
+  useEffect(() => {
+    if (!hasHeroSpeech || isEncounter || cardSpeechState !== 'open') return
+    const timer = window.setTimeout(() => {
+      setCardSpeechState(
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          ? 'closed'
+          : 'closing',
+      )
+    }, 5800)
+    return () => window.clearTimeout(timer)
+  }, [cardSpeechState, entityId, hasHeroSpeech, isEncounter])
 
   if (!entity) return <QueryState error="Хранитель не найден" />
 
@@ -95,9 +115,44 @@ export default function EntityPage({ character, isEncounter }: { character?: Ent
           <img
             className="entity-pixel-art"
             src={pixelImage}
-            alt=""
-            aria-hidden="true"
+            alt={hasHeroSpeech ? `Реплика: ${displayName}` : ''}
+            aria-hidden={hasHeroSpeech ? undefined : true}
+            role={hasHeroSpeech ? 'button' : undefined}
+            tabIndex={hasHeroSpeech ? 0 : undefined}
+            aria-expanded={hasHeroSpeech ? cardSpeechState === 'open' : undefined}
+            onClick={
+              hasHeroSpeech
+                ? () => setCardSpeechState((state) => state === 'open' ? 'closing' : 'open')
+                : undefined
+            }
+            onKeyDown={(event) => {
+              if (!hasHeroSpeech) return
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                setCardSpeechState((state) => state === 'open' ? 'closing' : 'open')
+              }
+            }}
           />
+          {heroSpeechLine && (
+            <>
+              {cardSpeechState !== 'closed' && (
+                <CharacterSpeech
+                  line={heroSpeechLine}
+                  placement="hero"
+                  visible={cardSpeechState === 'open'}
+                  onExitComplete={() => setCardSpeechState('closed')}
+                />
+              )}
+              <button
+                type="button"
+                className={`character-speech-toggle ${cardSpeechState === 'closed' ? 'is-visible' : ''}`}
+                aria-label="Показать реплику"
+                onClick={() => setCardSpeechState('open')}
+              >
+                <MessageCircle size={15} />
+              </button>
+            </>
+          )}
         </div>
 
         <div className="entity-drag-row">
@@ -181,7 +236,7 @@ export default function EntityPage({ character, isEncounter }: { character?: Ent
                     <Check size={18} /> Уже в коллекции
                   </span>
                 )}
-                
+
                 <div className="quiz-section" style={{ padding: 16, background: '#132b31', borderRadius: 8, border: '1px solid var(--border)' }}>
                   {!quizSuccess ? (
                     <>

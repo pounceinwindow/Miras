@@ -23,7 +23,8 @@ export default function Battle() {
   const { character = 'su-anasy' } = useParams()
   const [searchParams] = useSearchParams()
   const frame = useRef<HTMLIFrameElement>(null)
-  const battleFinished = useRef(false)
+  const defeatedEnemy = useRef<CharacterId | null>(null)
+  const recruitStarted = useRef(false)
   const navigate = useNavigate()
   const run = useGame((state) => state.run)
   const source = useMemo(() => {
@@ -36,6 +37,20 @@ export default function Battle() {
   }, [character, searchParams])
 
   useEffect(() => {
+    async function openCollection() {
+      const enemyId = defeatedEnemy.current
+      if (enemyId && !recruitStarted.current) {
+        recruitStarted.current = true
+        const alreadyOwned = useGame
+          .getState()
+          .progress.collection.some((item) => item.id === enemyId)
+        if (!alreadyOwned) {
+          await run({ type: 'recruit', characterId: enemyId })
+        }
+      }
+      navigate('/home', { replace: true })
+    }
+
     function onMessage(event: MessageEvent) {
       if (
         event.origin !== window.location.origin ||
@@ -43,23 +58,14 @@ export default function Battle() {
       )
         return
 
-      if (
-        event.data?.type !== 'miras:battle-finished' ||
-        battleFinished.current
-      )
+      if (event.data?.type === 'miras:open-collection') {
+        void openCollection()
         return
-
-      battleFinished.current = true
-      if (event.data?.result === 'win') {
-        const enemyId = appHeroIds[event.data?.enemy]
-        if (enemyId) {
-          void run({
-            type: 'recruit',
-            characterId: enemyId,
-          })
-        }
       }
-      navigate('/home', { replace: true })
+
+      if (event.data?.type !== 'miras:battle-finished') return
+      if (event.data?.result === 'win')
+        defeatedEnemy.current = appHeroIds[event.data?.enemy] ?? null
     }
 
     window.addEventListener('message', onMessage)

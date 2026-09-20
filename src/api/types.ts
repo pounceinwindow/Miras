@@ -33,4 +33,14 @@ export interface Entity {
     options: string[]
     correctIndex: number
   }[]
+  voice?: {
+    card?: CharacterLine
+    challenge: CharacterLine
+    defeat: CharacterLine
+  }
+}
+
+export interface CharacterLine {
+  tatar: string
+  russian: string
 }

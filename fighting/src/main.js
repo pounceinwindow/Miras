@@ -18,7 +18,7 @@ app.innerHTML=`
 </main>
 <aside class="desktop-note"><span class="eyebrow">ТАТАР.БУ / ИГРОВОЙ ПРОТОТИП</span><h2>Выбери русло.<br>Измени исход.</h2><p>Четыре хранителя, три позиции.<br>Девяносто секунд на победу.</p><div class="key-guide"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><span>сменить русло</span></div><div class="key-guide"><kbd>Q</kbd><kbd>E</kbd><span>применить умения</span></div><button class="text-button" id="atlas-button">Смотреть все спрайты ↗</button><p class="small-note">Локальная тренировка · без PvP</p></aside>
 <dialog id="pause-dialog" class="panel-dialog"><div class="dialog-eyebrow">ВРЕМЯ ОСТАНОВЛЕНО</div><h2>Пауза</h2><p id="pause-reason" class="dialog-description">Можно перевести дух.</p><button class="primary-button" id="resume">Продолжить бой</button><button class="text-button" id="pause-rules">Как играть</button></dialog>
-<dialog id="result-dialog" class="panel-dialog"><div class="result-mark" id="result-mark">✦</div><div class="dialog-eyebrow">ДУЭЛЬ ЗАВЕРШЕНА</div><h2 id="result-title"></h2><p id="result-description" class="dialog-description"></p><div class="result-stats"><div><strong id="stat-damage"></strong><small>УРОНА</small></div><div><strong id="stat-dodges"></strong><small>УКЛОНЕНИЙ</small></div><div><strong id="stat-reflect"></strong><small>ОТРАЖЕНИЙ</small></div></div><button class="primary-button" id="rematch">Ещё бой</button></dialog>
+<dialog id="result-dialog" class="panel-dialog"><div class="result-mark" id="result-mark">✦</div><div class="dialog-eyebrow">ДУЭЛЬ ЗАВЕРШЕНА</div><h2 id="result-title"></h2><p id="result-description" class="dialog-description"></p><blockquote class="result-quote" id="result-quote" hidden><img class="result-quote-portrait" id="result-quote-portrait" alt=""><div class="result-quote-bubble"><p id="result-quote-tatar" lang="tt"></p><footer id="result-quote-russian"></footer></div></blockquote><div class="result-stats"><div><strong id="stat-damage"></strong><small>УРОНА</small></div><div><strong id="stat-dodges"></strong><small>УКЛОНЕНИЙ</small></div><div><strong id="stat-reflect"></strong><small>ОТРАЖЕНИЙ</small></div></div><button class="primary-button" id="rematch">Ещё бой</button></dialog>
 <dialog id="rules-dialog" class="panel-dialog"><div class="dialog-eyebrow">ТРИ РУСЛА</div><h2>Два решения.<br>Много возможностей.</h2><div class="rules-list"><p><b>Двигайтесь.</b> Нажмите на русло или кнопку Ⅰ / Ⅱ / Ⅲ. Обычные снаряды летят автоматически, когда хранители стоят напротив друг друга.</p><p><b>Следите за предупреждениями.</b> Красное русло и таймер — вражеское умение. Золотое — ваше. Уйдите до попадания.</p><p><b>Удержание ≠ запрет умений.</b> Даже если движение запрещено, можно применить способность. Волна Су анасы и Воля ханбике снимают удержание.</p><p><b>Закрытые ворота.</b> Выйти из закрытого русла можно, войти обратно — нельзя до окончания таймера.</p><p><b>90 секунд.</b> Побеждает тот, кто первым обнулит здоровье врага. По времени сравнивается доля оставшегося здоровья.</p><p><b>Смена стороны.</b> В меню выберите «Поменять героев»: начнётся новая дуэль за другого хранителя.</p></div><button class="primary-button" id="close-rules">Понятно</button></dialog>
 <dialog id="atlas-dialog" class="atlas-dialog"><div class="atlas-header"><div><div class="dialog-eyebrow">40 ИСХОДНЫХ СПРАЙТОВ</div><h2>Все грани хранителей</h2></div><button class="icon-button" id="close-atlas" aria-label="Закрыть атлас">×</button></div><div id="atlas-content"></div><p class="small-note">В бою: снизу — вид со спины, сверху — вид спереди. Оба умения используют cast.</p></dialog>`;
 
@@ -27,6 +27,12 @@ let pvpConnection=null,pvpRole=null,pvpMatched=false,lastNetworkState=0,networkE
 const stateNames={idle:'Ожидание',attack:'Атака',cast:'Умение',hit:'Попадание',defeat:'Поражение'};
 const portraits=(hero,face='front',pose='idle')=>ASSET_URLS[`/${hero}/${face}/${pose}.png`];
 const abilityHints={su_anasy:['Отражение + очищение','Урон + удержание'],kremlin:['Щит · 32 урона','Урон + закрытие'],shurale:['Удержание · 2 с','Защита от автоатак'],syuyumbike:['Очищение + щит 22','Два русла + ослабление']};
+const defeatLines={
+  su_anasy:{tatar:'Көчеңне таныдым. Алда безне уртак юл көтә.',russian:'Я признаю твою силу. Впереди нас ждёт общий путь.'},
+  kremlin:{tatar:'Мин синең ныклыгыңны күрдем. Хәзер бу тарихны бергә сакларбыз.',russian:'Я увидел твою стойкость. Теперь будем хранить эту историю вместе.'},
+  shurale:{tatar:'Хәйләң дә, көчең дә бар икән. Мин синең белән.',russian:'У тебя есть и хитрость, и сила. Я с тобой.'},
+  syuyumbike:{tatar:'Син сынмадың. Хәзер Казан хәтерен бергә сакларбыз.',russian:'Ты не сломился. Теперь мы вместе сохраним память Казани.'},
+};
 if(isPvp){
   $('.desktop-note .small-note').textContent='Сетевая дуэль · Supabase Realtime';
   app.insertAdjacentHTML('beforeend',`
@@ -149,6 +155,9 @@ function showResult(event){
   lastResult=event.result;
   $('#result-title').textContent={win:'Ваша победа',lose:'Ещё одна попытка?',draw:'Равные силы'}[event.result];$('#result-mark').textContent=event.result==='win'?'✦':event.result==='draw'?'◇':'↻';
   $('#result-description').textContent=event.timeout?'Время вышло. Итог — по доле оставшегося здоровья.':event.result==='win'?(isPvp?'Вы переиграли друга на трёх руслах.':'Противник усмирён и присоединяется к твоей коллекции.'):(isPvp?'Друг оказался сильнее в этой дуэли.':'Изучите предупреждения и используйте защиту вовремя.');
+  const defeatLine=!isPvp&&event.result==='win'?defeatLines[enemyHero]:null;
+  $('#result-quote').hidden=!defeatLine;
+  if(defeatLine){$('#result-quote-portrait').src=portraits(enemyHero,'front','idle');$('#result-quote-portrait').alt=HEROES[enemyHero].name;$('#result-quote-tatar').textContent=defeatLine.tatar;$('#result-quote-russian').textContent=defeatLine.russian;}
   $('#rematch').textContent=isPvp?'Новая комната':event.result==='win'?'В коллекцию':'Ещё бой';
   $('#stat-damage').textContent=battle.stats.damage;$('#stat-dodges').textContent=battle.stats.dodges;$('#stat-reflect').textContent=battle.stats.reflections;$('#result-dialog').showModal();
   window.parent.postMessage({type:'miras:battle-finished',result:event.result,player:playerHero,enemy:enemyHero},window.location.origin);

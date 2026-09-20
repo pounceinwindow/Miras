@@ -7,6 +7,7 @@ import {
   type ArBundle,
 } from '../api/arTargets'
 import type { CharacterId } from '../api/types'
+import { handleSuccessfulScan } from '../game/handleSuccessfulScan'
 import { useGame } from '../store/game'
 
 const characterIds: CharacterId[] = [
@@ -59,7 +60,6 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
     message: string
   }>({ state: 'checking', message: 'Ищем доступные метки рядом…' })
   const [capturedSpirit, setCapturedSpirit] = useState<CharacterId | null>(null)
-  const run = useGame((state) => state.run)
   const entities = useGame((state) => state.entities)
   const navigate = useNavigate()
 
@@ -136,17 +136,9 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
       ) {
         handled.current = true
         const targetId = event.data.entityId as CharacterId
-        const starterId: CharacterId = 'su-anasy'
-        const state = useGame.getState()
-        if (!state.progress.collection.some((item) => item.id === starterId)) {
-          await run({ type: 'capture', characterId: starterId })
-        }
-        await run({ type: 'imprison', characterId: targetId })
+        const tag = await handleSuccessfulScan(targetId)
         setCapturedSpirit(targetId)
         setTimeout(() => {
-          const tag = useGame
-            .getState()
-            .entities.find((entity) => entity.id === targetId)?.tag
           close()
           if (tag) setTimeout(() => navigate(`/encounter/${tag}`), 240)
         }, 1800)
@@ -154,7 +146,7 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
     }
     window.addEventListener('message', onMessage)
     return () => window.removeEventListener('message', onMessage)
-  }, [close, navigate, run])
+  }, [close, navigate])
 
   return (
     <dialog

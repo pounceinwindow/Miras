@@ -39,4 +39,5 @@ export const entities: Entity[] = characters.map((character) => ({
   },
   nextUpgradeCost: 30,
   quiz: character.quiz,
+  voice: character.voice,
 }))

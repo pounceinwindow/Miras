@@ -19,6 +19,52 @@ test('home exposes the camera scanner', async ({ page }) => {
   await expect(page.getByRole('button', { name: /Начать сканировать/ })).toBeVisible()
 })
 
+test('Su Anasy and Kremlin cards use the approved bilingual lines', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+
+  await page.goto('/entity/su-anasy')
+  await expect(
+    page.locator('.character-speech--paper').getByText('Су һәркемгә дә серен ачмый.'),
+  ).toBeVisible()
+  await expect(
+    page.locator('.character-speech--paper').getByText('Вода не каждому открывает свои тайны.'),
+  ).toBeVisible()
+  await page.evaluate(() => window.scrollTo(0, 120))
+  await expect(page.locator('.character-speech--hero')).toHaveAttribute(
+    'aria-hidden',
+    'false',
+  )
+  await page.getByRole('button', { name: 'Реплика: Су анасы' }).click()
+  await expect(page.locator('.character-speech--hero')).toHaveAttribute(
+    'aria-hidden',
+    'true',
+  )
+  await expect(page.locator('.character-speech--hero')).toHaveCount(0, {
+    timeout: 1500,
+  })
+  await page.getByRole('button', { name: 'Показать реплику' }).click()
+  await expect(page.locator('.character-speech--hero')).toHaveAttribute(
+    'aria-hidden',
+    'false',
+  )
+
+  await page.goto('/encounter/stone-01')
+  await expect(
+    page.locator('.character-speech--paper').getByText('Мин бу шәһәрнең күп гасырлык хәтерен саклыйм.'),
+  ).toHaveCount(0)
+  await expect(
+    page.locator('.character-speech--hero').getByText('Казан рухын йөрәгеңдә йөртә аласыңмы — күрсәтик.'),
+  ).toBeVisible()
+  await expect(page.getByText('Перед боем', { exact: true })).toHaveCount(0)
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true)
+})
+
 test('lore card uses supplied art and folds with its character still visible', async ({
   page,
 }) => {

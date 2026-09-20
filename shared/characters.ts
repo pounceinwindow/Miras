@@ -20,6 +20,16 @@ export interface Character {
     options: string[]
     correctIndex: number
   }[]
+  voice?: {
+    card?: CharacterLine
+    challenge: CharacterLine
+    defeat: CharacterLine
+  }
+}
+
+export interface CharacterLine {
+  tatar: string
+  russian: string
 }
 export const characters: Character[] = [
   {
@@ -45,6 +55,16 @@ export const characters: Character[] = [
     skill: 'Корни леса',
     attack: 16,
     health: 100,
+    voice: {
+      challenge: {
+        tatar: 'Урманга кердең икән — кыюлыгыңны күрсәт.',
+        russian: 'Раз вошёл в лес — покажи свою храбрость.',
+      },
+      defeat: {
+        tatar: 'Хәйләң дә, көчең дә бар икән. Мин синең белән.',
+        russian: 'У тебя есть и хитрость, и сила. Я с тобой.',
+      },
+    },
     quiz: [
       { question: 'Кем по происхождению является Шурале?', options: ['Духом леса', 'Домашним духом', 'Водным духом'], correctIndex: 0 },
       { question: 'Кто написал знаменитую поэму о Шурале?', options: ['Муса Джалиль', 'Габдулла Тукай', 'Хасан Туфан'], correctIndex: 1 },
@@ -74,6 +94,16 @@ export const characters: Character[] = [
     skill: 'Свет памяти',
     attack: 15,
     health: 110,
+    voice: {
+      challenge: {
+        tatar: 'Казан хәтерен йөрәгеңдә йөртергә әзерме син?',
+        russian: 'Готов ли ты нести память Казани в своём сердце?',
+      },
+      defeat: {
+        tatar: 'Син сынмадың. Хәзер Казан хәтерен бергә сакларбыз.',
+        russian: 'Ты не сломился. Теперь мы вместе сохраним память Казани.',
+      },
+    },
     quiz: [
       { question: 'В каком веке Сююмбике правила Казанским ханством?', options: ['XVI век', 'XV век', 'XVII век'], correctIndex: 0 },
       { question: 'От имени кого Сююмбике управляла ханством?', options: ['От имени мужа', 'От имени своего малолетнего сына', 'От имени отца'], correctIndex: 1 },
@@ -103,6 +133,20 @@ export const characters: Character[] = [
     skill: 'Лунный прилив',
     attack: 17,
     health: 95,
+    voice: {
+      card: {
+        tatar: 'Су һәркемгә дә серен ачмый.',
+        russian: 'Вода не каждому открывает свои тайны.',
+      },
+      challenge: {
+        tatar: 'Көчеңне күрсәт. Сулар сине сынап карасын.',
+        russian: 'Покажи свою силу. Пусть воды испытают тебя.',
+      },
+      defeat: {
+        tatar: 'Көчеңне таныдым. Алда безне уртак юл көтә.',
+        russian: 'Я признаю твою силу. Впереди нас ждёт общий путь.',
+      },
+    },
     quiz: [
       { question: 'Что расчёсывает Су анасы своим гребнем?', options: ['Волосы', 'Траву', 'Волны'], correctIndex: 0 },
       { question: 'Из какого материала сделан гребень Су анасы?', options: ['Дерево', 'Золото', 'Кость'], correctIndex: 1 },
@@ -133,6 +177,20 @@ export const characters: Character[] = [
     skill: 'Каменная печать',
     attack: 14,
     health: 120,
+    voice: {
+      card: {
+        tatar: 'Мин бу шәһәрнең күп гасырлык хәтерен саклыйм.',
+        russian: 'Я храню многовековую память этого города.',
+      },
+      challenge: {
+        tatar: 'Казан рухын йөрәгеңдә йөртә аласыңмы — күрсәтик.',
+        russian: 'Посмотрим, способен ли ты нести дух Казани в своём сердце.',
+      },
+      defeat: {
+        tatar: 'Мин синең ныклыгыңны күрдем. Хәзер бу тарихны бергә сакларбыз.',
+        russian: 'Я увидел твою стойкость. Теперь будем хранить эту историю вместе.',
+      },
+    },
     quiz: [
       { question: 'В каком году Казанский кремль был включён в Список всемирного наследия ЮНЕСКО?', options: ['2000', '1995', '2005'], correctIndex: 0 },
       { question: 'На берегу какой реки расположен Казанский кремль?', options: ['Волга', 'Казанка', 'Кама'], correctIndex: 1 },
