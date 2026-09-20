@@ -177,7 +177,7 @@
   font-size: clamp(21px, 5.4vw, 24px);
   font-weight: 800;
   letter-spacing: -0.4px;
-  color: #fffdf7 !important;
+  color: #f0d58a !important;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
 }
 .heroes-preview-header .hero-intro,
@@ -1889,8 +1889,8 @@
   transform: scale(1.04);
 }
 .entity-lore-card.is-collapsed .entity-pixel-art {
-  right: 8px;
-  bottom: -158px;
+  right: 12px;
+  bottom: -186px;
   transform: scale(0.96);
 }
 .entity-lore-card.is-collapsed .entity-drag-row {
