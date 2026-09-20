@@ -152,6 +152,33 @@ test('scanner opens on home with one tap, handles denial and retries', async ({
   await expect(page.locator('iframe')).toHaveCount(0)
 })
 
+test('scanner loads all AR targets without requesting GPS', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'geolocation', {
+      configurable: true,
+      value: {
+        getCurrentPosition: () => {
+          throw new Error('Scanner must not request GPS')
+        },
+      },
+    })
+    if (navigator.mediaDevices)
+      navigator.mediaDevices.getUserMedia = async () => {
+        throw new DOMException('Permission denied', 'NotAllowedError')
+      }
+  })
+
+  await page.goto('/home')
+  await page.getByRole('button', { name: /Начать сканировать/ }).click()
+
+  const scanner = page.frameLocator('iframe')
+  await expect(scanner.getByRole('status')).toHaveText(
+    'Не удалось включить камеру',
+  )
+})
+
 test('battle opens as an immersive page with compact header controls', async ({
   page,
 }) => {
@@ -343,16 +370,4 @@ test('sheet fits narrow screens and respects reduced motion', async ({
   await page.screenshot({ path: 'test-results/scanner-sheet.png' })
   await page.getByRole('button', { name: 'Закрыть камеру' }).click()
   await expect(sheet).toHaveCount(0)
-})
-
-test('scanner does not start when every AR target is farther than 100 m', async ({
-  page,
-}) => {
-  await setScannerLocation(page, 55.82, 49.16)
-  await page.goto('/home')
-  await page.getByRole('button', { name: /Начать сканировать/ }).click()
-
-  await expect(page.locator('iframe')).toHaveCount(0)
-  await expect(page.getByText('Сканирование недоступно')).toBeVisible()
-  await expect(page.getByText('В радиусе 100 м нет доступных AR-меток.')).toBeVisible()
 })

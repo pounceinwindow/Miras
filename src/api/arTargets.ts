@@ -1,6 +1,5 @@
 import { mergeMindFiles } from '../../lib/merge-mind-files.js'
 import { authenticatedUserId, supabase } from '../lib/api'
-import { calculateDistance, INTERACTION_RADIUS } from '../utils/geo'
 import type { CharacterId } from './types'
 
 export interface ArTarget {
@@ -32,13 +31,13 @@ type ArTargetRow = {
   distance_meters?: number
 }
 
-export class NearbyArTargetsError extends Error {
+export class ArTargetsError extends Error {
   constructor(
-    public readonly code: 'NO_NEARBY_TARGETS' | 'TARGET_DOWNLOAD_FAILED',
+    public readonly code: 'NO_TARGETS' | 'TARGET_DOWNLOAD_FAILED',
     message: string,
   ) {
     super(message)
-    this.name = 'NearbyArTargetsError'
+    this.name = 'ArTargetsError'
   }
 }
 
@@ -66,80 +65,34 @@ function mapTarget(row: ArTargetRow): ArTarget {
   }
 }
 
-function withinRadius(
-  targets: ArTarget[],
-  latitude: number,
-  longitude: number,
-) {
-  return targets
-    .map((target) => ({
-      ...target,
-      distanceMeters: calculateDistance(
-        latitude,
-        longitude,
-        target.latitude,
-        target.longitude,
-      ),
-    }))
-    .filter((target) => target.distanceMeters <= INTERACTION_RADIUS)
-    .sort((a, b) => a.distanceMeters - b.distanceMeters)
-}
-
-async function queryNearbyTargets(latitude: number, longitude: number) {
-  if (!supabase) return withinRadius(offlineTargets, latitude, longitude)
+async function queryAllTargets() {
+  if (!supabase) return offlineTargets
 
   await authenticatedUserId()
 
-  // Preferred path: the database itself returns only targets within 100 m.
-  const { data, error } = await supabase.rpc('nearby_ar_targets', {
-    player_lat: latitude,
-    player_lon: longitude,
-    radius_meters: INTERACTION_RADIUS,
-  })
-  if (!error) return (data as ArTargetRow[]).map(mapTarget)
-
-  // Keeps the current deployment working until the SQL migration is applied:
-  // request only a 100 m bounding box, then apply exact Haversine distance.
-  const latitudeDelta = INTERACTION_RADIUS / 111_320
-  const longitudeDelta =
-    INTERACTION_RADIUS /
-    (111_320 * Math.max(Math.cos((latitude * Math.PI) / 180), 0.01))
-  const fallback = await supabase
+  const result = await supabase
     .from('ar_targets')
     .select('tag, entity_id, mind_path, latitude, longitude')
     .eq('active', true)
-    .gte('latitude', latitude - latitudeDelta)
-    .lte('latitude', latitude + latitudeDelta)
-    .gte('longitude', longitude - longitudeDelta)
-    .lte('longitude', longitude + longitudeDelta)
+    .order('tag')
 
-  if (fallback.error) throw fallback.error
-  return withinRadius(
-    (fallback.data as ArTargetRow[]).map(mapTarget),
-    latitude,
-    longitude,
-  )
+  if (result.error) throw result.error
+  return (result.data as ArTargetRow[]).map(mapTarget)
 }
 
-export async function getNearbyArBundle(
-  latitude: number,
-  longitude: number,
-): Promise<ArBundle> {
-  const targets = await queryNearbyTargets(latitude, longitude)
+export async function getArBundle(): Promise<ArBundle> {
+  const targets = await queryAllTargets()
   if (targets.length === 0) {
-    throw new NearbyArTargetsError(
-      'NO_NEARBY_TARGETS',
-      'В радиусе 100 м нет доступных AR-меток.',
-    )
+    throw new ArTargetsError('NO_TARGETS', 'Нет доступных AR-меток.')
   }
 
   const files = await Promise.all(
     targets.map(async (target) => {
       const response = await fetch(target.mindPath)
       if (!response.ok) {
-        throw new NearbyArTargetsError(
+        throw new ArTargetsError(
           'TARGET_DOWNLOAD_FAILED',
-          'Не удалось загрузить ближайшую AR-метку.',
+          'Не удалось загрузить AR-метку.',
         )
       }
       return {

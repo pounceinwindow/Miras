@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Check, LoaderCircle, Lock, MapPin, RotateCcw, X } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 import {
-  getNearbyArBundle,
-  NearbyArTargetsError,
-  type ArBundle,
-} from '../api/arTargets'
+  AlertCircle,
+  Check,
+  LoaderCircle,
+  Lock,
+  RotateCcw,
+  X,
+} from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { ArTargetsError, getArBundle, type ArBundle } from '../api/arTargets'
 import type { CharacterId } from '../api/types'
 import { handleSuccessfulScan } from '../game/handleSuccessfulScan'
 import { useGame } from '../store/game'
@@ -17,30 +20,9 @@ const characterIds: CharacterId[] = [
   'kereml',
 ]
 
-function getCurrentPosition(): Promise<GeolocationPosition> {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error('unsupported'))
-      return
-    }
-    navigator.geolocation.getCurrentPosition(resolve, reject, {
-      enableHighAccuracy: true,
-      timeout: 15_000,
-      maximumAge: 0,
-    })
-  })
-}
-
-function locationErrorMessage(error: unknown) {
-  if (error instanceof NearbyArTargetsError) return error.message
-  if (error && typeof error === 'object' && 'code' in error) {
-    const code = Number(error.code)
-    if (code === 1)
-      return 'Разреши доступ к геопозиции, чтобы найти доступные рядом метки.'
-    if (code === 3)
-      return 'Не удалось быстро получить GPS. Выйди на открытое место и повтори.'
-  }
-  return 'Не удалось определить местоположение. Проверь GPS и интернет.'
+function scannerErrorMessage(error: unknown) {
+  if (error instanceof ArTargetsError) return error.message
+  return 'Не удалось загрузить AR-метки. Проверь интернет и повтори.'
 }
 
 export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
@@ -55,10 +37,10 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
   )
   const [isClosing, setIsClosing] = useState(false)
   const [bundle, setBundle] = useState<ArBundle | null>(null)
-  const [locationGate, setLocationGate] = useState<{
+  const [scannerGate, setScannerGate] = useState<{
     state: 'checking' | 'error'
     message: string
-  }>({ state: 'checking', message: 'Ищем доступные метки рядом…' })
+  }>({ state: 'checking', message: 'Подготавливаем сканер…' })
   const [capturedSpirit, setCapturedSpirit] = useState<CharacterId | null>(null)
   const entities = useGame((state) => state.entities)
   const navigate = useNavigate()
@@ -66,21 +48,17 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
   const prepareScanner = useCallback(async () => {
     const currentRequest = ++requestId.current
     setBundle(null)
-    setLocationGate({
+    setScannerGate({
       state: 'checking',
-      message: 'Ищем доступные метки рядом…',
+      message: 'Подготавливаем сканер…',
     })
     try {
-      const position = await getCurrentPosition()
-      const nearbyBundle = await getNearbyArBundle(
-        position.coords.latitude,
-        position.coords.longitude,
-      )
+      const arBundle = await getArBundle()
       if (closing.current || requestId.current !== currentRequest) return
-      setBundle(nearbyBundle)
+      setBundle(arBundle)
     } catch (error) {
       if (closing.current || requestId.current !== currentRequest) return
-      setLocationGate({ state: 'error', message: locationErrorMessage(error) })
+      setScannerGate({ state: 'error', message: scannerErrorMessage(error) })
     }
   }, [])
 
@@ -179,19 +157,19 @@ export function ScannerSheet({ onClosed }: { onClosed: () => void }) {
         ) : (
           <div className="scanner-location-gate" role="status">
             <div className="scanner-location-icon" aria-hidden="true">
-              {locationGate.state === 'checking' ? (
+              {scannerGate.state === 'checking' ? (
                 <LoaderCircle className="scanner-location-spinner" size={30} />
               ) : (
-                <MapPin size={30} />
+                <AlertCircle size={30} />
               )}
             </div>
             <h2>
-              {locationGate.state === 'checking'
-                ? 'Проверяем местоположение'
+              {scannerGate.state === 'checking'
+                ? 'Загружаем AR-метки'
                 : 'Сканирование недоступно'}
             </h2>
-            <p>{locationGate.message}</p>
-            {locationGate.state === 'error' && (
+            <p>{scannerGate.message}</p>
+            {scannerGate.state === 'error' && (
               <button type="button" onClick={() => void prepareScanner()}>
                 <RotateCcw size={16} /> Повторить
               </button>
