@@ -15,6 +15,7 @@ import {
 import { getLocations, type LocationPoint } from '../api/locations'
 import { calculateDistance, formatDistance, type GeoPoint } from '../utils/geo'
 import { useGame } from '../store/game'
+import { trackEvent } from '../lib/analytics'
 
 // Leaflet map and location catalogue adapted from Miras-feature-map.
 export default function MapPage() {
@@ -253,6 +254,12 @@ export default function MapPage() {
               className={selected?.id === location.id ? 'selected' : ''}
               onClick={() => {
                 setSelected(location)
+                trackEvent('location_selected', {
+                  location_id: location.id,
+                  character_id:
+                    entities.find((item) => item.tag === location.tag)?.id ??
+                    'unknown',
+                })
                 map.current?.setView(
                   [location.latitude, location.longitude],
                   15,

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useGame } from '../store/game'
+import { trackEvent } from '../lib/analytics'
 
 const heroAliases: Record<string, string> = {
   'su-anasy': 'su_anasy',
@@ -23,6 +24,10 @@ export default function Pvp() {
       build: 'pvp-3',
     })}`
   }, [collection])
+
+  useEffect(() => {
+    trackEvent('pvp_opened')
+  }, [])
 
   useEffect(() => {
     function onMessage(event: MessageEvent) {

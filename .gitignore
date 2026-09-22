@@ -8,6 +8,7 @@ playwright-report/
 test-results/
 *.tsbuildinfo
 .DS_Store
+artifacts/
 supabase/.temp/
 
 **/bin/

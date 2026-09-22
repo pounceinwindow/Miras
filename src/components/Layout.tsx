@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { UserRound, Flower2, X, LoaderCircle } from 'lucide-react'
 import { useGame } from '../store/game'
+import { flushAnalytics, trackEvent } from '../lib/analytics'
 export function Layout() {
   const { error, busy, ready, run, clearError } = useGame()
   const location = useLocation()
@@ -10,7 +11,11 @@ export function Layout() {
   }, [run])
   useEffect(() => {
     window.scrollTo(0, 0)
+    trackEvent('screen_view', { path: location.pathname })
   }, [location.pathname])
+  useEffect(() => {
+    if (ready) void flushAnalytics()
+  }, [ready])
   return (
     <div className="app-shell mobile-app">
       <a className="skip-link" href="#main">

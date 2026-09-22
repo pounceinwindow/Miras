@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useGame } from '../store/game'
 import type { CharacterId } from '../api/types'
+import { trackEvent } from '../lib/analytics'
 
 const heroAliases: Record<string, string> = {
   'su-anasy': 'su_anasy',
@@ -22,6 +23,7 @@ const appHeroIds: Record<string, CharacterId> = {
 export default function Battle() {
   const { character = 'su-anasy' } = useParams()
   const [searchParams] = useSearchParams()
+  const requestedEnemy = searchParams.get('enemy') ?? ''
   const frame = useRef<HTMLIFrameElement>(null)
   const defeatedEnemy = useRef<CharacterId | null>(null)
   const recruitStarted = useRef(false)
@@ -29,12 +31,19 @@ export default function Battle() {
   const run = useGame((state) => state.run)
   const source = useMemo(() => {
     const player = heroAliases[character] ?? 'su_anasy'
-    const enemy = heroAliases[searchParams.get('enemy') ?? '']
+    const enemy = heroAliases[requestedEnemy]
     const params = new URLSearchParams({ player })
     if (enemy) params.set('enemy', enemy)
     if (searchParams.get('bonus') === 'true') params.set('bonus', 'true')
     return `/fighting/index.html?${params}`
-  }, [character, searchParams])
+  }, [character, requestedEnemy, searchParams])
+
+  useEffect(() => {
+    trackEvent('battle_started', {
+      player_id: character,
+      boss_id: requestedEnemy,
+    })
+  }, [character, requestedEnemy])
 
   useEffect(() => {
     async function openCollection() {
@@ -64,13 +73,18 @@ export default function Battle() {
       }
 
       if (event.data?.type !== 'miras:battle-finished') return
+      trackEvent('battle_finished', {
+        boss_id: requestedEnemy,
+        result: String(event.data.result ?? 'unknown'),
+        duration_sec: Number(event.data.duration_sec ?? 0),
+      })
       if (event.data?.result === 'win')
         defeatedEnemy.current = appHeroIds[event.data?.enemy] ?? null
     }
 
     window.addEventListener('message', onMessage)
     return () => window.removeEventListener('message', onMessage)
-  }, [navigate, run])
+  }, [navigate, requestedEnemy, run])
 
   return (
     <div className="battle-page">

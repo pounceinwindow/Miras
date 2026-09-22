@@ -8,6 +8,9 @@
     "predev": "npm run build:fighting",
     "dev": "vite --host 0.0.0.0",
     "build": "npm run build:fighting && tsc -b && vite build",
+    "mobile:sync": "npm run build && cap sync",
+    "mobile:android": "npm run mobile:sync && cap open android",
+    "mobile:ios": "npm run mobile:sync && cap open ios",
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -17,6 +20,9 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/ios": "^8.5.2",
     "@msgpack/msgpack": "^3.1.3",
     "@supabase/supabase-js": "^2.116.0",
     "leaflet": "^1.9.4",
@@ -29,6 +35,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.2",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/vite": "^4.3.3",

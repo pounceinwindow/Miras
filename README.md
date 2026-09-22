@@ -13,6 +13,20 @@ npm run dev
 
 Без переменных окружения приложение работает локально, а прогресс хранится в `localStorage`.
 
+## Мобильные приложения
+
+Проект подготовлен для Android и iOS через Capacitor 8. Нативные проекты находятся в `android/` и `ios/`.
+
+```bash
+npm run mobile:sync
+npm run mobile:android
+npm run mobile:ios
+```
+
+Для Android нужны Android Studio и JDK 21. Для iOS нужны актуальные Xcode и Apple Developer account. Камера и геолокация уже объявлены в нативных разрешениях.
+
+План публичного запуска, тексты магазинов, сценарии роликов, закрытый тест и партнёрская модель находятся в [`docs/launch/`](docs/launch/README.md). Готовая графика лежит в `marketing/store/`.
+
 ## Supabase
 
 Для общего прогресса на телефонах используется Supabase Auth и таблица `game_progress` с RLS. Каждый анонимный пользователь может читать и менять только свою запись.
@@ -20,6 +34,7 @@ npm run dev
 1. Создайте Supabase-проект.
 2. Включите Anonymous Sign-ins в разделе Authentication.
 3. Выполните миграцию `supabase/migrations/20260919000000_game_progress.sql` через SQL Editor или Supabase CLI.
+   Для аналитики первого маршрута также выполните `supabase/migrations/20260922000000_analytics_events.sql`.
 4. Скопируйте `.env.example` в `.env.local` и укажите:
 
 ```dotenv

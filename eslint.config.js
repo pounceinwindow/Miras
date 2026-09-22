@@ -14,6 +14,8 @@ export default tseslint.config(
       'supabase/functions',
       'test-results',
       'playwright-report',
+      'android',
+      'ios',
     ],
   },
   js.configs.recommended,
@@ -30,7 +32,7 @@ export default tseslint.config(
       ],
     },
   },
-  { files: ['*.js'], languageOptions: { globals: globals.node } },
+  { files: ['*.js', '**/*.mjs'], languageOptions: { globals: globals.node } },
   {
     files: ['public/ar/**/*.js'],
     languageOptions: { globals: globals.browser },

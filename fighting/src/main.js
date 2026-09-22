@@ -161,7 +161,7 @@ function showResult(event){
   if(defeatLine){$('#result-quote-portrait').src=portraits(enemyHero,'front','idle');$('#result-quote-portrait').alt=HEROES[enemyHero].name;$('#result-quote-tatar').textContent=defeatLine.tatar;$('#result-quote-russian').textContent=defeatLine.russian;}
   $('#rematch').textContent=isPvp?'Новая комната':event.result==='win'?'В коллекцию':'Ещё бой';
   $('#stat-damage').textContent=battle.stats.damage;$('#stat-dodges').textContent=battle.stats.dodges;$('#stat-reflect').textContent=battle.stats.reflections;$('#result-dialog').showModal();
-  window.parent.postMessage({type:'miras:battle-finished',result:event.result,player:playerHero,enemy:enemyHero},window.location.origin);
+  window.parent.postMessage({type:'miras:battle-finished',result:event.result,player:playerHero,enemy:enemyHero,duration_sec:Math.round(battle.time),mode:isPvp?'pvp':'pve'},window.location.origin);
 }
 $('#rematch').onclick=()=>{if(isPvp){void leavePvp('Создайте новую комнату для реванша.');return;}if(lastResult==='win'){window.parent.postMessage({type:'miras:open-collection'},window.location.origin);if(window.parent===window)window.location.assign('/collection');return;}start();};
 $('#resume').onclick=()=>{if(document.hidden||!navigator.onLine){$('#pause-reason').textContent='Вернитесь в игру и восстановите соединение.';return;}$('#pause-dialog').close();battle.resume();};
